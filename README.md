@@ -117,6 +117,7 @@ TokenShield is under active development. Planned directions include (in priority
 1. **Persistent Mask Mapping Storage**: A way to save the mask ↔ original mapping so a session can be resumed later.
 2. **File Upload Masking**: Direct masking support for uploaded Excel, Word, and PDF files, not just pasted text.
 3. **Enterprise-grade Features**: Audit logs and related governance features for the Business persona.
+4. **Independent UI Language Toggle**: The Region selector (US/EU/UK/TW/JP) currently only switches which regex ruleset is active — the interface itself is English-only regardless of region. Add a separate language toggle so the display language isn't tied to which regional ruleset is selected.
 
 ---
 
