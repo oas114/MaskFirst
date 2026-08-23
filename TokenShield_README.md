@@ -61,9 +61,9 @@ let currentPersona = DEFAULT_PERSONA;
 
 Only **one** region preset is active at a time, layered on top of the always-on `global` baseline — this deliberately avoids cross-country format collisions (e.g. a bare 9-digit number shouldn't simultaneously be tested as a US SSN and something unrelated). Persona works the same way: only one keyword set is active at a time.
 
-`getActiveRegexRules()` returns `[...REGEX_PRESETS.global, ...REGEX_PRESETS[currentRegion]]`; `getHardBlockKeywords()` returns `HARD_BLOCK_PRESETS[currentPersona]`. Both are recomputed on every scan, so switching the dropdowns takes effect immediately (they call `triggerPreview()`).
+`getActiveRegexRules()` returns `[...regexPresets.global, ...regexPresets.custom, ...regexPresets[currentRegion]]`; `getHardBlockKeywords()` returns `[...hardBlockPresets.custom, ...hardBlockPresets[currentPersona]]`. Both are recomputed on every scan, so switching the dropdowns takes effect immediately (they call `triggerPreview()`). The `custom` bucket (new — see §2.8) always merges in regardless of the selected region/persona; built-in defaults live in the frozen `REGEX_PRESETS_DEFAULT`/`HARD_BLOCK_PRESETS_DEFAULT`, and `regexPresets`/`hardBlockPresets` are the live working copies these getters actually read.
 
-### 2.2 Detection Rule Library (`REGEX_PRESETS`)
+### 2.2 Detection Rule Library (`REGEX_PRESETS_DEFAULT`)
 
 Each rule object has the shape `{ type, regex, name, example, validate? }`. Tokens follow the `{{TYPE_N}}` format, where `N` is a per-type running counter.
 
@@ -93,7 +93,7 @@ Each rule object has the shape `{ type, regex, name, example, validate? }`. Toke
 
 The Credit Card rule additionally runs a **Luhn checksum** (`luhnCheck()`) against every regex match before accepting it, to cut down false positives from arbitrary 13-19 digit numbers.
 
-### 2.3 Hard Block Interlock (`HARD_BLOCK_PRESETS`)
+### 2.3 Hard Block Interlock (`HARD_BLOCK_PRESETS_DEFAULT`)
 
 Two keyword arrays, `personal` and `business`, each ~20 terms. If the currently-active persona's list matches the input text, TokenShield locks the UI:
 - A **red warning banner** appears
@@ -104,7 +104,7 @@ Unlike EduShield's Chinese keyword matching (which needs no case handling), Engl
 
 ### 2.4 Custom Dictionary (`customDict`)
 
-Unchanged from EduShield's mechanism: CSV upload, online table editor (paste from Excel supported), or manual "mark as sensitive" selection, plus entities the local AI returns. The CSV template header is `Keyword,Category(optional)` — the upload parser detects a header row by checking (case-insensitively) whether the first cell contains the word "keyword".
+Same mechanism as EduShield, now with a `source` field added to every entry (`builtin`/`auto-loaded`/`manual`/`overridden`/`ai-session`, shown as a badge in the UI — see §2.8): CSV upload, online table editor (paste from Excel supported), or manual "mark as sensitive" selection, plus entities the local AI returns. The CSV template header is `Keyword,Category(optional)` — the upload parser detects a header row by checking (case-insensitively) whether the first cell contains the word "keyword", and now parses each row with `parseCsvLine()` (standard CSV double-quote escaping) instead of a naive `split(',')`. CSV-file imports are routed through the Merge/Replace/Cancel dialog (§2.8) rather than blindly overwriting the dictionary; the online table editor keeps its original overwrite-everything behavior.
 
 ### 2.5 Local AI Module (Ollama)
 
@@ -121,9 +121,48 @@ Same safeguards as EduShield: pre-flight connection check, manual cancel, runawa
 
 A small addition not present in EduShield: the Settings modal includes a **Local AI Prompt Library** panel with two ready-to-copy system prompt templates (`LOCAL_AI_PROMPTS.personal` / `.business`, copied via `copyLocalPrompt(which)`). These are meant to be pasted ahead of your masked text into any local model's chat (Ollama, LM Studio, etc.) so the model's own behavior stays privacy-aware too — reinforcing that nothing, including your prompt phrasing, needs to leave the machine.
 
+> [!NOTE]
+> `LOCAL_AI_PROMPTS` is unrelated to and never read by the actual Channel 1/2 calls in `processAnonymizePhase2()` — it's purely a copy-to-clipboard convenience for external chat tools. The real scan prompts live in `aiPrompts`/`AI_PROMPTS_DEFAULT`, editable via the Custom Protection Manager — see §2.8.
+
 ### 2.7 Restore & Integrity Verification
 
 Unchanged from EduShield. `sessionVault` maps `{{TAG_N}}` tokens to their original values; `processRestore()` strips a leading system-instruction prefix (now the ASCII marker `[SYSTEM INSTRUCTION: ...]` instead of the Chinese `【系統指令：...】` marker EduShield uses), then applies a triple-tolerance match: exact, whitespace-tolerant, and bracket-tolerant (`[TAG_N]`, `(TAG_N)`, `【TAG_N】`). Missing tokens are reported and highlighted in red across both the left-hand original view and the chip list.
+
+### 2.8 Custom Protection Manager (Four Dimensions)
+
+Click "**Manage Custom Protection Rules**" in the toolbar to customize, import, and export across four dimensions without hand-editing the HTML source: Roster/Dictionary (§2.4), Hard Block Keywords, Regex Rules, and Local AI Prompts (the real scan prompts, not the copy-to-clipboard library in §2.6).
+
+**Scope decision**: unlike the region/persona-specific built-in presets, every custom/imported/auto-loaded Hard Block keyword and regex rule lands in one **always-on `custom` bucket** per dimension (`hardBlockPresets.custom`, `regexPresets.custom`) — never inside a specific persona/region's own array. This keeps collision handling simple (dedup only within `custom`, never silently rewriting a specific persona's or region's built-in list) and matches the fact `customDict` has always been a single flat, non-scoped array. The management tables in this panel list only the `custom` bucket; built-in region/persona rules remain visible (read-only) in the PII Rule Guide.
+
+Built-in defaults are frozen as `HARD_BLOCK_PRESETS_DEFAULT` / `REGEX_PRESETS_DEFAULT` / `AI_PROMPTS_DEFAULT`. Live working state:
+```javascript
+let hardBlockPresets = { personal: [], business: [], custom: [] };
+let regexPresets = { global: [], us: [], eu: [], uk: [], custom: [] };
+let aiPrompts = { channel1: '', channel2Personal: '', channel2Business: '' };
+```
+Each entry carries a `source` field shown as a badge: `Built-in` / `Auto-loaded` / `Manually imported` / `Overridden`. Regex rules store `pattern`/`flags` as strings (not a live `RegExp`), reconstructed through the `tryCompileRegexRow()` try/catch guard on every use — a malformed rule is skipped and reported without aborting the rest of the scan. Note: the built-in `CREDIT_CARD` rule's Luhn `validate` function is preserved for built-in entries, but is necessarily lost if a CSV/config import happens to override it (CSV/JSON can't carry a function) — the import dialog surfaces a warning when this happens.
+
+CSV templates: Hard Block Keywords is a single `Keyword` column; Regex Rules is 4 columns (`TypeTag,RuleName,Pattern,ExampleText`), where `Pattern` accepts a bare pattern (defaults to flag `g`) or a full `/pattern/flags` literal-style string.
+
+Importing a CSV shows a **Merge with Existing / Replace All / Cancel** dialog whenever the `custom` bucket already has entries:
+- **Merge**: keep existing `custom` entries, append new ones; a regex whose **pattern string** (flags excluded) matches an existing `custom` entry, or a keyword/value that matches case-insensitively, is fully overwritten (tagged `Overridden`).
+- **Replace All**: wipe the `custom` bucket for that dimension and use only the imported content.
+- **Cancel**: no changes.
+
+**Same-folder auto-load**: on startup, `<script src="tokenshield.config.js">` is dynamically injected (same pattern as the Tailwind CDN/local-`style.css` degradation IIFE) — absent file is silently skipped, a broken file logs a console warning without crashing, and a valid file is merged into the `custom` buckets and prompts (tagged `Auto-loaded`):
+```javascript
+window.TOKENSHIELD_AUTO_CONFIG = {
+  version: 1,
+  roster: [ { type: "VENDOR", value: "...", reason: "..." } ],
+  hardBlock: [ "custom hard-block term" ],
+  regexRules: [ { type: "CUSTOM_CODE", pattern: "CODE-\\d{4}", flags: "g", name: "Custom code", example: "CODE-1234" } ],
+  aiPrompts: { channel1: "...{{TEXT}}", channel2Personal: "...{{TEXT}}", channel2Business: "...{{TEXT}}" }
+};
+```
+The toolbar's "**Reload Config**" button (with a confirmation prompt) resets all four dimensions to built-in defaults and re-runs the auto-load step — discarding this session's manual edits. The panel's "**Export as Auto-load File**" button packages the current in-memory state (all four dimensions, all merge/override results, excluding `ai-session`-tagged roster entries) into the same format, downloaded as the fixed filename `tokenshield.config.js`.
+
+> [!NOTE]
+> This mechanism only ever touches rule/prompt configuration — never the actual document content typed into the app. The existing zero-persistence promise (everything destroyed on page close/reload, see §1.2) is untouched for `sessionVault` and the input textareas.
 
 ---
 
@@ -165,13 +204,13 @@ Unchanged from EduShield. `sessionVault` maps `{{TAG_N}}` tokens to their origin
 ## 4. Advanced / Developer Notes
 
 ### 4.1 Adding a Hard Block term
-Open `TokenShield.html`, find `HARD_BLOCK_PRESETS`, and add a string to the `personal` or `business` array.
+No source editing needed for a personal customization — use "Manage Custom Protection Rules" → "Hard Block Keywords" tab (§2.8) to import a CSV. To change the built-in `personal`/`business` lists themselves, open `TokenShield.html`, find `HARD_BLOCK_PRESETS_DEFAULT`, and add a string to the appropriate array.
 
 ### 4.2 Adding a detection rule
-Find `REGEX_PRESETS`, and add `{ type: "TAG_NAME", regex: /your-regex/g, name: "Display Name", example: "Match Example" }` to the `global` array (always on) or a specific region array (`us`/`eu`/`uk`).
+Use "Manage Custom Protection Rules" → "Regex Rules" tab (§2.8) to import a 4-column CSV. To change a built-in region's rules directly, find `REGEX_PRESETS_DEFAULT`, and add `{ type: "TAG_NAME", regex: /your-regex/g, name: "Display Name", example: "Match Example" }` to the `global` array (always on) or a specific region array (`us`/`eu`/`uk`).
 
 ### 4.3 Adding a new region preset
-Add a new key to `REGEX_PRESETS` (e.g. `ca` for Canada), then add a matching `<option>` to `#regionSelect` in the HTML. Rules in a new region are layered on top of `global` exactly like the existing three.
+Add a new key to `REGEX_PRESETS_DEFAULT` (e.g. `ca` for Canada) and to the live-state initializer in `buildDefaultRegexPresetsState()`, then add a matching `<option>` to `#regionSelect` in the HTML. Rules in a new region are layered on top of `global` exactly like the existing three.
 
 ### 4.4 Rebuilding `style.css`
 The Tailwind build tooling lives in this repo's own `dev/` folder — no external dependency on any other project. After changing Tailwind classes in `TokenShield.html`:

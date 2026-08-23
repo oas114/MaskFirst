@@ -236,6 +236,12 @@
         <button onclick="openSettings()" class="bg-white hover:bg-stone-50 border border-stone-300 text-stone-700 px-2 sm:px-3 py-1.5 rounded-lg text-[10px] sm:text-xs font-medium transition-colors">
           Settings
         </button>
+        <button id="manageProtectionBtn" onclick="openProtectionManagerModal()" class="bg-white hover:bg-stone-50 border border-stone-300 text-stone-700 px-2 sm:px-3 py-1.5 rounded-lg text-[10px] sm:text-xs font-medium transition-colors">
+          Manage Custom Protection Rules
+        </button>
+        <button id="reloadConfigBtn" onclick="reloadConfig()" title="Discard manual edits and re-apply built-in defaults plus the same-folder auto-load config file" class="bg-white hover:bg-stone-50 border border-stone-300 text-stone-700 px-2 sm:px-3 py-1.5 rounded-lg text-[10px] sm:text-xs font-medium transition-colors">
+          Reload Config
+        </button>
       </div>
     </div>
   </header>
@@ -628,14 +634,14 @@
         </div>
 
         <div id="guideInstructions" class="hidden bg-stone-50 border border-stone-200 rounded-lg p-4 mb-4 text-xs text-stone-700 leading-relaxed space-y-2">
-          <p class="font-bold text-stone-800 text-sm">How do I edit the PII rules and Hard Block keywords myself?</p>
-          <p>Because of browser security restrictions, you can't save changes to this HTML file directly from the page. But editing it by hand is easy:</p>
+          <p class="font-bold text-stone-800 text-sm">How do I add my own PII rules and Hard Block keywords?</p>
+          <p>You don't need to hand-edit the HTML source — use the "Manage Custom Protection Rules" button in the toolbar instead:</p>
           <ol class="list-decimal list-inside space-y-1 ml-1 text-stone-600">
-            <li>Right-click <code class="bg-white border border-stone-200 px-1 rounded">TokenShield.html</code>.</li>
-            <li>Choose "Open with" → "Notepad" or "VS Code".</li>
-            <li>Use Find (Ctrl+F) to locate <code class="bg-white border border-stone-200 px-1 rounded text-emerald-700">HARD_BLOCK_PRESETS</code> or <code class="bg-white border border-stone-200 px-1 rounded text-emerald-700">REGEX_PRESETS</code>.</li>
-            <li>Add your term or rule inside the appropriate region (<code class="bg-white border border-stone-200 px-1 rounded">global</code>/<code class="bg-white border border-stone-200 px-1 rounded">us</code>/<code class="bg-white border border-stone-200 px-1 rounded">eu</code>/<code class="bg-white border border-stone-200 px-1 rounded">uk</code>) or persona (<code class="bg-white border border-stone-200 px-1 rounded">personal</code>/<code class="bg-white border border-stone-200 px-1 rounded">business</code>) sub-array, following the existing format.</li>
-            <li>Save (Ctrl+S) and reload the page (F5) to see your changes take effect.</li>
+            <li>Click <strong>"Manage Custom Protection Rules"</strong> in the toolbar, then switch to the "Hard Block Keywords" or "Regex Rules" tab.</li>
+            <li>Download that tab's CSV template, fill in your keywords or patterns, and save it.</li>
+            <li>Click "Import CSV", pick that file, and choose "Merge with Existing" or "Replace All".</li>
+            <li>To have your customizations applied automatically every time you open this file, click "Export as Auto-load File" in the same panel and place the downloaded <code class="bg-white border border-stone-200 px-1 rounded">tokenshield.config.js</code> next to <code class="bg-white border border-stone-200 px-1 rounded">TokenShield.html</code>.</li>
+            <li>To discard manual edits and restore the built-in defaults, click "Reload Config" in the toolbar.</li>
           </ol>
         </div>
 
@@ -756,6 +762,110 @@
     </div>
   </div>
 
+  <!-- ==================== Manage Custom Protection Rules Modal ==================== -->
+  <div id="protectionManagerModal" class="hidden fixed inset-0 bg-stone-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4 opacity-0 transition-opacity duration-300">
+    <div class="bg-white rounded-xl shadow-2xl w-full max-w-4xl overflow-hidden transform scale-95 transition-transform duration-300 flex flex-col max-h-full border border-stone-200">
+      <div class="px-6 py-4 border-b border-stone-100 flex justify-between items-center bg-emerald-50/50 flex-shrink-0">
+        <h2 class="text-sm font-bold text-emerald-900">Manage Custom Protection Rules</h2>
+        <button onclick="closeModal('protectionManagerModal')" class="text-stone-400 hover:text-stone-600 font-medium text-lg">&times;</button>
+      </div>
+      <div class="px-6 pt-3 flex gap-2 border-b border-stone-100 flex-shrink-0">
+        <button id="pmTabBtnHardBlock" onclick="switchPmTab('hardBlock')" class="pm-tab-btn px-3 py-2 text-xs font-medium border-b-2 border-emerald-600 text-emerald-700">Hard Block Keywords</button>
+        <button id="pmTabBtnRegex" onclick="switchPmTab('regex')" class="pm-tab-btn px-3 py-2 text-xs font-medium border-b-2 border-transparent text-stone-500 hover:text-stone-700">Regex Rules</button>
+        <button id="pmTabBtnPrompts" onclick="switchPmTab('prompts')" class="pm-tab-btn px-3 py-2 text-xs font-medium border-b-2 border-transparent text-stone-500 hover:text-stone-700">Local AI Prompts</button>
+      </div>
+      <div class="p-6 overflow-y-auto flex-1 bg-white">
+        <div id="pmPanelHardBlock" class="pm-panel space-y-3">
+          <div class="flex flex-wrap justify-between items-center gap-2">
+            <p class="text-xs text-stone-500">Single-column CSV, one keyword per row. This only manages your custom layer — the built-in Personal/Business keyword lists aren't editable here (see PII Rule Guide).</p>
+            <div class="flex gap-2">
+              <input type="file" id="hardBlockCsvFileInput" accept=".csv" class="hidden" onchange="handleHardBlockCsvUpload(event)" />
+              <button onclick="downloadHardBlockCsvTemplate()" class="text-xs bg-white border border-stone-300 px-3 py-1.5 rounded hover:bg-stone-50">Download Template</button>
+              <button onclick="document.getElementById('hardBlockCsvFileInput').click()" class="text-xs bg-white border border-stone-300 px-3 py-1.5 rounded hover:bg-stone-50">Import CSV</button>
+            </div>
+          </div>
+          <div class="border border-stone-200 rounded-lg overflow-x-auto max-h-64 overflow-y-auto">
+            <table class="w-full text-left text-sm">
+              <thead class="bg-stone-50 sticky top-0"><tr>
+                <th class="px-3 py-2 font-medium text-stone-600 border-b border-stone-200">Keyword</th>
+                <th class="px-3 py-2 font-medium text-stone-600 border-b border-stone-200 w-16 text-center">Delete</th>
+              </tr></thead>
+              <tbody id="hardBlockMgmtTbody" class="divide-y divide-stone-200 bg-white"></tbody>
+            </table>
+          </div>
+        </div>
+        <div id="pmPanelRegex" class="pm-panel space-y-3 hidden">
+          <div class="flex flex-wrap justify-between items-center gap-2">
+            <p class="text-xs text-stone-500">4-column CSV: TypeTag,RuleName,Pattern,ExampleText. The Pattern column accepts a bare pattern or a full /pattern/flags literal. This only manages your custom layer — the built-in region-specific rules aren't editable here (see PII Rule Guide).</p>
+            <div class="flex gap-2">
+              <input type="file" id="regexCsvFileInput" accept=".csv" class="hidden" onchange="handleRegexCsvUpload(event)" />
+              <button onclick="downloadRegexCsvTemplate()" class="text-xs bg-white border border-stone-300 px-3 py-1.5 rounded hover:bg-stone-50">Download Template</button>
+              <button onclick="document.getElementById('regexCsvFileInput').click()" class="text-xs bg-white border border-stone-300 px-3 py-1.5 rounded hover:bg-stone-50">Import CSV</button>
+            </div>
+          </div>
+          <div class="border border-stone-200 rounded-lg overflow-x-auto max-h-64 overflow-y-auto">
+            <table class="w-full text-left text-sm min-w-[600px]">
+              <thead class="bg-stone-50 sticky top-0"><tr>
+                <th class="px-3 py-2 font-medium text-stone-600 border-b border-stone-200">Tag</th>
+                <th class="px-3 py-2 font-medium text-stone-600 border-b border-stone-200">Name</th>
+                <th class="px-3 py-2 font-medium text-stone-600 border-b border-stone-200">Pattern</th>
+                <th class="px-3 py-2 font-medium text-stone-600 border-b border-stone-200 w-16 text-center">Delete</th>
+              </tr></thead>
+              <tbody id="regexMgmtTbody" class="divide-y divide-stone-200 bg-white"></tbody>
+            </table>
+          </div>
+        </div>
+        <div id="pmPanelPrompts" class="pm-panel space-y-4 hidden">
+          <div class="space-y-2">
+            <div class="flex justify-between items-center">
+              <label class="text-xs font-medium text-stone-600">Channel 1 — entity extraction prompt ({{TEXT}} is replaced with the actual text to scan)</label>
+              <button onclick="resetAiPrompt('channel1')" class="text-xs bg-white border border-stone-300 px-3 py-1 rounded hover:bg-stone-50">Reset to Default</button>
+            </div>
+            <textarea id="aiPromptChannel1Textarea" oninput="saveAiPromptFromTextarea('channel1')" rows="5" class="w-full text-xs font-mono p-2 border border-stone-300 rounded focus:outline-none focus:border-emerald-500"></textarea>
+            <p id="aiPromptChannel1Warning" class="hidden text-xs text-amber-600">No {{TEXT}} placeholder found — the AI won't receive the actual document text.</p>
+          </div>
+          <div class="space-y-2">
+            <div class="flex justify-between items-center">
+              <label class="text-xs font-medium text-stone-600">Channel 2 — risk assessment prompt (Personal persona)</label>
+              <button onclick="resetAiPrompt('channel2Personal')" class="text-xs bg-white border border-stone-300 px-3 py-1 rounded hover:bg-stone-50">Reset to Default</button>
+            </div>
+            <textarea id="aiPromptChannel2PersonalTextarea" oninput="saveAiPromptFromTextarea('channel2Personal')" rows="5" class="w-full text-xs font-mono p-2 border border-stone-300 rounded focus:outline-none focus:border-emerald-500"></textarea>
+            <p id="aiPromptChannel2PersonalWarning" class="hidden text-xs text-amber-600">No {{TEXT}} placeholder found — the AI won't receive the actual document text.</p>
+          </div>
+          <div class="space-y-2">
+            <div class="flex justify-between items-center">
+              <label class="text-xs font-medium text-stone-600">Channel 2 — risk assessment prompt (Business persona)</label>
+              <button onclick="resetAiPrompt('channel2Business')" class="text-xs bg-white border border-stone-300 px-3 py-1 rounded hover:bg-stone-50">Reset to Default</button>
+            </div>
+            <textarea id="aiPromptChannel2BusinessTextarea" oninput="saveAiPromptFromTextarea('channel2Business')" rows="5" class="w-full text-xs font-mono p-2 border border-stone-300 rounded focus:outline-none focus:border-emerald-500"></textarea>
+            <p id="aiPromptChannel2BusinessWarning" class="hidden text-xs text-amber-600">No {{TEXT}} placeholder found — the AI won't receive the actual document text.</p>
+          </div>
+        </div>
+      </div>
+      <div class="px-6 py-4 border-t border-stone-100 bg-stone-50 flex justify-between items-center gap-3 flex-shrink-0">
+        <button id="exportAutoConfigBtn" onclick="exportAutoConfig()" title="Package the current in-memory custom rules and prompts into an auto-load config file" class="px-4 py-2 bg-emerald-700 hover:bg-emerald-800 text-white rounded-lg text-sm font-semibold transition-colors">Export as Auto-load File</button>
+        <button onclick="closeModal('protectionManagerModal')" class="px-4 py-2 bg-white border border-stone-300 text-stone-700 rounded-lg text-sm font-medium hover:bg-stone-50 transition-colors">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== Import Merge/Replace Modal ==================== -->
+  <div id="importModeModal" class="hidden fixed inset-0 bg-stone-900/40 backdrop-blur-sm z-[60] flex items-center justify-center p-4 opacity-0 transition-opacity duration-300">
+    <div class="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden transform scale-95 transition-transform duration-300 border border-stone-200">
+      <div class="px-6 py-4 border-b border-stone-100 bg-emerald-50/50">
+        <h2 class="text-sm font-bold text-emerald-900">Import Mode</h2>
+      </div>
+      <div class="p-6 space-y-3">
+        <p id="importModeMessage" class="text-sm text-stone-700"></p>
+        <div id="importModeErrorList" class="hidden text-xs text-red-600 bg-red-50 border border-red-200 rounded p-2 max-h-32 overflow-y-auto"></div>
+      </div>
+      <div class="px-6 py-4 border-t border-stone-100 bg-stone-50 flex flex-col gap-2">
+        <button onclick="confirmImportMode('merge')" class="px-4 py-2 bg-emerald-700 hover:bg-emerald-800 text-white rounded-lg text-sm font-semibold transition-colors">Merge with Existing</button>
+        <button onclick="confirmImportMode('replace')" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm font-semibold transition-colors">Replace All</button>
+        <button onclick="closeModal('importModeModal')" class="px-4 py-2 bg-white border border-stone-300 text-stone-700 rounded-lg text-sm font-medium hover:bg-stone-50 transition-colors">Cancel</button>
+      </div>
+    </div>
+  </div>
 
   <!-- ==================== Global Tooltip ==================== -->
   <div id="globalTooltip" class="fixed z-[100] px-2 py-1 bg-stone-800 text-white text-[10px] rounded whitespace-nowrap shadow-lg pointer-events-none transition-opacity duration-150 opacity-0 hidden"></div>
@@ -773,7 +883,8 @@
         .replace(/'/g, "&#039;");
     }
 
-    let customDict = []; // Array of { type, value }
+    let customDict = []; // Array of { type, value, reason, isAi?, source }
+    let aiPrompts = { channel1: '', channel2Personal: '', channel2Business: '' }; // live working copy of AI_PROMPTS_DEFAULT
     let whitelist = new Set();
     let sessionVault = {};
     let reportData = [];
@@ -847,8 +958,9 @@
       triggerPreview();
     }
 
-    // Add your own terms inside the appropriate persona array below.
-    const HARD_BLOCK_PRESETS = {
+    // Built-in defaults, frozen — never mutated. "Reload Config" and merge/replace imports
+    // restore to this baseline. To add your own terms, use the "Manage Custom Protection Rules" UI instead.
+    const HARD_BLOCK_PRESETS_DEFAULT = Object.freeze({
       personal: [
         "sexual assault", "sexual abuse", "domestic violence", "child abuse", "self-harm",
         "suicidal ideation", "suicide attempt", "substance abuse treatment", "mental health diagnosis",
@@ -863,9 +975,18 @@
         "internal investigation", "attorney-client privileged", "pending litigation", "regulatory investigation",
         "non-disclosure breach", "confidential settlement", "bribery allegation", "antitrust investigation"
       ]
-    };
+    });
+
+    // Live working state — this is what the rest of the app actually reads from.
+    // hardBlockPresets.custom is always merged in regardless of persona (see getHardBlockKeywords below);
+    // it holds custom/imported/auto-loaded entries that aren't tied to a specific persona.
+    let hardBlockPresets = { personal: [], business: [], custom: [] };
+
+    function getHardBlockKeywordEntries() {
+      return [...hardBlockPresets.custom, ...(hardBlockPresets[currentPersona] || hardBlockPresets.personal)];
+    }
     function getHardBlockKeywords() {
-      return HARD_BLOCK_PRESETS[currentPersona] || HARD_BLOCK_PRESETS.personal;
+      return getHardBlockKeywordEntries().map(e => e.value);
     }
 
     function luhnCheck(numStr) {
@@ -883,7 +1004,9 @@
 
     // Add your own rules inside the appropriate region array below.
     // Format: { type: "TAG_NAME", regex: /your-regex/g, name: "Display Name", example: "Match Example", validate: optionalFn }
-    const REGEX_PRESETS = {
+    // Built-in defaults, frozen — never mutated. To add your own rules, use the
+    // "Manage Custom Protection Rules" UI instead of editing this literal.
+    const REGEX_PRESETS_DEFAULT = Object.freeze({
       // Always merged in, regardless of selected region.
       global: [
         { type: "EMAIL", regex: /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g, name: "Email Address", example: "user@example.com" },
@@ -909,9 +1032,15 @@
         { type: "UK_POSTCODE", regex: /\b[A-Z]{1,2}\d[A-Z\d]?\s?\d[A-Z]{2}\b/gi, name: "UK Postcode", example: "SW1A 1AA" },
         { type: "UK_PHONE", regex: /\b(?:\+44\s?|0)(?:\d{2,4}[-.\s]?){2,3}\d{3,4}\b/g, name: "UK Phone Number", example: "+44 7911 123456" }
       ]
-    };
+    });
+
+    // Live working state — this is what the rest of the app actually reads from.
+    // regexPresets.custom is always merged in regardless of region (like "global"); it holds
+    // custom/imported/auto-loaded rules that aren't tied to a specific region.
+    let regexPresets = { global: [], us: [], eu: [], uk: [], custom: [] };
+
     function getActiveRegexRules() {
-      return [...REGEX_PRESETS.global, ...(REGEX_PRESETS[currentRegion] || [])];
+      return [...regexPresets.global, ...regexPresets.custom, ...(regexPresets[currentRegion] || [])];
     }
 
     // ==========================================
@@ -925,6 +1054,437 @@
       const text = LOCAL_AI_PROMPTS[which];
       if (text) navigator.clipboard.writeText(text).then(() => alert(`Copied the ${which === 'business' ? 'Business' : 'Personal'} local AI prompt template!`));
     }
+
+    // ==========================================
+    // Actual local AI scan prompts (used by processAnonymizePhase2 below) — unrelated to
+    // LOCAL_AI_PROMPTS above, which is only a copy-to-clipboard convenience for external chat tools.
+    // {{TEXT}} is replaced with the real text to scan at call time.
+    // ==========================================
+    const AI_PROMPTS_DEFAULT = Object.freeze({
+      channel1: `Find any un-masked "person names (PERSON)" (including title-before forms like "English teacher John Carter"; title-after forms like "Mary Smith, teacher"; colon-separated forms like "Student: Jane Doe"; and plain names or nicknames like "Robert Johnson" or "Bob". Extract the name portion only into the PERSON category, excluding the title), "vendors/organizations (VENDOR)" (including informal shops without a formal company suffix, e.g. "Sunny Diner"), "addresses (ADDRESS)", "project/event names (PROJECT)", and "bank/payment account numbers (BANK_ACCT)".\nReturn ONLY a JSON array like [{"type":"PERSON","value":"Jane Doe","reason":"..."}]. Return [] if nothing is found. Text:\n{{TEXT}}`,
+      channel2Personal: `Determine whether the following text contains "extremely sensitive information." Extremely sensitive information includes: self-harm, suicide, sexual assault or abuse, domestic violence, a protective order, a disability or special-needs status (including a psychological/educational assessment), or mental health counseling or treatment records.\nIf it contains any of the above, return this exact JSON: {"critical": true, "reason": "describe the specific risk"}\nIf not, return: {"critical": false, "reason": ""}\n\nText:\n{{TEXT}}`,
+      channel2Business: `Determine whether the following text contains "extremely sensitive information." Extremely sensitive information includes: insider trading or material non-public information, an active merger/acquisition, a layoff or workforce reduction plan, unreleased financial results, a data breach or security incident, a whistleblower report, active litigation, or a regulatory investigation.\nIf it contains any of the above, return this exact JSON: {"critical": true, "reason": "describe the specific risk"}\nIf not, return: {"critical": false, "reason": ""}\n\nText:\n{{TEXT}}`
+    });
+
+    // ==========================================
+    // Custom protection state: builtin defaults -> live working state
+    // ==========================================
+    function parsePatternColumn(raw) {
+      const m = /^\/(.*)\/([a-z]*)$/i.exec((raw || '').trim());
+      if (m) return { pattern: m[1], flags: m[2] || 'g' };
+      return { pattern: (raw || '').trim(), flags: 'g' };
+    }
+
+    function tryCompileRegexRow(row, idx) {
+      try {
+        let pattern, flags;
+        if (typeof row.flags === 'string' && row.flags) {
+          pattern = (row.pattern || '').trim();
+          flags = row.flags;
+        } else {
+          ({ pattern, flags } = parsePatternColumn(row.pattern));
+        }
+        const finalFlags = flags.includes('g') ? flags : flags + 'g';
+        new RegExp(pattern, finalFlags);
+        return {
+          ok: true,
+          entry: {
+            type: row.type || 'CUSTOM',
+            pattern, flags: finalFlags,
+            name: row.name || pattern,
+            example: row.example || '',
+            source: row.source || 'manual'
+          }
+        };
+      } catch (err) {
+        return { ok: false, idx, raw: row, error: err.message };
+      }
+    }
+
+    // NOTE ON SCOPE: the "custom" bucket is the only layer this management system ever writes to.
+    // The persona-specific (personal/business) and region-specific (us/eu/uk) builtin arrays stay
+    // untouched by merge/replace/import — they remain a library concern, same as before. This keeps
+    // collision handling simple (dedup only within "custom") instead of silently rewriting a specific
+    // persona/region's builtin list from an import that may not even target that persona/region.
+    function buildDefaultHardBlockPresetsState() {
+      return {
+        personal: HARD_BLOCK_PRESETS_DEFAULT.personal.map(value => ({ value, source: 'builtin' })),
+        business: HARD_BLOCK_PRESETS_DEFAULT.business.map(value => ({ value, source: 'builtin' })),
+        custom: []
+      };
+    }
+    function buildDefaultRegexPresetsState() {
+      const mapRule = r => ({ type: r.type, pattern: r.regex.source, flags: r.regex.flags, name: r.name, example: r.example, validate: r.validate, source: 'builtin' });
+      return {
+        global: REGEX_PRESETS_DEFAULT.global.map(mapRule),
+        us: REGEX_PRESETS_DEFAULT.us.map(mapRule),
+        eu: REGEX_PRESETS_DEFAULT.eu.map(mapRule),
+        uk: REGEX_PRESETS_DEFAULT.uk.map(mapRule),
+        custom: []
+      };
+    }
+    function buildDefaultAiPromptsState() {
+      return { channel1: AI_PROMPTS_DEFAULT.channel1, channel2Personal: AI_PROMPTS_DEFAULT.channel2Personal, channel2Business: AI_PROMPTS_DEFAULT.channel2Business };
+    }
+    function initCustomProtectionState() {
+      hardBlockPresets = buildDefaultHardBlockPresetsState();
+      regexPresets = buildDefaultRegexPresetsState();
+      aiPrompts = buildDefaultAiPromptsState();
+      customDict = []; // roster has no builtin baseline, reset just means clear
+    }
+
+    const SOURCE_BADGE_LABELS = {
+      builtin: 'Built-in', 'auto-loaded': 'Auto-loaded', manual: 'Manually imported',
+      overridden: 'Overridden', 'ai-session': 'AI-extracted (session)'
+    };
+    function sourceBadgeHtml(source) {
+      const label = SOURCE_BADGE_LABELS[source] || source || '';
+      if (!label) return '';
+      return ` <span class="badge-source badge-${source}" style="font-size:10px;padding:1px 6px;border-radius:9999px;background:#e7e5e4;color:#57534e;margin-left:4px;white-space:nowrap;">${label}</span>`;
+    }
+
+    // ==========================================
+    // Merge/replace engine, same-folder auto-load config
+    // ==========================================
+    function mergeByKey(existingArr, incomingArr, keyFn, sourceForNew, sourceForOverwrite) {
+      const byKey = new Map(existingArr.map(e => [keyFn(e), e]));
+      incomingArr.forEach(incoming => {
+        const key = keyFn(incoming);
+        byKey.set(key, { ...incoming, source: byKey.has(key) ? sourceForOverwrite : sourceForNew });
+      });
+      return Array.from(byKey.values());
+    }
+
+    function mergeRegexRules(existingArr, incomingRows, sourceForNew, sourceForOverwrite) {
+      const errors = [];
+      const compiled = [];
+      incomingRows.forEach((row, idx) => {
+        const r = tryCompileRegexRow(row, idx);
+        if (r.ok) compiled.push(r.entry); else errors.push(r);
+      });
+      const result = mergeByKey(existingArr, compiled, e => e.pattern, sourceForNew, sourceForOverwrite);
+      return { result, errors };
+    }
+
+    function applyAutoConfig(cfg) {
+      let errors = [];
+      if (Array.isArray(cfg.hardBlock)) {
+        const incoming = cfg.hardBlock.filter(v => typeof v === 'string' && v.trim()).map(v => ({ value: v.trim() }));
+        hardBlockPresets.custom = mergeByKey(hardBlockPresets.custom, incoming, e => e.value.toLowerCase(), 'auto-loaded', 'auto-loaded');
+      }
+      if (Array.isArray(cfg.roster)) {
+        const incoming = cfg.roster.filter(r => r && r.value).map(r => ({ type: r.type || 'CUSTOM', value: r.value, reason: r.reason || 'Auto-loaded config' }));
+        customDict = mergeByKey(customDict, incoming, e => e.value, 'auto-loaded', 'auto-loaded');
+      }
+      if (Array.isArray(cfg.regexRules)) {
+        const { result, errors: regexErrors } = mergeRegexRules(regexPresets.custom, cfg.regexRules, 'auto-loaded', 'auto-loaded');
+        regexPresets.custom = result;
+        errors = errors.concat(regexErrors);
+      }
+      if (cfg.aiPrompts && typeof cfg.aiPrompts === 'object') {
+        if (typeof cfg.aiPrompts.channel1 === 'string' && cfg.aiPrompts.channel1.trim()) aiPrompts.channel1 = cfg.aiPrompts.channel1;
+        if (typeof cfg.aiPrompts.channel2Personal === 'string' && cfg.aiPrompts.channel2Personal.trim()) aiPrompts.channel2Personal = cfg.aiPrompts.channel2Personal;
+        if (typeof cfg.aiPrompts.channel2Business === 'string' && cfg.aiPrompts.channel2Business.trim()) aiPrompts.channel2Business = cfg.aiPrompts.channel2Business;
+      }
+      return errors;
+    }
+
+    function showAutoConfigErrorBanner(errors) {
+      console.warn(`[TokenShield] ${errors.length} regex rule(s) in the auto-loaded config had invalid patterns and were skipped:`, errors);
+    }
+
+    function loadAutoConfig(onDone) {
+      const s = document.createElement('script');
+      s.src = 'tokenshield.config.js';
+      s.onload = function () {
+        const cfg = window.TOKENSHIELD_AUTO_CONFIG;
+        if (cfg && typeof cfg === 'object') {
+          const errors = applyAutoConfig(cfg);
+          if (errors.length) showAutoConfigErrorBanner(errors);
+        } else {
+          console.warn('[TokenShield] tokenshield.config.js loaded but did not set window.TOKENSHIELD_AUTO_CONFIG — it may have a syntax error. Falling back to built-in defaults only.');
+        }
+        if (onDone) onDone();
+      };
+      s.onerror = function () {
+        console.info('[TokenShield] No tokenshield.config.js found next to the HTML file — using built-in defaults only.');
+        if (onDone) onDone();
+      };
+      document.head.appendChild(s);
+    }
+
+    function reloadConfig() {
+      if (!confirm('Reloading will discard any manually edited custom rules and dictionary entries, then re-apply the built-in defaults plus the auto-load config file (if present). Continue?')) return;
+      initCustomProtectionState();
+      loadAutoConfig(() => {
+        document.getElementById('dictCountLabel').innerText = `Dictionary: ${customDict.length}`;
+        renderHardBlockMgmtTable();
+        renderRegexMgmtTable();
+        renderAiPromptTextareas();
+        triggerPreview();
+        alert('Configuration reloaded.');
+      });
+    }
+
+    // ==========================================
+    // Shared CSV parsing/download helpers
+    // ==========================================
+    function parseCsvLine(line) {
+      // Regex pattern columns often contain commas (e.g. \d{7,8}); a naive split(',') would corrupt them,
+      // so this supports standard CSV double-quote escaping.
+      const result = [];
+      let cur = '';
+      let inQuotes = false;
+      for (let i = 0; i < line.length; i++) {
+        const ch = line[i];
+        if (inQuotes) {
+          if (ch === '"') {
+            if (line[i + 1] === '"') { cur += '"'; i++; }
+            else { inQuotes = false; }
+          } else {
+            cur += ch;
+          }
+        } else {
+          if (ch === '"') inQuotes = true;
+          else if (ch === ',') { result.push(cur); cur = ''; }
+          else cur += ch;
+        }
+      }
+      result.push(cur);
+      return result.map(s => s.trim());
+    }
+
+    function escapeForInlineJs(str) {
+      // Used before embedding into onclick="...('...')" — regex patterns almost always contain
+      // backslashes (\d, \b, ...); without escaping them first, the browser's JS string-literal
+      // parsing would drop unknown escapes like \d, corrupting the value passed to the handler.
+      return String(str).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+    }
+
+    function downloadTextAsFile(content, filename, mime) {
+      const blob = new Blob([content], { type: mime || 'text/plain;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.setAttribute('href', url);
+      link.setAttribute('download', filename);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    }
+
+    // ==========================================
+    // Manage Custom Protection Rules panel
+    // ==========================================
+    function openProtectionManagerModal() {
+      renderHardBlockMgmtTable();
+      renderRegexMgmtTable();
+      renderAiPromptTextareas();
+      openModal('protectionManagerModal');
+    }
+
+    function switchPmTab(tab) {
+      const panels = { hardBlock: 'pmPanelHardBlock', regex: 'pmPanelRegex', prompts: 'pmPanelPrompts' };
+      const buttons = { hardBlock: 'pmTabBtnHardBlock', regex: 'pmTabBtnRegex', prompts: 'pmTabBtnPrompts' };
+      const activeCls = ['border-emerald-600', 'text-emerald-700'];
+      const inactiveCls = ['border-transparent', 'text-stone-500'];
+      Object.keys(panels).forEach(key => {
+        document.getElementById(panels[key]).classList.toggle('hidden', key !== tab);
+        const btn = document.getElementById(buttons[key]);
+        btn.classList.remove(...activeCls, ...inactiveCls);
+        btn.classList.add(...(key === tab ? activeCls : inactiveCls));
+      });
+    }
+
+    function renderHardBlockMgmtTable() {
+      const tbody = document.getElementById('hardBlockMgmtTbody');
+      if (!tbody) return;
+      tbody.innerHTML = hardBlockPresets.custom.map(entry => `
+        <tr>
+          <td class="px-3 py-2">${escapeHtml(entry.value)}${sourceBadgeHtml(entry.source)}</td>
+          <td class="px-3 py-2 text-center">
+            <button onclick="deleteHardBlockEntry('${escapeHtml(escapeForInlineJs(entry.value))}')" class="text-red-500 hover:text-red-700 text-xs">Delete</button>
+          </td>
+        </tr>
+      `).join('') || `<tr><td colspan="2" class="px-3 py-4 text-center text-stone-400 text-xs">No custom hard-block keywords yet</td></tr>`;
+    }
+
+    function renderRegexMgmtTable() {
+      const tbody = document.getElementById('regexMgmtTbody');
+      if (!tbody) return;
+      tbody.innerHTML = regexPresets.custom.map(rule => `
+        <tr>
+          <td class="px-3 py-2 font-mono text-xs">${escapeHtml(rule.type)}</td>
+          <td class="px-3 py-2">${escapeHtml(rule.name)}${sourceBadgeHtml(rule.source)}</td>
+          <td class="px-3 py-2 font-mono text-[10px] break-all">${escapeHtml(`/${rule.pattern}/${rule.flags}`)}</td>
+          <td class="px-3 py-2 text-center">
+            <button onclick="deleteRegexEntry('${escapeHtml(escapeForInlineJs(rule.pattern))}')" class="text-red-500 hover:text-red-700 text-xs">Delete</button>
+          </td>
+        </tr>
+      `).join('') || `<tr><td colspan="4" class="px-3 py-4 text-center text-stone-400 text-xs">No custom regex rules yet</td></tr>`;
+    }
+
+    function deleteHardBlockEntry(value) {
+      hardBlockPresets.custom = hardBlockPresets.custom.filter(e => e.value !== value);
+      renderHardBlockMgmtTable();
+      triggerPreview();
+    }
+    function deleteRegexEntry(pattern) {
+      regexPresets.custom = regexPresets.custom.filter(r => r.pattern !== pattern);
+      renderRegexMgmtTable();
+      triggerPreview();
+    }
+
+    function downloadHardBlockCsvTemplate() {
+      const csvContent = "Keyword\nCustom hard-block term A\nCustom hard-block term B\n";
+      downloadTextAsFile(csvContent, 'TokenShield_HardBlock_Template.csv', 'text/csv;charset=utf-8;');
+    }
+    function downloadRegexCsvTemplate() {
+      const csvContent = "TypeTag,RuleName,Pattern,ExampleText\n" +
+        'CUSTOM_CODE,Custom code,"CODE-\\d{4}",CODE-1234\n' +
+        'CUSTOM_TEL2,Sample phone,"/0\\d{1,2}-?\\d{7,8}/gi",02-23456789\n';
+      downloadTextAsFile(csvContent, 'TokenShield_Regex_Template.csv', 'text/csv;charset=utf-8;');
+    }
+
+    let pendingImport = null; // { dimension: 'roster'|'hardBlock'|'regex', rows: [...] }
+
+    function openImportDialog(dimension, rows) {
+      if (!rows.length) { alert('The file has no usable rows.'); return; }
+      pendingImport = { dimension, rows };
+
+      const dimensionLabel = { roster: 'dictionary entries', hardBlock: 'hard-block keywords', regex: 'regex rules' }[dimension];
+      const existingCount = { roster: customDict.length, hardBlock: hardBlockPresets.custom.length, regex: regexPresets.custom.length }[dimension];
+
+      const errorList = document.getElementById('importModeErrorList');
+      if (dimension === 'regex') {
+        const errors = rows.map((row, idx) => tryCompileRegexRow(row, idx)).filter(r => !r.ok);
+        if (errors.length) {
+          errorList.classList.remove('hidden');
+          errorList.innerHTML = `The following ${errors.length} row(s) have an invalid pattern and will be skipped:<br>` +
+            errors.map(e => `Row ${e.idx + 1} (${escapeHtml(e.raw.pattern || '')}): ${escapeHtml(e.error)}`).join('<br>');
+        } else {
+          errorList.classList.add('hidden');
+          errorList.innerHTML = '';
+        }
+      } else {
+        errorList.classList.add('hidden');
+        errorList.innerHTML = '';
+      }
+
+      document.getElementById('importModeMessage').innerText =
+        `You currently have ${existingCount} ${dimensionLabel}. This file has ${rows.length} row(s). How should it be imported?`;
+      openModal('importModeModal');
+    }
+
+    function confirmImportMode(mode) {
+      if (!pendingImport) { closeModal('importModeModal'); return; }
+      const { dimension, rows } = pendingImport;
+
+      if (dimension === 'hardBlock') {
+        const base = mode === 'replace' ? [] : hardBlockPresets.custom;
+        hardBlockPresets.custom = mergeByKey(base, rows.map(v => ({ value: v })), e => e.value.toLowerCase(), 'manual', 'overridden');
+        renderHardBlockMgmtTable();
+      } else if (dimension === 'regex') {
+        const base = mode === 'replace' ? [] : regexPresets.custom;
+        const { result, errors } = mergeRegexRules(base, rows, 'manual', 'overridden');
+        regexPresets.custom = result;
+        if (errors.length) showAutoConfigErrorBanner(errors);
+        renderRegexMgmtTable();
+      } else if (dimension === 'roster') {
+        const base = mode === 'replace' ? [] : customDict;
+        customDict = mergeByKey(base, rows, e => e.value, 'manual', 'overridden');
+        document.getElementById('dictCountLabel').innerText = `Dictionary: ${customDict.length}`;
+      }
+
+      pendingImport = null;
+      closeModal('importModeModal');
+      triggerPreview();
+      alert('Import complete.');
+    }
+
+    function handleHardBlockCsvUpload(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        const lines = e.target.result.split(/\r\n|\n/).filter(l => l.trim() !== '');
+        let startIdx = 0;
+        if (lines[0] && /keyword/i.test(lines[0])) startIdx = 1;
+        const values = [];
+        for (let i = startIdx; i < lines.length; i++) {
+          const v = parseCsvLine(lines[i])[0];
+          if (v) values.push(v);
+        }
+        event.target.value = '';
+        openImportDialog('hardBlock', values);
+      };
+      reader.readAsText(file);
+    }
+
+    function handleRegexCsvUpload(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        const lines = e.target.result.split(/\r\n|\n/).filter(l => l.trim() !== '');
+        let startIdx = 0;
+        if (lines[0] && /typetag/i.test(lines[0])) startIdx = 1;
+        const rows = [];
+        for (let i = startIdx; i < lines.length; i++) {
+          const cols = parseCsvLine(lines[i]);
+          if (cols[0] || cols[2]) {
+            rows.push({ type: cols[0] || 'CUSTOM', name: cols[1] || '', pattern: cols[2] || '', example: cols[3] || '' });
+          }
+        }
+        event.target.value = '';
+        openImportDialog('regex', rows);
+      };
+      reader.readAsText(file);
+    }
+
+    function renderAiPromptTextareas() {
+      document.getElementById('aiPromptChannel1Textarea').value = aiPrompts.channel1;
+      document.getElementById('aiPromptChannel2PersonalTextarea').value = aiPrompts.channel2Personal;
+      document.getElementById('aiPromptChannel2BusinessTextarea').value = aiPrompts.channel2Business;
+      document.getElementById('aiPromptChannel1Warning').classList.toggle('hidden', aiPrompts.channel1.includes('{{TEXT}}'));
+      document.getElementById('aiPromptChannel2PersonalWarning').classList.toggle('hidden', aiPrompts.channel2Personal.includes('{{TEXT}}'));
+      document.getElementById('aiPromptChannel2BusinessWarning').classList.toggle('hidden', aiPrompts.channel2Business.includes('{{TEXT}}'));
+    }
+
+    function saveAiPromptFromTextarea(channel) {
+      const textareaIds = { channel1: 'aiPromptChannel1Textarea', channel2Personal: 'aiPromptChannel2PersonalTextarea', channel2Business: 'aiPromptChannel2BusinessTextarea' };
+      const warningIds = { channel1: 'aiPromptChannel1Warning', channel2Personal: 'aiPromptChannel2PersonalWarning', channel2Business: 'aiPromptChannel2BusinessWarning' };
+      const textarea = document.getElementById(textareaIds[channel]);
+      aiPrompts[channel] = textarea.value;
+      document.getElementById(warningIds[channel]).classList.toggle('hidden', textarea.value.includes('{{TEXT}}'));
+    }
+
+    function resetAiPrompt(channel) {
+      aiPrompts[channel] = AI_PROMPTS_DEFAULT[channel];
+      renderAiPromptTextareas();
+    }
+
+    function exportAutoConfig() {
+      const cfg = {
+        version: 1,
+        // AI-extracted session-only roster entries aren't appropriate to bake into a "load every time" config.
+        roster: customDict.filter(e => e.source !== 'ai-session').map(e => ({ type: e.type, value: e.value, reason: e.reason })),
+        hardBlock: hardBlockPresets.custom.map(e => e.value),
+        regexRules: regexPresets.custom.map(r => ({ type: r.type, pattern: r.pattern, flags: r.flags, name: r.name, example: r.example })),
+        aiPrompts: { channel1: aiPrompts.channel1, channel2Personal: aiPrompts.channel2Personal, channel2Business: aiPrompts.channel2Business }
+      };
+      const content = `// TokenShield auto-load config — place this file next to TokenShield.html and keep the filename tokenshield.config.js\n` +
+        `window.TOKENSHIELD_AUTO_CONFIG = ${JSON.stringify(cfg, null, 2)};\n`;
+      downloadTextAsFile(content, 'tokenshield.config.js', 'text/javascript;charset=utf-8;');
+    }
+
+    initCustomProtectionState(); // apply built-in defaults first
+    // then try merging in same-folder tokenshield.config.js (silently skipped if absent);
+    // must refresh the "Dictionary: N" counter afterward, otherwise it stays at the HTML's
+    // hardcoded initial value of 0 until something else happens to touch it.
+    loadAutoConfig(() => {
+      document.getElementById('dictCountLabel').innerText = `Dictionary: ${customDict.length}`;
+    });
 
     // ==========================================
     // UI control & tab switching
@@ -973,10 +1533,10 @@
       const tbody = document.getElementById("guideTableBody");
       tbody.innerHTML = getActiveRegexRules().map(rule => `
         <tr>
-          <td class="px-4 py-2">${rule.name}</td>
+          <td class="px-4 py-2">${rule.name}${sourceBadgeHtml(rule.source)}</td>
           <td class="px-4 py-2 font-mono text-xs">${rule.type}_X</td>
           <td class="px-4 py-2 text-stone-500">${rule.example || ''}</td>
-          <td class="px-4 py-2 font-mono text-[10px] break-all">${escapeHtml(rule.regex.toString())}</td>
+          <td class="px-4 py-2 font-mono text-[10px] break-all">${escapeHtml(`/${rule.pattern}/${rule.flags}`)}</td>
         </tr>
       `).join('');
       document.getElementById("guideHardBlockList").innerText = getHardBlockKeywords().join(", ");
@@ -1267,7 +1827,7 @@
 
       customDict = [];
       data.forEach(item => {
-        customDict.push({ type: item.type || 'CUSTOM', value: item.kw, reason: "Built online" });
+        customDict.push({ type: item.type || 'CUSTOM', value: item.kw, reason: "Built online", source: 'manual' });
       });
 
       document.getElementById('dictCountLabel').innerText = `Dictionary: ${customDict.length}`;
@@ -1306,29 +1866,24 @@
       reader.onload = function(e) {
         const text = e.target.result;
         const lines = text.split(/\r\n|\n/).filter(l => l.trim() !== '');
-        customDict = [];
 
-        const firstLine = lines[0].split(',');
         let startIdx = 0;
-        if (firstLine[0] && firstLine[0].trim().toLowerCase().includes('keyword')) {
+        if (lines[0] && /keyword/i.test(lines[0])) {
             startIdx = 1;
         }
 
+        const rows = [];
         for (let i = startIdx; i < lines.length; i++) {
-            const parts = lines[i].split(',');
-            let val = parts[0] ? parts[0].trim() : '';
-            if (val.startsWith('"') && val.endsWith('"') && val.length >= 2) {
-                val = val.substring(1, val.length - 1).replace(/""/g, '"');
-            }
+            const parts = parseCsvLine(lines[i]);
+            const val = parts[0] || '';
             if (val) {
-                const type = (parts[1] && parts[1].trim()) ? parts[1].trim().toUpperCase() : 'CUSTOM';
-                customDict.push({ type, value: val, reason: "Custom dictionary" });
+                const type = parts[1] ? parts[1].toUpperCase() : 'CUSTOM';
+                rows.push({ type, value: val, reason: "Custom dictionary" });
             }
         }
 
-        document.getElementById('dictCountLabel').innerText = `Dictionary: ${customDict.length}`;
-        alert(`Loaded ${customDict.length} custom dictionary entries!`);
-        triggerPreview();
+        event.target.value = '';
+        openImportDialog('roster', rows);
       };
       reader.readAsText(file);
     }
@@ -1562,7 +2117,7 @@
       if (val) {
         if (action === "add") {
           whitelist.delete(val);
-          customDict.push({ type: 'CUSTOM', value: val, reason: "Manually selected" });
+          customDict.push({ type: 'CUSTOM', value: val, reason: "Manually selected", source: 'manual' });
         } else if (action === "remove") {
           addToWhitelist(val);
         }
@@ -1617,11 +2172,18 @@
       customDict.forEach(item => addEnt(item.type, item.value, item.reason, item.isAi, false));
 
       getActiveRegexRules().forEach(rule => {
+        let regex;
+        try {
+          regex = new RegExp(rule.pattern, rule.flags);
+        } catch (err) {
+          console.warn(`[TokenShield] Rule ${rule.type} has an invalid pattern, skipping: ${err.message}`);
+          return;
+        }
         let match;
-        const regex = new RegExp(rule.regex);
         while ((match = regex.exec(text)) !== null) {
-          if (rule.validate && !rule.validate(match[0])) continue;
+          if (rule.validate && !rule.validate(match[0])) { if (match[0].length === 0) regex.lastIndex++; continue; }
           entities.push({ type: rule.type, value: match[0], reason: rule.name, isAi: false, isCritical: false, start: match.index, end: match.index + match[0].length });
+          if (match[0].length === 0) regex.lastIndex++;
         }
       });
 
@@ -1920,7 +2482,7 @@
           signal: controller.signal,
           body: JSON.stringify({
             model: model,
-            prompt: `Find any un-masked "person names (PERSON)" (including title-before forms like "English teacher John Carter"; title-after forms like "Mary Smith, teacher"; colon-separated forms like "Student: Jane Doe"; and plain names or nicknames like "Robert Johnson" or "Bob". Extract the name portion only into the PERSON category, excluding the title), "vendors/organizations (VENDOR)" (including informal shops without a formal company suffix, e.g. "Sunny Diner"), "addresses (ADDRESS)", "project/event names (PROJECT)", and "bank/payment account numbers (BANK_ACCT)".\nReturn ONLY a JSON array like [{"type":"PERSON","value":"Jane Doe","reason":"..."}]. Return [] if nothing is found. Text:\n${currentText}`,
+            prompt: aiPrompts.channel1.split('{{TEXT}}').join(currentText),
             stream: true, format: "json"
           })
         });
@@ -2004,7 +2566,7 @@
             sessionVault[token] = item.value;
             reportData.push({ raw: item.value, token: token, reason: item.reason || "AI entity extraction", isAi: true });
             newText = newText.split(item.value).join(token);
-            customDict.push({ type: tType, value: item.value, reason: item.reason || "AI entity extraction", isAi: true });
+            customDict.push({ type: tType, value: item.value, reason: item.reason || "AI entity extraction", isAi: true, source: 'ai-session' });
             newCount++;
           }
         });
@@ -2016,16 +2578,14 @@
         // Channel 2: risk assessment
         if (btnText) btnText.textContent = 'AI Scan (2/2 starting)';
 
-        const riskCategories = currentPersona === 'business'
-          ? 'insider trading or material non-public information, an active merger/acquisition, a layoff or workforce reduction plan, unreleased financial results, a data breach or security incident, a whistleblower report, active litigation, or a regulatory investigation'
-          : 'self-harm, suicide, sexual assault or abuse, domestic violence, a protective order, a disability or special-needs status (including a psychological/educational assessment), or mental health counseling or treatment records';
+        const channel2Prompt = currentPersona === 'business' ? aiPrompts.channel2Business : aiPrompts.channel2Personal;
 
         const res2 = await fetch(`${url}/api/generate`, {
           method: "POST", headers: { "Content-Type": "application/json" },
           signal: controller.signal,
           body: JSON.stringify({
             model: model,
-            prompt: `Determine whether the following text contains "extremely sensitive information." Extremely sensitive information includes: ${riskCategories}.\nIf it contains any of the above, return this exact JSON: {"critical": true, "reason": "describe the specific risk"}\nIf not, return: {"critical": false, "reason": ""}\n\nText:\n${currentText}`,
+            prompt: channel2Prompt.split('{{TEXT}}').join(currentText),
             stream: true, format: "json"
           })
         });

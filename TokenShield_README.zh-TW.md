@@ -45,7 +45,7 @@ TokenShield **不是**重寫 EduShield——它是一個獨立的姊妹檔案，
 
 ## 二、核心模組與技術規格
 
-### 2.1 地區與身分規則庫（`REGEX_PRESETS` / `HARD_BLOCK_PRESETS`）
+### 2.1 地區與身分規則庫（`REGEX_PRESETS_DEFAULT` / `HARD_BLOCK_PRESETS_DEFAULT`）
 
 這是 TokenShield 與 EduShield 在結構上最大的差異。偵測規則與 Hard Block 詞庫不再是單一綁死台灣格式的陣列，而是組織成使用者可於頂部工具列兩個下拉選單（`#regionSelect`、`#personaSelect`）即時切換的「規則預設集」。
 
@@ -61,9 +61,9 @@ let currentPersona = DEFAULT_PERSONA;
 
 同一時間僅有**一組**地區規則生效，疊加於永遠開啟的 `global` 底層規則之上——這是刻意設計以避免不同國家格式互相誤判（例如同一個 9 碼數字不該同時被當作美國 SSN 又被當作其他東西）。身分模式邏輯相同，同一時間僅有一組詞庫生效。
 
-`getActiveRegexRules()` 回傳 `[...REGEX_PRESETS.global, ...REGEX_PRESETS[currentRegion]]`；`getHardBlockKeywords()` 回傳 `HARD_BLOCK_PRESETS[currentPersona]`。兩者於每次掃描時即時運算，因此切換下拉選單會立即生效（會觸發 `triggerPreview()`）。
+`getActiveRegexRules()` 回傳 `[...regexPresets.global, ...regexPresets.custom, ...regexPresets[currentRegion]]`；`getHardBlockKeywords()` 回傳 `[...hardBlockPresets.custom, ...hardBlockPresets[currentPersona]]`。兩者於每次掃描時即時運算，因此切換下拉選單會立即生效（會觸發 `triggerPreview()`）。其中 `custom` 桶（新增，見 2.8 節）不分地區/身分、永遠合併進去；內建預設值凍結在 `REGEX_PRESETS_DEFAULT`／`HARD_BLOCK_PRESETS_DEFAULT`，`regexPresets`／`hardBlockPresets` 才是這兩個 getter 實際讀取的即時運作狀態。
 
-### 2.2 偵測規則庫（`REGEX_PRESETS`）
+### 2.2 偵測規則庫（`REGEX_PRESETS_DEFAULT`）
 
 每個規則物件格式為 `{ type, regex, name, example, validate? }`。Token 格式為 `{{TYPE_N}}`，`N` 為同類型流水計數器。
 
@@ -93,7 +93,7 @@ let currentPersona = DEFAULT_PERSONA;
 
 信用卡規則另外會對每個正則命中結果執行 **Luhn 校驗**（`luhnCheck()`）後才接受，以降低任意 13-19 碼數字的誤判率。
 
-### 2.3 安全阻斷防線（`HARD_BLOCK_PRESETS`）
+### 2.3 安全阻斷防線（`HARD_BLOCK_PRESETS_DEFAULT`）
 
 `personal` 與 `business` 兩組詞庫陣列，各約 20 個詞彙。若目前生效身分模式的詞庫命中輸入文字，TokenShield 會鎖定介面：
 - 顯示**紅色警示橫幅**
@@ -104,7 +104,7 @@ let currentPersona = DEFAULT_PERSONA;
 
 ### 2.4 自訂詞庫（`customDict`）
 
-機制與 EduShield 相同：CSV 上傳、線上表格編輯器（支援從 Excel 貼上）、手動「設為機密」選取，以及地端 AI 回傳的實體。CSV 範本表頭為 `Keyword,Category(optional)`；上傳解析器以「首欄是否包含 keyword 字樣（不分大小寫）」判斷是否為標題列。
+機制與 EduShield 相同，每筆多了 `source` 欄位（`builtin`／`auto-loaded`／`manual`／`overridden`／`ai-session`，會在介面上以徽章顯示，見 2.8 節）：CSV 上傳、線上表格編輯器（支援從 Excel 貼上）、手動「設為機密」選取，以及地端 AI 回傳的實體。CSV 範本表頭為 `Keyword,Category(optional)`；上傳解析器以「首欄是否包含 keyword 字樣（不分大小寫）」判斷是否為標題列，並改用 `parseCsvLine()`（支援標準 CSV 雙引號跳脫）取代原本單純的 `split(',')`。CSV 檔案匯入會經過「合併/取代/取消」對話框（見 2.8 節），不再直接整批覆蓋；線上表格編輯器則維持原本的整批覆蓋行為。
 
 ### 2.5 地端 AI 模組（Ollama）
 
@@ -121,9 +121,48 @@ let currentPersona = DEFAULT_PERSONA;
 
 EduShield 沒有的新增功能：系統設定視窗新增「Local AI Prompt Library」面板，提供兩組可直接複製的 System Prompt 範本（`LOCAL_AI_PROMPTS.personal` / `.business`，透過 `copyLocalPrompt(which)` 複製）。使用時將其貼在遮蔽後文字之前，一併交給任何本機模型（Ollama、LM Studio 等），讓模型本身的行為也保持隱私意識——強化「連提示詞措辭都不需要離開這台機器」的精神。
 
+> [!NOTE]
+> `LOCAL_AI_PROMPTS` 與 `processAnonymizePhase2()` 實際呼叫的通道一/二提示詞完全無關，純粹是給使用者複製貼到外部聊天工具用的靜態文字。真正送給 Ollama 的提示詞存放在 `aiPrompts`／`AI_PROMPTS_DEFAULT`，可透過「管理自訂防護規則」介面編輯，見 2.8 節。
+
 ### 2.7 還原與完整性檢驗
 
 與 EduShield 相同。`sessionVault` 將 `{{TAG_N}}` Token 對應回原始值；`processRestore()` 會先移除開頭的系統指令前綴（改為 ASCII 標記 `[SYSTEM INSTRUCTION: ...]`，取代 EduShield 使用的中文書名號標記 `【系統指令：...】`），接著套用三段容錯比對：精確匹配、空白容錯、括號容錯（`[TAG_N]`、`(TAG_N)`、`【TAG_N】`）。遺漏的 Token 會在左側原始資料區與膠囊列表中同步以紅色標示。
+
+### 2.8 自訂防護管理系統（四大維度）
+
+點擊工具列的「**管理自訂防護規則**」，可對以下四個維度進行自訂、匯入與匯出，不需要手動編輯 HTML 原始碼：名冊/詞庫（見 2.4 節）、硬阻斷詞彙、正則規則，以及地端 AI 提示詞（是實際送去掃描用的提示詞，不是 2.6 節那個複製貼上用的 Prompt Library）。
+
+**範圍決定**：跟地區/身分專屬的內建預設集不同，所有透過自訂/匯入/自動載入新增的硬阻斷詞彙與正則規則，一律只存進一個**永遠合併、不分地區/身分的「custom」桶**（`hardBlockPresets.custom`、`regexPresets.custom`），不會寫進某個特定 persona/region 自己的陣列。這樣可以讓衝突處理維持單純（只在 `custom` 桶內去重複，不會悄悄改動某個特定身分或地區的內建清單），也符合 `customDict` 原本就是不分地區/身分的單一扁平陣列這個既有慣例。這個管理面板的表格只會列出 `custom` 桶的內容；內建的地區/身分規則仍可在「PII Rule Guide」裡唯讀檢視。
+
+內建預設值凍結為 `HARD_BLOCK_PRESETS_DEFAULT`／`REGEX_PRESETS_DEFAULT`／`AI_PROMPTS_DEFAULT`。即時運作狀態：
+```javascript
+let hardBlockPresets = { personal: [], business: [], custom: [] };
+let regexPresets = { global: [], us: [], eu: [], uk: [], custom: [] };
+let aiPrompts = { channel1: '', channel2Personal: '', channel2Business: '' };
+```
+每筆都帶 `source` 欄位並以徽章顯示：`Built-in`／`Auto-loaded`／`Manually imported`／`Overridden`。正則規則改存 `pattern`／`flags` 字串（不再是即時的 `RegExp` 物件），每次使用都經過 `tryCompileRegexRow()` 的 try/catch 保護，格式錯誤的規則會被略過並個別回報，不會中斷其餘掃描。**注意**：內建 `CREDIT_CARD` 規則的 Luhn `validate` 函式只會保留在真正的內建項目上——若剛好被 CSV／設定檔匯入覆蓋掉（CSV／JSON 無法承載函式），驗證會隨之消失，匯入對話框會在這種情況下另外跳出警告。
+
+CSV 範本：硬阻斷詞彙為單欄 `Keyword`；正則規則為 4 欄 `TypeTag,RuleName,Pattern,ExampleText`，`Pattern` 欄可填純 pattern（預設補 `g` flag）或完整的 `/pattern/flags` 字面量格式字串。
+
+匯入 CSV 時，只要 `custom` 桶已有資料就會跳出**合併/取代/取消**對話框：
+- **合併**：保留 `custom` 桶既有項目，新增資料追加進去；正則的 **pattern 字串**（不含 flags）或關鍵字/值（不分大小寫）與既有 `custom` 項目相同時，會完全覆蓋（標籤變為 `Overridden`）。
+- **完全取代**：清空該維度的 `custom` 桶，改以本次匯入內容為準。
+- **取消**：不做任何變更。
+
+**同資料夾自動載入**：開機時會動態注入 `<script src="tokenshield.config.js">`（機制仿照既有 Tailwind CDN／本地 style.css 降級 IIFE）——檔案不存在時靜默略過，檔案損毀時僅顯示 Console 警告不影響運作，檔案正常時會合併進 `custom` 桶與提示詞（標籤為 `Auto-loaded`）：
+```javascript
+window.TOKENSHIELD_AUTO_CONFIG = {
+  version: 1,
+  roster: [ { type: "VENDOR", value: "...", reason: "..." } ],
+  hardBlock: [ "custom hard-block term" ],
+  regexRules: [ { type: "CUSTOM_CODE", pattern: "CODE-\\d{4}", flags: "g", name: "Custom code", example: "CODE-1234" } ],
+  aiPrompts: { channel1: "...{{TEXT}}", channel2Personal: "...{{TEXT}}", channel2Business: "...{{TEXT}}" }
+};
+```
+工具列的「**Reload Config**」按鈕（會先跳出確認對話框）把四個維度重置回內建預設值，再重新執行一次自動載入，用來捨棄當次手動調整。面板裡的「**Export as Auto-load File**」按鈕則會把目前記憶體中四個維度的最新狀態（含所有合併/覆蓋結果，排除 `ai-session` 標籤的暫存名冊項目）打包成同樣格式，下載成固定檔名 `tokenshield.config.js`。
+
+> [!NOTE]
+> 此機制只處理規則/提示詞設定，完全不涉及使用者實際輸入的文件內容——`sessionVault`、輸入文字框等仍完全遵循 1.2 節提到的既有零持久化承諾，頁面關閉或重整後立即消失。
 
 ---
 
@@ -165,13 +204,13 @@ EduShield 沒有的新增功能：系統設定視窗新增「Local AI Prompt Lib
 ## 四、進階開發者資訊
 
 ### 4.1 新增 Hard Block 詞彙
-開啟 `TokenShield.html`，搜尋 `HARD_BLOCK_PRESETS`，於 `personal` 或 `business` 陣列中加入字串。
+個人化自訂不需要改原始碼，透過「管理自訂防護規則」→「硬阻斷詞彙」分頁匯入 CSV 即可（見 2.8 節）。若要直接改內建的 `personal`／`business` 清單本身，開啟 `TokenShield.html`，搜尋 `HARD_BLOCK_PRESETS_DEFAULT`，於對應陣列中加入字串。
 
 ### 4.2 新增偵測規則
-搜尋 `REGEX_PRESETS`，於 `global`（永遠開啟）或特定地區陣列（`us`／`eu`／`uk`）中加入 `{ type: "TAG_NAME", regex: /您的正規表示式/g, name: "顯示名稱", example: "範例" }`。
+透過「管理自訂防護規則」→「正則規則」分頁匯入 4 欄 CSV（見 2.8 節）。若要直接改內建的某地區規則本身，搜尋 `REGEX_PRESETS_DEFAULT`，於 `global`（永遠開啟）或特定地區陣列（`us`／`eu`／`uk`）中加入 `{ type: "TAG_NAME", regex: /您的正規表示式/g, name: "顯示名稱", example: "範例" }`。
 
 ### 4.3 新增地區預設集
-於 `REGEX_PRESETS` 新增一個鍵值（例如加拿大用 `ca`），並在 HTML 中的 `#regionSelect` 加入對應 `<option>`。新地區規則與現有三組一樣，會疊加於 `global` 之上。
+於 `REGEX_PRESETS_DEFAULT` 與 `buildDefaultRegexPresetsState()` 的初始化邏輯中新增一個鍵值（例如加拿大用 `ca`），並在 HTML 中的 `#regionSelect` 加入對應 `<option>`。新地區規則與現有三組一樣，會疊加於 `global` 之上。
 
 ### 4.4 重新編譯 `style.css`
 Tailwind 建置工具就在本 repo 自己的 `dev/` 資料夾內，不依賴任何外部專案。修改 `TokenShield.html` 的 Tailwind class 後：
