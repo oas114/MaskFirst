@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -6,6 +6,77 @@
   <title>TokenShield — Zero-Trust PII De-identification</title>
   <meta name="description" content="TokenShield is a zero-trust, single-file, offline-first PII de-identification tool for individuals and businesses. Mask sensitive data before sending it to AI, then restore it in one click." />
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><defs><linearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'><stop offset='0%25' stop-color='%23047857'/><stop offset='100%25' stop-color='%2310b981'/></linearGradient></defs><path d='M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z' fill='url(%23g)'/></svg>" />
+  <!-- Design tokens: always loaded regardless of which Tailwind tier below activates (CDN or
+       local style.css), so both can resolve the same var(--...) semantic color references.
+       Keep in sync with the "colors" section of dev/tailwind.config.js and with EduShield's
+       equivalent block (identical except the --brand-* ramp, which is per-product). -->
+  <style>
+    :root {
+      --stone-50: #FAFAF9;
+      --stone-100: #F5F5F4;
+      --stone-200: #E7E5E4;
+      --stone-300: #D6D3D1;
+      --stone-400: #A8A29E;
+      --stone-500: #78716C;
+      --stone-600: #57534E;
+      --stone-700: #44403C;
+      --stone-800: #292524;
+      --stone-900: #1C1917;
+
+      --paper: #FAF9F6;
+      --paper-raised: #FFFFFF;
+      --ink: #292524;
+
+      --danger-50: #FEF2F2;
+      --danger-100: #FEE2E2;
+      --danger-200: #FECACA;
+      --danger-300: #FCA5A5;
+      --danger-400: #F87171;
+      --danger-500: #EF4444;
+      --danger-600: #DC2626;
+      --danger-700: #B91C1C;
+      --danger-800: #991B1B;
+      --danger-500-rgb: 239, 68, 68;
+
+      --warning-50: #FFFBEB;
+      --warning-200: #FDE68A;
+      --warning-300: #FCD34D;
+      --warning-500: #F59E0B;
+      --warning-600: #D97706;
+      --warning-700: #B45309;
+      --warning-800: #92400E;
+      --warning-900: #78350F;
+
+      --accent-ai-50: #EEF2FF;
+      --accent-ai-100: #E0E7FF;
+      --accent-ai-200: #C7D2FE;
+      --accent-ai-400: #818CF8;
+      --accent-ai-500: #6366F1;
+      --accent-ai-600: #4F46E5;
+      --accent-ai-700: #4338CA;
+
+      --ai-finding-50: #FAF5FF;
+      --ai-finding-100: #F3E8FF;
+      --ai-finding-200: #E9D5FF;
+      --ai-finding-400: #C084FC;
+      --ai-finding-600: #9333EA;
+      --ai-finding-700: #7E22CE;
+      --ai-finding-500-rgb: 168, 85, 247;
+
+      /* Brand (TokenShield = emerald) */
+      --brand-50: #ECFDF5;
+      --brand-100: #D1FAE5;
+      --brand-200: #A7F3D0;
+      --brand-300: #6EE7B7;
+      --brand-400: #34D399;
+      --brand-500: #10B981;
+      --brand-600: #059669;
+      --brand-700: #047857;
+      --brand-800: #065F46;
+      --brand-900: #064E3B;
+      --brand-500-rgb: 16, 185, 129;
+    }
+  </style>
   <!-- ===== Tailwind CSS hybrid loading strategy =====
        Tier 1: CDN (network available)
        Tier 2: local style.css (offline fallback)
@@ -28,8 +99,48 @@
                   mono: ['ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', 'Liberation Mono', 'Courier New', 'monospace'],
                 },
                 colors: {
-                  paper: '#FAF9F6',
-                  ink: '#292524'
+                  paper: 'var(--paper)',
+                  'paper-raised': 'var(--paper-raised)',
+                  'paper-sunken': 'var(--stone-50)',
+                  'paper-hover': 'var(--stone-100)',
+
+                  ink: 'var(--ink)',
+                  'ink-hover': 'var(--stone-700)',
+                  'ink-secondary': 'var(--stone-600)',
+                  'ink-muted': 'var(--stone-500)',
+                  'ink-faint': 'var(--stone-400)',
+
+                  line: 'var(--stone-200)',
+                  'line-strong': 'var(--stone-300)',
+                  'line-soft': 'var(--stone-100)',
+
+                  scrim: 'var(--stone-900)',
+
+                  danger: {
+                    50: 'var(--danger-50)', 100: 'var(--danger-100)', 200: 'var(--danger-200)',
+                    300: 'var(--danger-300)', 400: 'var(--danger-400)', 500: 'var(--danger-500)',
+                    600: 'var(--danger-600)', 700: 'var(--danger-700)', 800: 'var(--danger-800)'
+                  },
+                  warning: {
+                    50: 'var(--warning-50)', 200: 'var(--warning-200)', 300: 'var(--warning-300)',
+                    500: 'var(--warning-500)', 600: 'var(--warning-600)', 700: 'var(--warning-700)',
+                    800: 'var(--warning-800)', 900: 'var(--warning-900)'
+                  },
+                  'accent-ai': {
+                    50: 'var(--accent-ai-50)', 100: 'var(--accent-ai-100)', 200: 'var(--accent-ai-200)',
+                    400: 'var(--accent-ai-400)', 500: 'var(--accent-ai-500)', 600: 'var(--accent-ai-600)',
+                    700: 'var(--accent-ai-700)'
+                  },
+                  'ai-finding': {
+                    50: 'var(--ai-finding-50)', 100: 'var(--ai-finding-100)', 200: 'var(--ai-finding-200)',
+                    400: 'var(--ai-finding-400)', 600: 'var(--ai-finding-600)', 700: 'var(--ai-finding-700)'
+                  },
+                  brand: {
+                    50: 'var(--brand-50)', 100: 'var(--brand-100)', 200: 'var(--brand-200)',
+                    300: 'var(--brand-300)', 400: 'var(--brand-400)', 500: 'var(--brand-500)',
+                    600: 'var(--brand-600)', 700: 'var(--brand-700)', 800: 'var(--brand-800)',
+                    900: 'var(--brand-900)'
+                  }
                 }
               }
             }
@@ -141,39 +252,39 @@
       overflow-y: auto;
     }
     .editor-textarea:focus {
-      border-color: #3b82f6;
-      box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+      border-color: var(--brand-500);
+      box-shadow: 0 0 0 2px rgba(var(--brand-500-rgb), 0.1);
       border-radius: 0.5rem;
     }
 
     /* Highlight marks */
     mark {
-      background-color: rgba(16, 185, 129, 0.18);
+      background-color: rgba(var(--brand-500-rgb), 0.18);
       color: transparent;
       border-radius: 2px;
       transition: background-color 0.2s;
     }
     mark.highlight-active {
-      background-color: rgba(16, 185, 129, 0.4);
+      background-color: rgba(var(--brand-500-rgb), 0.4);
     }
     mark.highlight-ai {
-      background-color: rgba(168, 85, 247, 0.25);
+      background-color: rgba(var(--ai-finding-500-rgb), 0.25);
     }
     mark.highlight-ai.highlight-active {
-      background-color: rgba(168, 85, 247, 0.45);
+      background-color: rgba(var(--ai-finding-500-rgb), 0.45);
     }
     mark.highlight-critical {
-      background-color: rgba(239, 68, 68, 0.25);
+      background-color: rgba(var(--danger-500-rgb), 0.25);
     }
     mark.highlight-critical.highlight-active {
-      background-color: rgba(239, 68, 68, 0.45);
+      background-color: rgba(var(--danger-500-rgb), 0.45);
     }
 
     /* Scrollbar styling */
     ::-webkit-scrollbar { width: 6px; height: 6px; }
     ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: #d6d3d1; border-radius: 3px; }
-    ::-webkit-scrollbar-thumb:hover { background: #a8a29e; }
+    ::-webkit-scrollbar-thumb { background: var(--stone-300); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--stone-400); }
 
     /* Tooltip */
     .group:hover .tooltip {
@@ -185,23 +296,23 @@
 <body class="bg-paper text-ink min-h-[100dvh] overflow-y-auto lg:h-screen lg:overflow-hidden flex flex-col font-sans">
 
   <!-- Top navigation and tabs -->
-  <header class="bg-white border-b border-stone-200 sticky top-0 z-20 shadow-sm flex-shrink-0">
+  <header class="bg-white border-b border-line sticky top-0 z-20 shadow-sm flex-shrink-0">
     <div class="max-w-[90rem] mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-4">
       <div class="flex items-center justify-between w-full lg:w-auto lg:justify-start gap-4 sm:gap-6 flex-wrap">
         <div class="flex items-center gap-2.5">
-          <div style="width:30px;height:30px;background:linear-gradient(135deg,#047857,#10b981);border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+          <div style="width:30px;height:30px;background:linear-gradient(135deg,var(--brand-700),var(--brand-500));border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
             <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
             </svg>
           </div>
-          <h1 class="font-bold text-lg tracking-tight">TokenShield <span class="font-normal text-stone-500 text-sm ml-1 hidden sm:inline">Privacy Shield for AI</span></h1>
+          <h1 class="font-bold text-lg tracking-tight">TokenShield <span class="font-normal text-ink-muted text-sm ml-1 hidden sm:inline">Privacy Shield for AI</span></h1>
         </div>
         <!-- Tab switcher -->
-        <div class="flex flex-wrap bg-stone-100 p-1 rounded-lg gap-1 ml-auto lg:ml-0">
-          <button id="tabBtn1" onclick="switchTab(1)" class="px-3 sm:px-5 py-1.5 text-xs sm:text-sm font-semibold rounded-md bg-white shadow-sm text-emerald-700 transition-all">
+        <div class="flex flex-wrap bg-paper-hover p-1 rounded-lg gap-1 ml-auto lg:ml-0">
+          <button id="tabBtn1" onclick="switchTab(1)" class="px-3 sm:px-5 py-1.5 text-xs sm:text-sm font-semibold rounded-md bg-white shadow-sm text-brand-700 transition-all">
             De-identify
           </button>
-          <button id="tabBtn2" onclick="switchTab(2)" class="px-3 sm:px-5 py-1.5 text-xs sm:text-sm font-medium rounded-md text-stone-500 hover:text-stone-700 transition-all">
+          <button id="tabBtn2" onclick="switchTab(2)" class="px-3 sm:px-5 py-1.5 text-xs sm:text-sm font-medium rounded-md text-ink-muted hover:text-ink-hover transition-all">
             Restore
           </button>
         </div>
@@ -210,7 +321,7 @@
       <div class="flex flex-wrap items-center gap-2 sm:gap-3 text-[10px] sm:text-sm">
         <div class="flex items-center gap-1.5">
           <label class="sr-only" for="regionSelect">Region ruleset</label>
-          <select id="regionSelect" onchange="switchRegion(this.value)" title="Regional PII ruleset — only one is active at a time, plus the always-on Global baseline" class="bg-white hover:bg-stone-50 border border-stone-300 text-stone-700 px-2 py-1.5 rounded-lg text-[10px] sm:text-xs font-medium transition-colors focus:outline-none focus:ring-1 focus:ring-emerald-500">
+          <select id="regionSelect" onchange="switchRegion(this.value)" title="Regional PII ruleset — only one is active at a time, plus the always-on Global baseline" class="bg-white hover:bg-paper-sunken border border-line-strong text-ink-hover px-2 py-1.5 rounded-lg text-[10px] sm:text-xs font-medium transition-colors focus:outline-none focus:ring-1 focus:ring-brand-500">
             <option value="us">🇺🇸 US</option>
             <option value="eu">🇪🇺 EU (GDPR)</option>
             <option value="uk">🇬🇧 UK</option>
@@ -218,27 +329,27 @@
             <option value="jp">🇯🇵 JP</option>
           </select>
           <label class="sr-only" for="personaSelect">Persona</label>
-          <select id="personaSelect" onchange="switchPersona(this.value)" title="Hard Block keyword set — Personal privacy terms vs. Business confidentiality terms" class="bg-white hover:bg-stone-50 border border-stone-300 text-stone-700 px-2 py-1.5 rounded-lg text-[10px] sm:text-xs font-medium transition-colors focus:outline-none focus:ring-1 focus:ring-emerald-500">
+          <select id="personaSelect" onchange="switchPersona(this.value)" title="Hard Block keyword set — Personal privacy terms vs. Business confidentiality terms" class="bg-white hover:bg-paper-sunken border border-line-strong text-ink-hover px-2 py-1.5 rounded-lg text-[10px] sm:text-xs font-medium transition-colors focus:outline-none focus:ring-1 focus:ring-brand-500">
             <option value="personal">Personal</option>
             <option value="business">Business</option>
           </select>
         </div>
         <div class="flex items-center gap-2">
           <input type="file" id="csvFileInput" accept=".csv" class="hidden" onchange="handleCsvUpload(event)" />
-          <button onclick="document.getElementById('csvFileInput').click()" class="bg-white hover:bg-stone-50 border border-stone-300 text-stone-700 px-2 sm:px-3 py-1.5 rounded-lg text-[10px] sm:text-xs font-medium transition-colors">
+          <button onclick="document.getElementById('csvFileInput').click()" class="bg-white hover:bg-paper-sunken border border-line-strong text-ink-hover px-2 sm:px-3 py-1.5 rounded-lg text-[10px] sm:text-xs font-medium transition-colors">
             Import Custom Dictionary (CSV)
           </button>
-          <button id="dictCountLabel" onclick="openEditCsvModal()" class="bg-white hover:bg-stone-100 text-stone-600 px-2 sm:px-3 py-1.5 rounded-lg text-[10px] sm:text-xs font-mono transition-colors border border-stone-300">
+          <button id="dictCountLabel" onclick="openEditCsvModal()" class="bg-white hover:bg-paper-hover text-ink-secondary px-2 sm:px-3 py-1.5 rounded-lg text-[10px] sm:text-xs font-mono transition-colors border border-line-strong">
             Dictionary: 0
           </button>
         </div>
-        <button onclick="openGuide()" class="bg-white hover:bg-stone-50 border border-stone-300 text-stone-700 px-2 sm:px-3 py-1.5 rounded-lg text-[10px] sm:text-xs font-medium transition-colors">
+        <button onclick="openGuide()" class="bg-white hover:bg-paper-sunken border border-line-strong text-ink-hover px-2 sm:px-3 py-1.5 rounded-lg text-[10px] sm:text-xs font-medium transition-colors">
           PII Rule Guide
         </button>
-        <button onclick="openSettings()" class="bg-white hover:bg-stone-50 border border-stone-300 text-stone-700 px-2 sm:px-3 py-1.5 rounded-lg text-[10px] sm:text-xs font-medium transition-colors">
+        <button onclick="openSettings()" class="bg-white hover:bg-paper-sunken border border-line-strong text-ink-hover px-2 sm:px-3 py-1.5 rounded-lg text-[10px] sm:text-xs font-medium transition-colors">
           Settings
         </button>
-        <button id="manageProtectionBtn" onclick="openProtectionManagerModal()" class="bg-white hover:bg-stone-50 border border-stone-300 text-stone-700 px-2 sm:px-3 py-1.5 rounded-lg text-[10px] sm:text-xs font-medium transition-colors">
+        <button id="manageProtectionBtn" onclick="openProtectionManagerModal()" class="bg-white hover:bg-paper-sunken border border-line-strong text-ink-hover px-2 sm:px-3 py-1.5 rounded-lg text-[10px] sm:text-xs font-medium transition-colors">
           Manage Custom Protection Rules
         </button>
       </div>
@@ -246,11 +357,11 @@
   </header>
 
   <!-- Hard block warning banner -->
-  <div id="hardBlockBanner" class="hidden flex-shrink-0 bg-red-50 border-b border-red-200 px-4 py-2.5 shadow-inner flex flex-wrap gap-2 items-center justify-between z-10">
-    <div class="text-xs font-medium text-red-700 flex-1">
+  <div id="hardBlockBanner" class="hidden flex-shrink-0 bg-danger-50 border-b border-danger-200 px-4 py-2.5 shadow-inner flex flex-wrap gap-2 items-center justify-between z-10">
+    <div class="text-xs font-medium text-danger-700 flex-1">
       Warning: extremely sensitive terms detected. The copy function has been locked to prevent accidental exposure.
     </div>
-    <button onclick="openUnlockModal()" class="bg-white border border-red-200 text-red-700 hover:bg-red-100 px-3 py-1 rounded text-xs font-bold transition-colors shadow-sm whitespace-nowrap">
+    <button onclick="openUnlockModal()" class="bg-white border border-danger-200 text-danger-700 hover:bg-danger-100 px-3 py-1 rounded text-xs font-bold transition-colors shadow-sm whitespace-nowrap">
       View Details & Unlock
     </button>
   </div>
@@ -262,10 +373,10 @@
     <div id="viewPhase1" class="flex-1 flex flex-col lg:flex-row gap-6 min-h-0">
 
       <!-- Left: data input & pre-scan -->
-      <section class="flex-1 bg-white rounded-xl border border-stone-200 shadow-sm flex flex-col min-h-[50vh] lg:min-h-0">
-        <div class="p-3 border-b border-stone-100 flex justify-between items-center bg-stone-50/50 flex-shrink-0">
-          <label class="font-semibold text-sm text-stone-800">Original Data Input</label>
-          <button onclick="clearLeftInput()" class="text-xs text-stone-500 hover:text-stone-800 transition-colors">Clear</button>
+      <section class="flex-1 bg-white rounded-xl border border-line shadow-sm flex flex-col min-h-[50vh] lg:min-h-0">
+        <div class="p-3 border-b border-line-soft flex justify-between items-center bg-paper-sunken/50 flex-shrink-0">
+          <label class="font-semibold text-sm text-ink">Original Data Input</label>
+          <button onclick="clearLeftInput()" class="text-xs text-ink-muted hover:text-ink transition-colors">Clear</button>
         </div>
 
         <!-- Highlight editor core -->
@@ -277,45 +388,45 @@
         </div>
 
         <!-- Detected-item chips -->
-        <div class="p-3 border-t border-stone-100 bg-white flex-shrink-0">
-          <div class="text-xs font-medium text-stone-500 mb-2">Detected Items (click to un-mask)</div>
+        <div class="p-3 border-t border-line-soft bg-white flex-shrink-0">
+          <div class="text-xs font-medium text-ink-muted mb-2">Detected Items (click to un-mask)</div>
           <div id="entityChips" class="flex flex-wrap gap-1.5 max-h-24 overflow-y-auto p-1 -m-1">
-            <span class="text-stone-400 italic text-xs py-1">No data</span>
+            <span class="text-ink-faint italic text-xs py-1">No data</span>
           </div>
         </div>
 
-        <div class="p-4 border-t border-stone-100 bg-stone-50 flex-shrink-0">
-          <button id="phase1Btn" onclick="processAnonymizePhase1()" class="w-full bg-emerald-700 hover:bg-emerald-800 text-white font-semibold py-2.5 px-4 rounded-lg shadow-sm transition-colors text-sm flex items-center justify-center gap-2">
+        <div class="p-4 border-t border-line-soft bg-paper-sunken flex-shrink-0">
+          <button id="phase1Btn" onclick="processAnonymizePhase1()" class="w-full bg-brand-700 hover:bg-brand-800 text-white font-semibold py-2.5 px-4 rounded-lg shadow-sm transition-colors text-sm flex items-center justify-center gap-2">
             <span id="phase1BtnText">Execute De-identification</span>
           </button>
         </div>
       </section>
 
       <!-- Right: results & prompt -->
-      <section class="flex-1 bg-white rounded-xl border border-stone-200 shadow-sm flex flex-col min-h-[50vh] lg:min-h-0">
+      <section class="flex-1 bg-white rounded-xl border border-line shadow-sm flex flex-col min-h-[50vh] lg:min-h-0">
 
-        <div class="p-3 border-b border-stone-100 bg-stone-50/50 flex-shrink-0">
-          <label class="font-semibold text-sm text-stone-800">Masking Details</label>
+        <div class="p-3 border-b border-line-soft bg-paper-sunken/50 flex-shrink-0">
+          <label class="font-semibold text-sm text-ink">Masking Details</label>
         </div>
 
-        <div id="anonymizeReport" class="flex-shrink-0 h-1/3 overflow-y-auto p-4 text-xs space-y-1.5 font-mono text-stone-700 bg-white border-b border-stone-100">
-          <div class="text-stone-400 italic">Not run yet</div>
+        <div id="anonymizeReport" class="flex-shrink-0 h-1/3 overflow-y-auto p-4 text-xs space-y-1.5 font-mono text-ink-hover bg-white border-b border-line-soft">
+          <div class="text-ink-faint italic">Not run yet</div>
         </div>
 
-        <div class="p-3 bg-stone-50/50 flex-shrink-0">
-          <label class="font-semibold text-sm text-stone-800">De-identified Data</label>
+        <div class="p-3 bg-paper-sunken/50 flex-shrink-0">
+          <label class="font-semibold text-sm text-ink">De-identified Data</label>
         </div>
 
         <div class="flex-1 relative min-h-[40vh] lg:min-h-0 flex flex-col">
-          <textarea id="anonymizedOutput" readonly class="flex-1 w-full lg:absolute lg:inset-0 lg:h-full p-4 text-sm bg-white text-stone-600 resize-none font-mono focus:outline-none overflow-y-auto" style="tab-size: 4; field-sizing: content;" placeholder="Output will appear here after running de-identification..."></textarea>
+          <textarea id="anonymizedOutput" readonly class="flex-1 w-full lg:absolute lg:inset-0 lg:h-full p-4 text-sm bg-white text-ink-secondary resize-none font-mono focus:outline-none overflow-y-auto" style="tab-size: 4; field-sizing: content;" placeholder="Output will appear here after running de-identification..."></textarea>
         </div>
 
-        <div class="p-4 bg-stone-50 border-t border-stone-100 flex-shrink-0 flex gap-3">
-          <button id="phase2Btn" onclick="processAnonymizePhase2()" class="hidden flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2.5 px-4 rounded-lg shadow-sm transition-colors text-sm flex items-center justify-center gap-2">
+        <div class="p-4 bg-paper-sunken border-t border-line-soft flex-shrink-0 flex gap-3">
+          <button id="phase2Btn" onclick="processAnonymizePhase2()" class="hidden flex-1 bg-accent-ai-600 hover:bg-accent-ai-700 text-white font-semibold py-2.5 px-4 rounded-lg shadow-sm transition-colors text-sm flex items-center justify-center gap-2">
             <svg id="phase2Spinner" class="hidden animate-spin w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4l3-3-3-3v4a8 8 0 100 16v-4l-3 3 3 3v-4a8 8 0 01-8-8z"></path></svg>
             <span id="phase2BtnText" class="whitespace-nowrap truncate">Scan with Local AI</span>
           </button>
-          <button id="copyPromptBtn" onclick="copyAnonymizedPrompt()" disabled class="flex-1 bg-stone-800 hover:bg-stone-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold py-2.5 px-4 rounded-lg shadow-sm transition-colors text-sm text-center">
+          <button id="copyPromptBtn" onclick="copyAnonymizedPrompt()" disabled class="flex-1 bg-ink hover:bg-ink-hover disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold py-2.5 px-4 rounded-lg shadow-sm transition-colors text-sm text-center">
             Copy Masked Data
           </button>
         </div>
@@ -328,17 +439,17 @@
     <div id="viewPhase2" class="hidden flex-1 flex flex-col lg:flex-row gap-6 min-h-0">
 
       <!-- Left: read-only original & chips -->
-      <section class="flex-1 bg-white rounded-xl border border-stone-200 shadow-sm flex flex-col min-h-[40vh] lg:min-h-0">
-        <div class="p-3 border-b border-stone-100 bg-stone-50/50 flex-shrink-0">
-          <label class="font-semibold text-sm text-stone-800">Original Data & Masking Record</label>
+      <section class="flex-1 bg-white rounded-xl border border-line shadow-sm flex flex-col min-h-[40vh] lg:min-h-0">
+        <div class="p-3 border-b border-line-soft bg-paper-sunken/50 flex-shrink-0">
+          <label class="font-semibold text-sm text-ink">Original Data & Masking Record</label>
         </div>
 
-        <div id="readOnlyOriginal" class="flex-1 p-4 text-sm bg-white font-mono text-stone-500 overflow-y-auto whitespace-pre-wrap min-h-0 leading-[2.25]" style="tab-size: 4;">
+        <div id="readOnlyOriginal" class="flex-1 p-4 text-sm bg-white font-mono text-ink-muted overflow-y-auto whitespace-pre-wrap min-h-0 leading-[2.25]" style="tab-size: 4;">
           Please run de-identification in the "De-identify" view first.
         </div>
 
-        <div class="p-3 border-t border-stone-100 bg-white flex-shrink-0">
-          <div class="text-xs font-medium text-stone-500 mb-2">Masked Items (hover to see the tag)</div>
+        <div class="p-3 border-t border-line-soft bg-white flex-shrink-0">
+          <div class="text-xs font-medium text-ink-muted mb-2">Masked Items (hover to see the tag)</div>
           <div id="restoreChips" class="flex flex-wrap gap-2 max-h-24 overflow-y-auto p-1 -m-1">
             <!-- Interactive tooltip chips -->
           </div>
@@ -349,43 +460,43 @@
       <section class="flex-1 flex flex-col gap-4 min-h-[50vh] lg:min-h-0">
 
         <!-- Collapsible: paste AI reply -->
-        <div id="aiReplyContainer" class="bg-white rounded-xl border border-stone-200 flex flex-col transition-all duration-300 flex-shrink-0 shadow-sm">
-          <div class="p-3 border-b border-stone-100 flex justify-between items-center bg-stone-50/50">
-            <label class="font-semibold text-sm text-stone-800">External AI Reply</label>
+        <div id="aiReplyContainer" class="bg-white rounded-xl border border-line flex flex-col transition-all duration-300 flex-shrink-0 shadow-sm">
+          <div class="p-3 border-b border-line-soft flex justify-between items-center bg-paper-sunken/50">
+            <label class="font-semibold text-sm text-ink">External AI Reply</label>
             <div class="flex gap-2">
-              <button onclick="openAiReplyModal()" class="text-xs text-stone-500 hover:text-stone-800 transition-colors">Enlarge View</button>
-              <button onclick="document.getElementById('aiReplyInput').value = ''" class="text-xs text-stone-400 hover:text-stone-600">Clear</button>
+              <button onclick="openAiReplyModal()" class="text-xs text-ink-muted hover:text-ink transition-colors">Enlarge View</button>
+              <button onclick="document.getElementById('aiReplyInput').value = ''" class="text-xs text-ink-faint hover:text-ink-secondary">Clear</button>
             </div>
           </div>
           <textarea id="aiReplyInput" class="w-full h-40 p-4 text-sm bg-white border-none resize-none font-mono focus:outline-none transition-all duration-300" style="tab-size: 4;" placeholder="Paste the reply from ChatGPT / Claude here..."></textarea>
-          <div class="p-3 border-t border-stone-100 bg-stone-50 flex gap-2">
-            <button onclick="pasteFromClipboard()" class="flex-[1] bg-white border border-stone-300 hover:bg-stone-50 text-stone-700 font-medium py-2 px-3 rounded-lg shadow-sm transition-colors text-sm whitespace-nowrap">
+          <div class="p-3 border-t border-line-soft bg-paper-sunken flex gap-2">
+            <button onclick="pasteFromClipboard()" class="flex-[1] bg-white border border-line-strong hover:bg-paper-sunken text-ink-hover font-medium py-2 px-3 rounded-lg shadow-sm transition-colors text-sm whitespace-nowrap">
               Paste from Clipboard
             </button>
-            <button onclick="processRestore()" class="flex-[2] bg-emerald-700 hover:bg-emerald-800 text-white font-semibold py-2 px-4 rounded-lg shadow-sm transition-colors text-sm">
+            <button onclick="processRestore()" class="flex-[2] bg-brand-700 hover:bg-brand-800 text-white font-semibold py-2 px-4 rounded-lg shadow-sm transition-colors text-sm">
               Run Restore
             </button>
           </div>
         </div>
 
         <!-- Restore result -->
-        <div class="flex-1 bg-white rounded-xl border border-stone-200 flex flex-col min-h-0 shadow-sm">
-          <div class="p-3 border-b border-stone-100 bg-stone-50/50 flex justify-between items-center flex-shrink-0">
+        <div class="flex-1 bg-white rounded-xl border border-line flex flex-col min-h-0 shadow-sm">
+          <div class="p-3 border-b border-line-soft bg-paper-sunken/50 flex justify-between items-center flex-shrink-0">
             <div class="flex items-center gap-3">
-              <label class="font-semibold text-sm text-stone-800">Restore Result</label>
-              <div class="flex items-center gap-1 text-xs text-stone-500">
+              <label class="font-semibold text-sm text-ink">Restore Result</label>
+              <div class="flex items-center gap-1 text-xs text-ink-muted">
                 <span>Mask symbol:</span>
-                <input type="text" id="customMaskSymbol" value="■" placeholder="■" maxlength="1" class="w-8 text-center border border-stone-300 rounded bg-white focus:outline-none focus:ring-1 focus:ring-emerald-500 font-mono text-stone-700 py-0.5 cursor-text shadow-sm">
+                <input type="text" id="customMaskSymbol" value="■" placeholder="■" maxlength="1" class="w-8 text-center border border-line-strong rounded bg-white focus:outline-none focus:ring-1 focus:ring-brand-500 font-mono text-ink-hover py-0.5 cursor-text shadow-sm">
               </div>
             </div>
             <div id="integrityStatus" class="text-xs font-medium"></div>
           </div>
-          <div id="restoredOutputView" contenteditable="true" class="flex-1 p-4 text-sm bg-white overflow-y-auto font-sans leading-[2.25] whitespace-pre-wrap min-h-0 focus:outline-none focus:ring-2 focus:ring-emerald-100 transition-shadow" style="tab-size: 4;"></div>
-          <div class="p-3 border-t border-stone-100 bg-stone-50 flex-shrink-0 flex gap-2">
-            <button onclick="clearRestoredResult()" class="flex-[1] bg-white border border-stone-300 hover:bg-stone-50 text-stone-700 font-medium py-2 px-3 rounded-lg shadow-sm transition-colors text-sm whitespace-nowrap">
+          <div id="restoredOutputView" contenteditable="true" class="flex-1 p-4 text-sm bg-white overflow-y-auto font-sans leading-[2.25] whitespace-pre-wrap min-h-0 focus:outline-none focus:ring-2 focus:ring-brand-100 transition-shadow" style="tab-size: 4;"></div>
+          <div class="p-3 border-t border-line-soft bg-paper-sunken flex-shrink-0 flex gap-2">
+            <button onclick="clearRestoredResult()" class="flex-[1] bg-white border border-line-strong hover:bg-paper-sunken text-ink-hover font-medium py-2 px-3 rounded-lg shadow-sm transition-colors text-sm whitespace-nowrap">
               Clear Result
             </button>
-            <button onclick="copyRestoredResult()" class="flex-[3] bg-stone-800 hover:bg-stone-700 text-white font-semibold py-2 px-4 rounded-lg shadow-sm transition-colors text-sm">
+            <button onclick="copyRestoredResult()" class="flex-[3] bg-ink hover:bg-ink-hover text-white font-semibold py-2 px-4 rounded-lg shadow-sm transition-colors text-sm">
               Copy Restored Text
             </button>
           </div>
@@ -397,214 +508,214 @@
   </main>
 
   <!-- ==================== Enlarge AI Reply Modal ==================== -->
-  <div id="aiReplyModal" class="hidden fixed inset-0 bg-stone-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4 opacity-0 transition-opacity duration-300">
-    <div class="bg-white rounded-xl shadow-2xl w-full max-w-4xl h-[80vh] flex flex-col transform scale-95 transition-transform duration-300 border border-stone-200">
-      <div class="px-6 py-4 border-b border-stone-100 flex justify-between items-center bg-stone-50 flex-shrink-0">
-        <h2 class="text-sm font-bold text-stone-800">Edit External AI Reply (Enlarged)</h2>
+  <div id="aiReplyModal" class="hidden fixed inset-0 bg-scrim/40 backdrop-blur-sm z-50 flex items-center justify-center p-4 opacity-0 transition-opacity duration-300">
+    <div class="bg-white rounded-xl shadow-2xl w-full max-w-4xl h-[80vh] flex flex-col transform scale-95 transition-transform duration-300 border border-line">
+      <div class="px-6 py-4 border-b border-line-soft flex justify-between items-center bg-paper-sunken flex-shrink-0">
+        <h2 class="text-sm font-bold text-ink">Edit External AI Reply (Enlarged)</h2>
         <div class="flex items-center gap-3">
-          <button onclick="pasteFromClipboard(true)" class="text-xs text-emerald-700 font-medium hover:text-emerald-900">Paste from Clipboard</button>
-          <button onclick="closeAiReplyModal()" class="text-stone-400 hover:text-stone-600 font-medium text-lg">&times;</button>
+          <button onclick="pasteFromClipboard(true)" class="text-xs text-brand-700 font-medium hover:text-brand-900">Paste from Clipboard</button>
+          <button onclick="closeAiReplyModal()" class="text-ink-faint hover:text-ink-secondary font-medium text-lg">&times;</button>
         </div>
       </div>
       <div class="flex-1 relative">
         <textarea id="aiReplyInputLarge" class="absolute inset-0 w-full h-full p-6 text-sm bg-white border-none resize-none font-mono focus:outline-none" style="tab-size: 4;" placeholder="Paste the reply from ChatGPT / Claude here..."></textarea>
       </div>
-      <div class="px-6 py-4 border-t border-stone-100 bg-stone-50 flex justify-end gap-3 flex-shrink-0">
-        <button onclick="closeAiReplyModal()" class="px-4 py-2 bg-white border border-stone-300 text-stone-700 rounded-lg text-sm font-medium hover:bg-stone-50 transition-colors">Cancel</button>
-        <button onclick="syncAiReplyAndClose()" class="px-4 py-2 bg-emerald-700 hover:bg-emerald-800 text-white rounded-lg text-sm font-semibold shadow-sm transition-colors">Apply & Restore</button>
+      <div class="px-6 py-4 border-t border-line-soft bg-paper-sunken flex justify-end gap-3 flex-shrink-0">
+        <button onclick="closeAiReplyModal()" class="px-4 py-2 bg-white border border-line-strong text-ink-hover rounded-lg text-sm font-medium hover:bg-paper-sunken transition-colors">Cancel</button>
+        <button onclick="syncAiReplyAndClose()" class="px-4 py-2 bg-brand-700 hover:bg-brand-800 text-white rounded-lg text-sm font-semibold shadow-sm transition-colors">Apply & Restore</button>
       </div>
     </div>
   </div>
 
   <!-- ==================== Settings Modal ==================== -->
-  <div id="settingsModal" class="hidden fixed inset-0 bg-stone-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4 opacity-0 transition-opacity duration-300">
+  <div id="settingsModal" class="hidden fixed inset-0 bg-scrim/40 backdrop-blur-sm z-50 flex items-center justify-center p-4 opacity-0 transition-opacity duration-300">
     <div class="bg-white rounded-xl shadow-2xl w-full max-w-2xl overflow-hidden transform scale-95 transition-transform duration-300 flex flex-col max-h-full">
-      <div class="px-6 py-4 border-b border-stone-100 flex justify-between items-center bg-stone-50/50 flex-shrink-0">
-        <h2 class="text-sm font-bold text-stone-800">Settings & Advanced Features</h2>
-        <button onclick="closeSettings()" class="text-stone-400 hover:text-stone-600 font-medium text-lg">&times;</button>
+      <div class="px-6 py-4 border-b border-line-soft flex justify-between items-center bg-paper-sunken/50 flex-shrink-0">
+        <h2 class="text-sm font-bold text-ink">Settings & Advanced Features</h2>
+        <button onclick="closeSettings()" class="text-ink-faint hover:text-ink-secondary font-medium text-lg">&times;</button>
       </div>
 
       <div class="p-6 overflow-y-auto space-y-6">
 
         <!-- Open-source author info -->
-        <div class="flex justify-end items-center gap-3 text-xs text-stone-500 pb-2 border-b border-stone-100/60">
+        <div class="flex justify-end items-center gap-3 text-xs text-ink-muted pb-2 border-b border-line-soft/60">
           <div>Author: <strong>OA (oas114)</strong></div>
-          <span class="text-stone-300">|</span>
-          <a href="https://github.com/oas114/TokenShield" target="_blank" rel="noopener noreferrer" class="hover:text-stone-800 transition-colors flex items-center gap-1.5 group">
+          <span class="text-line-strong">|</span>
+          <a href="https://github.com/oas114/TokenShield" target="_blank" rel="noopener noreferrer" class="hover:text-ink transition-colors flex items-center gap-1.5 group">
             <svg class="w-3.5 h-3.5 fill-current opacity-70 group-hover:opacity-100 transition-opacity" viewBox="0 0 24 24"><path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.477 2 2 6.477 2 12c0 4.42 2.865 8.166 6.839 9.489.5.092.682-.217.682-.482 0-.237-.008-.866-.013-1.7-2.782.603-3.369-1.34-3.369-1.34-.454-1.156-1.11-1.462-1.11-1.462-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.831.092-.646.35-1.086.636-1.336-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.578 9.578 0 0112 6.836c.85.004 1.705.114 2.504.336 1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.203 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48C19.138 20.161 22 16.418 22 12c0-5.523-4.477-10-10-10z"/></svg>
             oas114/TokenShield
           </a>
-          <span class="text-stone-300">|</span>
-          <a href="https://ko-fi.com/oasgrow" target="_blank" rel="noopener noreferrer" class="hover:text-rose-600 transition-colors flex items-center gap-1 text-stone-500 font-medium group">
-            <svg class="w-3.5 h-3.5 text-rose-500 opacity-70 group-hover:opacity-100 transition-opacity" viewBox="0 0 24 24" fill="currentColor"><path d="M23.881 8.948c-.773-4.085-4.859-4.593-4.859-4.593H.723c-.604 0-.679.798-.679.798s-.082 7.324-.022 11.822c.164 2.424 2.586 2.672 2.586 2.672s8.267-.023 11.966-.049c2.438-.426 2.683-2.566 2.658-3.734 4.352.24 7.422-2.831 6.649-6.916zm-11.062 3.511c-1.246 1.453-4.011 3.976-4.011 3.976s-.121.119-.31.023c-.076-.057-.108-.09-.108-.09-.443-.441-3.368-3.049-4.051-3.954-1.094-1.465-1.085-3.275.088-4.4C5.586 6.892 7.393 7.323 8.5 8.5c1.092-1.127 2.923-1.644 4.093-.457 1.157 1.17 1.157 3.238.226 4.416zm10.158 1.25c-.217 2.148-2.604 2.846-2.604 2.846s-1.424.037-2.658.077c.394-1.411.411-2.909.411-2.909l2.428-.016c.365-.008.572-.34.426-.642-.376-.842-1.348-1.054-1.348-1.054h-1.579c.006-.356.035-.717.035-1.082 0 0 1.258-.008 1.954-.037 1.343-.053 2.008-.946 2.008-.946 1.111-.806 1.09-2.571 1.09-2.571s-.027-1.107-1.098-1.595c-.868-.396-1.895-.296-1.895-.296h-1.666c-.053-.393-.111-.795-.178-1.189 0 0 3.328.067 4.15.539 1.637.935 1.542 2.502 1.542 2.502s.101 2.086-.889 3.21c0 0-.171.186-.184.186z"/></svg>
+          <span class="text-line-strong">|</span>
+          <a href="https://ko-fi.com/oasgrow" target="_blank" rel="noopener noreferrer" class="hover:text-danger-600 transition-colors flex items-center gap-1 text-ink-muted font-medium group">
+            <svg class="w-3.5 h-3.5 text-danger-500 opacity-70 group-hover:opacity-100 transition-opacity" viewBox="0 0 24 24" fill="currentColor"><path d="M23.881 8.948c-.773-4.085-4.859-4.593-4.859-4.593H.723c-.604 0-.679.798-.679.798s-.082 7.324-.022 11.822c.164 2.424 2.586 2.672 2.586 2.672s8.267-.023 11.966-.049c2.438-.426 2.683-2.566 2.658-3.734 4.352.24 7.422-2.831 6.649-6.916zm-11.062 3.511c-1.246 1.453-4.011 3.976-4.011 3.976s-.121.119-.31.023c-.076-.057-.108-.09-.108-.09-.443-.441-3.368-3.049-4.051-3.954-1.094-1.465-1.085-3.275.088-4.4C5.586 6.892 7.393 7.323 8.5 8.5c1.092-1.127 2.923-1.644 4.093-.457 1.157 1.17 1.157 3.238.226 4.416zm10.158 1.25c-.217 2.148-2.604 2.846-2.604 2.846s-1.424.037-2.658.077c.394-1.411.411-2.909.411-2.909l2.428-.016c.365-.008.572-.34.426-.642-.376-.842-1.348-1.054-1.348-1.054h-1.579c.006-.356.035-.717.035-1.082 0 0 1.258-.008 1.954-.037 1.343-.053 2.008-.946 2.008-.946 1.111-.806 1.09-2.571 1.09-2.571s-.027-1.107-1.098-1.595c-.868-.396-1.895-.296-1.895-.296h-1.666c-.053-.393-.111-.795-.178-1.189 0 0 3.328.067 4.15.539 1.637.935 1.542 2.502 1.542 2.502s.101 2.086-.889 3.21c0 0-.171.186-.184.186z"/></svg>
             Support on Ko-fi
           </a>
         </div>
 
         <div class="space-y-3">
-          <h3 class="font-semibold text-sm text-stone-800">Region & Persona Presets</h3>
-          <p class="text-xs text-stone-500 leading-relaxed">
+          <h3 class="font-semibold text-sm text-ink">Region & Persona Presets</h3>
+          <p class="text-xs text-ink-muted leading-relaxed">
             The <strong>Region</strong> selector (top toolbar) swaps which country/region regex ruleset is layered on top of the always-on <strong>Global</strong> baseline (email, IP addresses, credit card numbers, generic dates). Only one region is active at a time to avoid cross-country format collisions (e.g. a bare 9-digit number shouldn't simultaneously be treated as a US SSN and something else).
             The <strong>Persona</strong> selector swaps the Hard Block keyword set between <strong>Personal</strong> privacy terms and <strong>Business</strong> confidentiality terms.
           </p>
-          <p class="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-lg p-3 leading-relaxed">
-            <strong>Nothing here is saved.</strong> TokenShield destroys all state on reload by design, so your Region/Persona choice resets every time you open the file. If you always work in one region or persona, open <code class="bg-white border border-amber-200 px-1 rounded">TokenShield.html</code> in a text editor, search for <code class="bg-white border border-amber-200 px-1 rounded">DEFAULT_REGION</code> and <code class="bg-white border border-amber-200 px-1 rounded">DEFAULT_PERSONA</code> near the top of the <code class="bg-white border border-amber-200 px-1 rounded">&lt;script&gt;</code> block, and change the value — that becomes your new startup default.
+          <p class="text-xs text-warning-700 bg-warning-50 border border-warning-200 rounded-lg p-3 leading-relaxed">
+            <strong>Nothing here is saved.</strong> TokenShield destroys all state on reload by design, so your Region/Persona choice resets every time you open the file. If you always work in one region or persona, open <code class="bg-white border border-warning-200 px-1 rounded">TokenShield.html</code> in a text editor, search for <code class="bg-white border border-warning-200 px-1 rounded">DEFAULT_REGION</code> and <code class="bg-white border border-warning-200 px-1 rounded">DEFAULT_PERSONA</code> near the top of the <code class="bg-white border border-warning-200 px-1 rounded">&lt;script&gt;</code> block, and change the value — that becomes your new startup default.
           </p>
         </div>
 
-        <hr class="border-stone-100">
+        <hr class="border-line-soft">
 
         <div class="space-y-3">
-          <h3 class="font-semibold text-sm text-stone-800">Custom Dictionary (CSV)</h3>
-          <p class="text-xs text-stone-500 leading-relaxed">
+          <h3 class="font-semibold text-sm text-ink">Custom Dictionary (CSV)</h3>
+          <p class="text-xs text-ink-muted leading-relaxed">
             Batch-import your own keywords, names, or project codenames. Download the template and fill it out using the "Keyword,Category" format. <strong>Category is optional</strong> — it defaults to CUSTOM if left blank. The system generates matching tags automatically (e.g. NAME_1, CUSTOM_1).<br>
-            <span class="text-amber-700 font-medium">Note: keyword values cannot contain commas — this will break CSV parsing. If a term itself contains a comma, use "Build Dictionary Online" instead.</span>
+            <span class="text-warning-700 font-medium">Note: keyword values cannot contain commas — this will break CSV parsing. If a term itself contains a comma, use "Build Dictionary Online" instead.</span>
           </p>
           <div class="flex gap-2">
-            <button onclick="downloadCsvTemplate()" class="text-xs bg-stone-100 hover:bg-stone-200 text-stone-700 px-4 py-2 rounded-md font-medium transition-colors border border-stone-200">
+            <button onclick="downloadCsvTemplate()" class="text-xs bg-paper-hover hover:bg-line text-ink-hover px-4 py-2 rounded-md font-medium transition-colors border border-line">
               Download CSV Template
             </button>
-            <button onclick="closeSettings(); openEditCsvModal();" class="text-xs bg-emerald-50 hover:bg-emerald-100 text-emerald-800 px-4 py-2 rounded-md font-medium transition-colors border border-emerald-200">
+            <button onclick="closeSettings(); openEditCsvModal();" class="text-xs bg-brand-50 hover:bg-brand-100 text-brand-800 px-4 py-2 rounded-md font-medium transition-colors border border-brand-200">
               Build / Edit Dictionary Online
             </button>
           </div>
         </div>
 
-        <hr class="border-stone-100">
+        <hr class="border-line-soft">
 
         <div class="space-y-4">
-          <h3 class="font-semibold text-sm text-stone-800">Local AI Prompt Library</h3>
-          <p class="text-xs text-stone-500 leading-relaxed">
+          <h3 class="font-semibold text-sm text-ink">Local AI Prompt Library</h3>
+          <p class="text-xs text-ink-muted leading-relaxed">
             Ready-to-copy system prompts for local models (Ollama, LM Studio, etc.). Paste one of these ahead of your masked text so the model's own instructions also stay privacy-aware — reinforcing that nothing, including your prompt phrasing, needs to leave this machine.
           </p>
           <div class="grid sm:grid-cols-2 gap-3">
-            <div class="border border-stone-200 rounded-lg p-3 bg-stone-50/50">
+            <div class="border border-line rounded-lg p-3 bg-paper-sunken/50">
               <div class="flex justify-between items-center mb-1.5">
-                <span class="text-xs font-semibold text-stone-700">Personal</span>
-                <button onclick="copyLocalPrompt('personal')" class="text-[10px] bg-white border border-stone-300 hover:bg-stone-100 text-stone-600 px-2 py-1 rounded transition-colors">Copy</button>
+                <span class="text-xs font-semibold text-ink-hover">Personal</span>
+                <button onclick="copyLocalPrompt('personal')" class="text-[10px] bg-white border border-line-strong hover:bg-paper-hover text-ink-secondary px-2 py-1 rounded transition-colors">Copy</button>
               </div>
-              <p class="text-[10px] text-stone-500 leading-relaxed font-mono line-clamp-4">For personal documents — reminds the model that names/contacts are tokenized and must stay untouched.</p>
+              <p class="text-[10px] text-ink-muted leading-relaxed font-mono line-clamp-4">For personal documents — reminds the model that names/contacts are tokenized and must stay untouched.</p>
             </div>
-            <div class="border border-stone-200 rounded-lg p-3 bg-stone-50/50">
+            <div class="border border-line rounded-lg p-3 bg-paper-sunken/50">
               <div class="flex justify-between items-center mb-1.5">
-                <span class="text-xs font-semibold text-stone-700">Business</span>
-                <button onclick="copyLocalPrompt('business')" class="text-[10px] bg-white border border-stone-300 hover:bg-stone-100 text-stone-600 px-2 py-1 rounded transition-colors">Copy</button>
+                <span class="text-xs font-semibold text-ink-hover">Business</span>
+                <button onclick="copyLocalPrompt('business')" class="text-[10px] bg-white border border-line-strong hover:bg-paper-hover text-ink-secondary px-2 py-1 rounded transition-colors">Copy</button>
               </div>
-              <p class="text-[10px] text-stone-500 leading-relaxed font-mono line-clamp-4">For business documents — frames the content as confidential/trade-secret material.</p>
+              <p class="text-[10px] text-ink-muted leading-relaxed font-mono line-clamp-4">For business documents — frames the content as confidential/trade-secret material.</p>
             </div>
           </div>
         </div>
 
-        <hr class="border-stone-100">
+        <hr class="border-line-soft">
 
         <div class="space-y-4">
-          <h3 class="font-semibold text-sm text-stone-800">Local AI (Ollama) Connection Setup</h3>
+          <h3 class="font-semibold text-sm text-ink">Local AI (Ollama) Connection Setup</h3>
 
-          <div class="bg-emerald-50 border border-emerald-200 rounded-lg p-3 text-xs text-emerald-900 leading-relaxed">
+          <div class="bg-brand-50 border border-brand-200 rounded-lg p-3 text-xs text-brand-900 leading-relaxed">
             <strong>Don't have Ollama installed yet?</strong><br>
-            Download it from the <a href="https://ollama.com/download" target="_blank" class="underline font-bold text-emerald-700 hover:text-emerald-900">official Ollama website</a> and install it. Then open a terminal (Command Prompt / PowerShell / Terminal) and run the following command to install the default model:<br>
-            <code class="block mt-1 bg-white border border-emerald-200 px-2 py-1 rounded font-mono text-stone-800">ollama run qwen2.5:3b</code>
+            Download it from the <a href="https://ollama.com/download" target="_blank" class="underline font-bold text-brand-700 hover:text-brand-900">official Ollama website</a> and install it. Then open a terminal (Command Prompt / PowerShell / Terminal) and run the following command to install the default model:<br>
+            <code class="block mt-1 bg-white border border-brand-200 px-2 py-1 rounded font-mono text-ink">ollama run qwen2.5:3b</code>
           </div>
 
           <!-- Explanation and risk warning -->
-          <div class="bg-amber-50 border border-amber-200 rounded-lg p-3 text-xs text-amber-800 leading-relaxed">
-            <strong class="text-amber-900">Why is this setting needed? And a risk warning</strong><br>
+          <div class="bg-warning-50 border border-warning-200 rounded-lg p-3 text-xs text-warning-800 leading-relaxed">
+            <strong class="text-warning-900">Why is this setting needed? And a risk warning</strong><br>
             Ollama blocks all web page access by default (a security protection). You need to add an "environment variable" named <code>OLLAMA_ORIGINS</code> set to <code>*</code> so Ollama allows this local TokenShield page to connect.<br><br>
-            <strong class="text-red-700">⚠️ Security risk notice:</strong><br>
+            <strong class="text-danger-700">⚠️ Security risk notice:</strong><br>
             Setting the origin to <code>*</code> allows any web page to call your local model. This only affects your own user account and doesn't require administrator rights, but it does carry some risk of abuse by other malicious pages.<br><br>
             <strong>We strongly recommend fully quitting Ollama from the system tray when you're not using this tool, or removing the environment variable afterward.</strong>
           </div>
 
           <!-- Setup steps -->
           <div class="space-y-4">
-            <p class="text-xs font-semibold text-stone-700">Setup steps (one-time; persists across reboots after that)</p>
+            <p class="text-xs font-semibold text-ink-hover">Setup steps (one-time; persists across reboots after that)</p>
 
-            <div class="space-y-4 text-xs text-stone-600">
+            <div class="space-y-4 text-xs text-ink-secondary">
 
               <div class="flex gap-3 items-start">
-                <span class="flex-shrink-0 w-5 h-5 bg-stone-800 text-white rounded-full flex items-center justify-center font-bold text-[10px] mt-0.5">1</span>
+                <span class="flex-shrink-0 w-5 h-5 bg-ink text-white rounded-full flex items-center justify-center font-bold text-[10px] mt-0.5">1</span>
                 <div>
-                  <p class="font-medium text-stone-700 mb-1">Quit Ollama first</p>
+                  <p class="font-medium text-ink-hover mb-1">Quit Ollama first</p>
                   <p>Find the Ollama icon in your <strong>system tray</strong> (bottom-right, near the clock), <strong>right-click</strong> it, and choose "<strong>Quit Ollama</strong>" to fully close it.</p>
                 </div>
               </div>
 
               <div class="flex gap-3 items-start">
-                <span class="flex-shrink-0 w-5 h-5 bg-stone-800 text-white rounded-full flex items-center justify-center font-bold text-[10px] mt-0.5">2</span>
+                <span class="flex-shrink-0 w-5 h-5 bg-ink text-white rounded-full flex items-center justify-center font-bold text-[10px] mt-0.5">2</span>
                 <div>
-                  <p class="font-medium text-stone-700 mb-1">Open your OS's "Environment Variables" dialog</p>
-                  <p><strong>Windows:</strong> click Start, search "<strong>Edit environment variables for your account</strong>", and open it. Or press <code class="bg-stone-100 px-1 rounded">Win + R</code>, type <code class="bg-stone-100 px-1 rounded">sysdm.cpl</code>, press Enter, then "Advanced" → "Environment Variables".</p>
-                  <p class="text-stone-400 mt-1"><strong>macOS/Linux:</strong> set <code class="bg-stone-100 px-1 rounded">OLLAMA_ORIGINS=*</code> in your shell profile (e.g. <code class="bg-stone-100 px-1 rounded">~/.zshrc</code>) or launch Ollama with the variable set for the session.</p>
+                  <p class="font-medium text-ink-hover mb-1">Open your OS's "Environment Variables" dialog</p>
+                  <p><strong>Windows:</strong> click Start, search "<strong>Edit environment variables for your account</strong>", and open it. Or press <code class="bg-paper-hover px-1 rounded">Win + R</code>, type <code class="bg-paper-hover px-1 rounded">sysdm.cpl</code>, press Enter, then "Advanced" → "Environment Variables".</p>
+                  <p class="text-ink-faint mt-1"><strong>macOS/Linux:</strong> set <code class="bg-paper-hover px-1 rounded">OLLAMA_ORIGINS=*</code> in your shell profile (e.g. <code class="bg-paper-hover px-1 rounded">~/.zshrc</code>) or launch Ollama with the variable set for the session.</p>
                 </div>
               </div>
 
               <div class="flex gap-3 items-start">
-                <span class="flex-shrink-0 w-5 h-5 bg-stone-800 text-white rounded-full flex items-center justify-center font-bold text-[10px] mt-0.5">3</span>
+                <span class="flex-shrink-0 w-5 h-5 bg-ink text-white rounded-full flex items-center justify-center font-bold text-[10px] mt-0.5">3</span>
                 <div>
-                  <p class="font-medium text-stone-700 mb-1">Add a new entry under "User variables"</p>
+                  <p class="font-medium text-ink-hover mb-1">Add a new entry under "User variables"</p>
                   <p>Click "<strong>New...</strong>" under the <strong>upper half (your personal account variables)</strong> and enter:</p>
-                  <div class="mt-2 bg-stone-50 border border-stone-200 rounded-lg overflow-hidden">
-                    <div class="flex items-center gap-3 px-3 py-2 border-b border-stone-200">
-                      <span class="text-stone-500 w-24 flex-shrink-0 font-medium">Variable name</span>
-                      <code class="bg-white border border-stone-300 px-2 py-0.5 rounded font-mono text-stone-800">OLLAMA_ORIGINS</code>
+                  <div class="mt-2 bg-paper-sunken border border-line rounded-lg overflow-hidden">
+                    <div class="flex items-center gap-3 px-3 py-2 border-b border-line">
+                      <span class="text-ink-muted w-24 flex-shrink-0 font-medium">Variable name</span>
+                      <code class="bg-white border border-line-strong px-2 py-0.5 rounded font-mono text-ink">OLLAMA_ORIGINS</code>
                     </div>
                     <div class="flex items-start gap-3 px-3 py-2">
-                      <span class="text-stone-500 w-24 flex-shrink-0 font-medium mt-0.5">Variable value</span>
-                      <code class="bg-white border border-stone-300 px-2 py-0.5 rounded font-mono text-stone-800 break-all leading-relaxed">*</code>
+                      <span class="text-ink-muted w-24 flex-shrink-0 font-medium mt-0.5">Variable value</span>
+                      <code class="bg-white border border-line-strong px-2 py-0.5 rounded font-mono text-ink break-all leading-relaxed">*</code>
                     </div>
                   </div>
-                  <p class="text-stone-400 mt-2">Click OK, then OK again to close the dialog.</p>
+                  <p class="text-ink-faint mt-2">Click OK, then OK again to close the dialog.</p>
                 </div>
               </div>
 
               <div class="flex gap-3 items-start">
-                <span class="flex-shrink-0 w-5 h-5 bg-stone-800 text-white rounded-full flex items-center justify-center font-bold text-[10px] mt-0.5">4</span>
+                <span class="flex-shrink-0 w-5 h-5 bg-ink text-white rounded-full flex items-center justify-center font-bold text-[10px] mt-0.5">4</span>
                 <div>
-                  <p class="font-medium text-stone-700 mb-1">Restart Ollama</p>
+                  <p class="font-medium text-ink-hover mb-1">Restart Ollama</p>
                   <p>Reopen the Ollama app from the Start menu, wait for the tray icon to appear, then come back here and click "<strong>Test Connection</strong>" to confirm.</p>
                 </div>
               </div>
 
-              <div class="flex gap-3 items-start bg-stone-50 border border-stone-200 rounded-lg p-3">
-                <span class="text-stone-400">↩</span>
+              <div class="flex gap-3 items-start bg-paper-sunken border border-line rounded-lg p-3">
+                <span class="text-ink-faint">↩</span>
                 <div>
-                  <p class="font-medium text-stone-700 mb-0.5">How do I undo this later?</p>
-                  <p class="text-stone-500">Repeat step 2, find the <code class="bg-stone-100 px-1 rounded font-mono">OLLAMA_ORIGINS</code> entry under "User variables", select it, click "<strong>Delete</strong>", and restart Ollama.</p>
+                  <p class="font-medium text-ink-hover mb-0.5">How do I undo this later?</p>
+                  <p class="text-ink-muted">Repeat step 2, find the <code class="bg-paper-hover px-1 rounded font-mono">OLLAMA_ORIGINS</code> entry under "User variables", select it, click "<strong>Delete</strong>", and restart Ollama.</p>
                 </div>
               </div>
 
-              <div class="flex gap-3 items-start bg-stone-50 border border-stone-200 rounded-lg p-3">
-                <span class="text-stone-400 font-bold text-xs mt-0.5">i</span>
+              <div class="flex gap-3 items-start bg-paper-sunken border border-line rounded-lg p-3">
+                <span class="text-ink-faint font-bold text-xs mt-0.5">i</span>
                 <div>
-                  <p class="font-medium text-stone-700 mb-0.5">How do I stop Ollama from auto-starting?</p>
-                  <p class="text-stone-500">On Windows: open Task Manager (right-click the taskbar) → "Startup apps" tab → find Ollama → set to "Disabled" so it won't launch in the background at boot.</p>
+                  <p class="font-medium text-ink-hover mb-0.5">How do I stop Ollama from auto-starting?</p>
+                  <p class="text-ink-muted">On Windows: open Task Manager (right-click the taskbar) → "Startup apps" tab → find Ollama → set to "Disabled" so it won't launch in the background at boot.</p>
                 </div>
               </div>
 
             </div>
           </div>
 
-          <hr class="border-stone-100">
+          <hr class="border-line-soft">
 
           <!-- API settings -->
           <div class="space-y-2">
-            <p class="text-xs font-semibold text-stone-700">Connection & Model Settings</p>
+            <p class="text-xs font-semibold text-ink-hover">Connection & Model Settings</p>
             <div>
-              <label class="block text-xs text-stone-500 mb-1">API URL</label>
-              <input type="text" id="ollamaUrl" value="http://localhost:11434" class="w-full text-sm p-2 bg-white border border-stone-300 rounded-md focus:ring-1 focus:ring-emerald-500 outline-none">
+              <label class="block text-xs text-ink-muted mb-1">API URL</label>
+              <input type="text" id="ollamaUrl" value="http://localhost:11434" class="w-full text-sm p-2 bg-white border border-line-strong rounded-md focus:ring-1 focus:ring-brand-500 outline-none">
             </div>
             <div>
-              <label class="block text-xs text-stone-500 mb-1">Model Name</label>
-              <select id="ollamaModelSelect" onchange="toggleCustomModel()" class="w-full text-sm p-2 bg-white border border-stone-300 rounded-md focus:ring-1 focus:ring-emerald-500 outline-none">
+              <label class="block text-xs text-ink-muted mb-1">Model Name</label>
+              <select id="ollamaModelSelect" onchange="toggleCustomModel()" class="w-full text-sm p-2 bg-white border border-line-strong rounded-md focus:ring-1 focus:ring-brand-500 outline-none">
                 <option value="qwen2.5:3b" selected>qwen2.5:3b (default)</option>
                 <option value="qwen2.5:1.5b">qwen2.5:1.5b</option>
                 <option value="llama3.1">llama3.1</option>
                 <option value="custom">Custom (type your own)</option>
               </select>
-              <input type="text" id="ollamaModel" value="qwen2.5:3b" class="hidden mt-2 w-full text-sm p-2 bg-white border border-stone-300 rounded-md focus:ring-1 focus:ring-emerald-500 outline-none" placeholder="Enter model name">
-              <p class="text-[10px] text-stone-400 mt-1">※ Make sure you've pulled this model via Ollama. Developers can edit these default options directly in the source (TokenShield.html).</p>
+              <input type="text" id="ollamaModel" value="qwen2.5:3b" class="hidden mt-2 w-full text-sm p-2 bg-white border border-line-strong rounded-md focus:ring-1 focus:ring-brand-500 outline-none" placeholder="Enter model name">
+              <p class="text-[10px] text-ink-faint mt-1">※ Make sure you've pulled this model via Ollama. Developers can edit these default options directly in the source (TokenShield.html).</p>
             </div>
-            <button onclick="testOllamaConnection()" class="text-xs bg-emerald-50 hover:bg-emerald-100 text-emerald-800 px-4 py-2 rounded-md font-medium transition-colors border border-emerald-200">
+            <button onclick="testOllamaConnection()" class="text-xs bg-brand-50 hover:bg-brand-100 text-brand-800 px-4 py-2 rounded-md font-medium transition-colors border border-brand-200">
               Test Connection
             </button>
             <div id="ollamaTestResult" class="text-xs mt-1 hidden"></div>
@@ -615,39 +726,39 @@
   </div>
 
   <!-- ==================== PII Rule Guide Modal ==================== -->
-  <div id="guideModal" class="hidden fixed inset-0 bg-stone-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4 opacity-0 transition-opacity duration-300">
+  <div id="guideModal" class="hidden fixed inset-0 bg-scrim/40 backdrop-blur-sm z-50 flex items-center justify-center p-4 opacity-0 transition-opacity duration-300">
     <div class="bg-white rounded-xl shadow-2xl w-full max-w-5xl overflow-hidden transform scale-95 transition-transform duration-300 flex flex-col max-h-full">
-      <div class="px-6 py-4 border-b border-stone-100 flex justify-between items-center bg-stone-50/50 flex-shrink-0">
-        <h2 class="text-sm font-bold text-stone-800">PII Rule Guide</h2>
-        <button onclick="closeGuide()" class="text-stone-400 hover:text-stone-600 font-medium text-lg">&times;</button>
+      <div class="px-6 py-4 border-b border-line-soft flex justify-between items-center bg-paper-sunken/50 flex-shrink-0">
+        <h2 class="text-sm font-bold text-ink">PII Rule Guide</h2>
+        <button onclick="closeGuide()" class="text-ink-faint hover:text-ink-secondary font-medium text-lg">&times;</button>
       </div>
 
       <div class="p-6 overflow-y-auto">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
-          <p class="text-sm text-stone-600">
+          <p class="text-sm text-ink-secondary">
             TokenShield ships with a set of regex rules to detect sensitive personal and business data. The table below shows the rules currently active for your selected <strong>Region</strong> (plus the always-on Global baseline) — switch Region in the top toolbar to see a different set.
           </p>
-          <button onclick="toggleGuideInstructions()" class="bg-emerald-50 text-emerald-800 border border-emerald-200 hover:bg-emerald-100 px-3 py-1.5 rounded text-xs font-semibold transition-colors whitespace-nowrap">
+          <button onclick="toggleGuideInstructions()" class="bg-brand-50 text-brand-800 border border-brand-200 hover:bg-brand-100 px-3 py-1.5 rounded text-xs font-semibold transition-colors whitespace-nowrap">
             How to edit these rules
           </button>
         </div>
 
-        <div id="guideInstructions" class="hidden bg-stone-50 border border-stone-200 rounded-lg p-4 mb-4 text-xs text-stone-700 leading-relaxed space-y-2">
-          <p class="font-bold text-stone-800 text-sm">How do I add my own PII rules and Hard Block keywords?</p>
+        <div id="guideInstructions" class="hidden bg-paper-sunken border border-line rounded-lg p-4 mb-4 text-xs text-ink-hover leading-relaxed space-y-2">
+          <p class="font-bold text-ink text-sm">How do I add my own PII rules and Hard Block keywords?</p>
           <p>You don't need to hand-edit the HTML source — use the "Manage Custom Protection Rules" button in the toolbar instead:</p>
-          <ol class="list-decimal list-inside space-y-1 ml-1 text-stone-600">
+          <ol class="list-decimal list-inside space-y-1 ml-1 text-ink-secondary">
             <li>Click <strong>"Manage Custom Protection Rules"</strong> in the toolbar, then switch to the "Hard Block Keywords" or "Regex Rules" tab.</li>
             <li>Download that tab's CSV template, fill in your keywords or patterns, and save it.</li>
             <li>Click "Import CSV", pick that file, and choose "Merge with Existing" or "Replace All".</li>
-            <li>To have your customizations applied automatically every time you open this file, expand "Advanced Settings" (desktop only) in the same panel, click "Export as Auto-load File", and place the downloaded <code class="bg-white border border-stone-200 px-1 rounded">tokenshield.config.js</code> next to <code class="bg-white border border-stone-200 px-1 rounded">TokenShield.html</code> — this only takes effect when the page is opened as a local file.</li>
+            <li>To have your customizations applied automatically every time you open this file, expand "Advanced Settings" (desktop only) in the same panel, click "Export as Auto-load File", and place the downloaded <code class="bg-white border border-line px-1 rounded">tokenshield.config.js</code> next to <code class="bg-white border border-line px-1 rounded">TokenShield.html</code> — this only takes effect when the page is opened as a local file.</li>
             <li>To discard manual edits and restore the built-in defaults, open "Manage Custom Protection Rules", expand "Advanced Settings" (desktop only), and click "Reload Config".</li>
           </ol>
         </div>
 
         <div class="space-y-4">
-          <div class="border border-stone-200 rounded-lg overflow-x-auto">
+          <div class="border border-line rounded-lg overflow-x-auto">
             <table class="w-full text-sm text-left min-w-[700px]">
-              <thead class="bg-stone-50 text-stone-600 border-b border-stone-200">
+              <thead class="bg-paper-sunken text-ink-secondary border-b border-line">
                 <tr>
                   <th class="px-4 py-2 font-medium w-1/6">Data Category</th>
                   <th class="px-4 py-2 font-medium w-1/6">Replacement Tag</th>
@@ -655,17 +766,17 @@
                   <th class="px-4 py-2 font-medium w-5/12">Regular Expression</th>
                 </tr>
               </thead>
-              <tbody id="guideTableBody" class="divide-y divide-stone-100 text-stone-700">
+              <tbody id="guideTableBody" class="divide-y divide-line-soft text-ink-hover">
                 <!-- Generated dynamically by JS -->
               </tbody>
             </table>
           </div>
 
-          <div class="bg-red-50 p-4 rounded-lg border border-red-100">
-            <h4 class="text-sm font-bold text-red-700 mb-1">Extremely Sensitive Terms (Hard Block)</h4>
-            <p class="text-xs text-red-600">
+          <div class="bg-danger-50 p-4 rounded-lg border border-danger-100">
+            <h4 class="text-sm font-bold text-danger-700 mb-1">Extremely Sensitive Terms (Hard Block)</h4>
+            <p class="text-xs text-danger-600">
               If the source text contains any of the following terms (from the currently selected Persona), TokenShield locks the copy function to prevent accidental exposure:<br>
-              <span id="guideHardBlockList" class="font-medium text-red-700 leading-relaxed"></span>
+              <span id="guideHardBlockList" class="font-medium text-danger-700 leading-relaxed"></span>
             </p>
           </div>
         </div>
@@ -674,87 +785,87 @@
   </div>
 
   <!-- ==================== Unlock Confirmation Modal ==================== -->
-  <div id="unlockModal" class="hidden fixed inset-0 bg-stone-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4 opacity-0 transition-opacity duration-300">
-    <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg overflow-hidden transform scale-95 transition-transform duration-300 flex flex-col max-h-full border border-red-200">
-      <div class="px-6 py-4 border-b border-red-100 flex justify-between items-center bg-red-50 flex-shrink-0">
-        <h2 class="text-sm font-bold text-red-800 flex items-center gap-2">
+  <div id="unlockModal" class="hidden fixed inset-0 bg-scrim/40 backdrop-blur-sm z-50 flex items-center justify-center p-4 opacity-0 transition-opacity duration-300">
+    <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg overflow-hidden transform scale-95 transition-transform duration-300 flex flex-col max-h-full border border-danger-200">
+      <div class="px-6 py-4 border-b border-danger-100 flex justify-between items-center bg-danger-50 flex-shrink-0">
+        <h2 class="text-sm font-bold text-danger-800 flex items-center gap-2">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
           Sensitive Information Block Warning
         </h2>
-        <button onclick="closeUnlockModal()" class="text-red-400 hover:text-red-600 font-medium text-lg">&times;</button>
+        <button onclick="closeUnlockModal()" class="text-danger-400 hover:text-danger-600 font-medium text-lg">&times;</button>
       </div>
 
       <div class="p-6 overflow-y-auto space-y-4">
-        <p class="text-sm text-stone-700">TokenShield detected text that may contain extremely sensitive information. To protect the people involved, copy/export has been temporarily locked.</p>
+        <p class="text-sm text-ink-hover">TokenShield detected text that may contain extremely sensitive information. To protect the people involved, copy/export has been temporarily locked.</p>
 
-        <div class="bg-stone-50 p-4 rounded-lg border border-stone-200">
-          <h3 class="text-xs font-bold text-stone-500 mb-2 uppercase tracking-wider">Block Reason(s)</h3>
-          <ul id="unlockReasonList" class="list-disc list-inside text-sm text-stone-800 space-y-1.5 font-medium">
+        <div class="bg-paper-sunken p-4 rounded-lg border border-line">
+          <h3 class="text-xs font-bold text-ink-muted mb-2 uppercase tracking-wider">Block Reason(s)</h3>
+          <ul id="unlockReasonList" class="list-disc list-inside text-sm text-ink space-y-1.5 font-medium">
             <!-- Injected dynamically -->
           </ul>
         </div>
 
-        <p class="text-xs text-stone-500 leading-relaxed mt-4">
+        <p class="text-xs text-ink-muted leading-relaxed mt-4">
           If you've confirmed this information is safe to release, or believe this is a false positive, you can force-unlock it.
         </p>
       </div>
 
-      <div class="px-6 py-4 border-t border-stone-100 bg-stone-50 flex justify-end gap-3">
-        <button onclick="closeUnlockModal()" class="px-4 py-2 bg-white border border-stone-300 text-stone-700 rounded-lg text-sm font-medium hover:bg-stone-50 transition-colors">
+      <div class="px-6 py-4 border-t border-line-soft bg-paper-sunken flex justify-end gap-3">
+        <button onclick="closeUnlockModal()" class="px-4 py-2 bg-white border border-line-strong text-ink-hover rounded-lg text-sm font-medium hover:bg-paper-sunken transition-colors">
           Keep Locked (Safe)
         </button>
-        <button onclick="confirmUnlock()" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm font-semibold shadow-sm transition-colors flex items-center gap-2">
+        <button onclick="confirmUnlock()" class="px-4 py-2 bg-danger-600 hover:bg-danger-700 text-white rounded-lg text-sm font-semibold shadow-sm transition-colors flex items-center gap-2">
           I Confirm No Risk, Unlock
         </button>
       </div>
     </div>
   </div>
   <!-- ==================== Build Dictionary Online Modal ==================== -->
-  <div id="editCsvModal" class="hidden fixed inset-0 bg-stone-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4 opacity-0 transition-opacity duration-300">
-    <div class="bg-white rounded-xl shadow-2xl w-full max-w-3xl overflow-hidden transform scale-95 transition-transform duration-300 flex flex-col max-h-full border border-stone-200">
-      <div class="px-6 py-4 border-b border-stone-100 flex justify-between items-center bg-emerald-50/50 flex-shrink-0">
-        <h2 class="text-sm font-bold text-emerald-900">Custom Dictionary Manager (View / Edit / Build)</h2>
-        <button onclick="closeEditCsvModal()" class="text-stone-400 hover:text-stone-600 font-medium text-lg">&times;</button>
+  <div id="editCsvModal" class="hidden fixed inset-0 bg-scrim/40 backdrop-blur-sm z-50 flex items-center justify-center p-4 opacity-0 transition-opacity duration-300">
+    <div class="bg-white rounded-xl shadow-2xl w-full max-w-3xl overflow-hidden transform scale-95 transition-transform duration-300 flex flex-col max-h-full border border-line">
+      <div class="px-6 py-4 border-b border-line-soft flex justify-between items-center bg-brand-50/50 flex-shrink-0">
+        <h2 class="text-sm font-bold text-brand-900">Custom Dictionary Manager (View / Edit / Build)</h2>
+        <button onclick="closeEditCsvModal()" class="text-ink-faint hover:text-ink-secondary font-medium text-lg">&times;</button>
       </div>
       <div class="p-6 overflow-y-auto flex-1 bg-white space-y-4">
         <div class="flex flex-col gap-3">
           <div class="flex justify-between items-end">
-            <p class="text-xs text-stone-500">
-              Type directly into the table below, or <strong class="text-stone-700">copy two columns from Excel and paste into any cell</strong> — the table expands automatically.<br>
+            <p class="text-xs text-ink-muted">
+              Type directly into the table below, or <strong class="text-ink-hover">copy two columns from Excel and paste into any cell</strong> — the table expands automatically.<br>
               Empty rows are ignored when you apply.
             </p>
-            <button onclick="addCsvEditRow()" class="text-xs bg-stone-100 hover:bg-stone-200 text-stone-700 px-3 py-1.5 rounded font-medium transition-colors border border-stone-200">
+            <button onclick="addCsvEditRow()" class="text-xs bg-paper-hover hover:bg-line text-ink-hover px-3 py-1.5 rounded font-medium transition-colors border border-line">
               + Add Row Manually
             </button>
           </div>
-          <div class="flex gap-3 bg-stone-50 p-2 rounded-lg border border-stone-200">
-            <input type="text" id="csvFilterKw" oninput="filterCsvEditRows()" placeholder="Filter by keyword..." class="w-1/2 text-sm p-1.5 border border-stone-300 rounded focus:outline-none focus:border-emerald-500 bg-white">
-            <input type="text" id="csvFilterType" oninput="filterCsvEditRows()" placeholder="Filter by category..." class="w-1/2 text-sm p-1.5 border border-stone-300 rounded focus:outline-none focus:border-emerald-500 bg-white">
+          <div class="flex gap-3 bg-paper-sunken p-2 rounded-lg border border-line">
+            <input type="text" id="csvFilterKw" oninput="filterCsvEditRows()" placeholder="Filter by keyword..." class="w-1/2 text-sm p-1.5 border border-line-strong rounded focus:outline-none focus:border-brand-500 bg-white">
+            <input type="text" id="csvFilterType" oninput="filterCsvEditRows()" placeholder="Filter by category..." class="w-1/2 text-sm p-1.5 border border-line-strong rounded focus:outline-none focus:border-brand-500 bg-white">
           </div>
         </div>
 
-        <div class="border border-stone-200 rounded-lg overflow-x-auto">
+        <div class="border border-line rounded-lg overflow-x-auto">
           <table class="w-full text-left text-sm min-w-[500px]" id="csvEditTable">
-            <thead class="bg-stone-50">
+            <thead class="bg-paper-sunken">
               <tr>
-                <th class="px-3 py-2 font-medium text-stone-600 w-12 text-center border-b border-r border-stone-200">#</th>
-                <th class="px-3 py-2 font-medium text-stone-600 w-1/2 border-b border-r border-stone-200">Keyword (required)</th>
-                <th class="px-3 py-2 font-medium text-stone-600 w-1/3 border-b border-r border-stone-200">Category (optional, e.g. NAME)</th>
-                <th class="px-3 py-2 font-medium text-stone-600 w-16 border-b border-stone-200 text-center">Delete</th>
+                <th class="px-3 py-2 font-medium text-ink-secondary w-12 text-center border-b border-r border-line">#</th>
+                <th class="px-3 py-2 font-medium text-ink-secondary w-1/2 border-b border-r border-line">Keyword (required)</th>
+                <th class="px-3 py-2 font-medium text-ink-secondary w-1/3 border-b border-r border-line">Category (optional, e.g. NAME)</th>
+                <th class="px-3 py-2 font-medium text-ink-secondary w-16 border-b border-line text-center">Delete</th>
               </tr>
             </thead>
-            <tbody id="csvEditTbody" class="divide-y divide-stone-200 bg-white">
+            <tbody id="csvEditTbody" class="divide-y divide-line bg-white">
               <!-- Default 5 rows -->
             </tbody>
           </table>
         </div>
       </div>
-      <div class="px-6 py-4 border-t border-stone-100 bg-stone-50 flex justify-end gap-3 flex-shrink-0">
-        <button onclick="downloadOnlineCsv()" class="px-4 py-2 bg-white border border-stone-300 text-stone-700 rounded-lg text-sm font-medium hover:bg-stone-50 transition-colors flex items-center gap-1">
+      <div class="px-6 py-4 border-t border-line-soft bg-paper-sunken flex justify-end gap-3 flex-shrink-0">
+        <button onclick="downloadOnlineCsv()" class="px-4 py-2 bg-white border border-line-strong text-ink-hover rounded-lg text-sm font-medium hover:bg-paper-sunken transition-colors flex items-center gap-1">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
           Download as CSV
         </button>
-        <button onclick="applyOnlineCsv()" class="px-4 py-2 bg-emerald-700 hover:bg-emerald-800 text-white rounded-lg text-sm font-semibold shadow-sm transition-colors flex items-center gap-2">
+        <button onclick="applyOnlineCsv()" class="px-4 py-2 bg-brand-700 hover:bg-brand-800 text-white rounded-lg text-sm font-semibold shadow-sm transition-colors flex items-center gap-2">
           Apply to System
         </button>
       </div>
@@ -762,128 +873,128 @@
   </div>
 
   <!-- ==================== Manage Custom Protection Rules Modal ==================== -->
-  <div id="protectionManagerModal" class="hidden fixed inset-0 bg-stone-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4 opacity-0 transition-opacity duration-300">
-    <div class="bg-white rounded-xl shadow-2xl w-full max-w-4xl overflow-hidden transform scale-95 transition-transform duration-300 flex flex-col max-h-full border border-stone-200">
-      <div class="px-6 py-4 border-b border-stone-100 flex justify-between items-center bg-emerald-50/50 flex-shrink-0">
-        <h2 class="text-sm font-bold text-emerald-900">Manage Custom Protection Rules</h2>
-        <button onclick="closeModal('protectionManagerModal')" class="text-stone-400 hover:text-stone-600 font-medium text-lg">&times;</button>
+  <div id="protectionManagerModal" class="hidden fixed inset-0 bg-scrim/40 backdrop-blur-sm z-50 flex items-center justify-center p-4 opacity-0 transition-opacity duration-300">
+    <div class="bg-white rounded-xl shadow-2xl w-full max-w-4xl overflow-hidden transform scale-95 transition-transform duration-300 flex flex-col max-h-full border border-line">
+      <div class="px-6 py-4 border-b border-line-soft flex justify-between items-center bg-brand-50/50 flex-shrink-0">
+        <h2 class="text-sm font-bold text-brand-900">Manage Custom Protection Rules</h2>
+        <button onclick="closeModal('protectionManagerModal')" class="text-ink-faint hover:text-ink-secondary font-medium text-lg">&times;</button>
       </div>
-      <div class="px-6 pt-3 flex gap-2 border-b border-stone-100 flex-shrink-0">
-        <button id="pmTabBtnHardBlock" onclick="switchPmTab('hardBlock')" class="pm-tab-btn px-3 py-2 text-xs font-medium border-b-2 border-emerald-600 text-emerald-700">Hard Block Keywords</button>
-        <button id="pmTabBtnRegex" onclick="switchPmTab('regex')" class="pm-tab-btn px-3 py-2 text-xs font-medium border-b-2 border-transparent text-stone-500 hover:text-stone-700">Regex Rules</button>
-        <button id="pmTabBtnPrompts" onclick="switchPmTab('prompts')" class="pm-tab-btn px-3 py-2 text-xs font-medium border-b-2 border-transparent text-stone-500 hover:text-stone-700">Local AI Prompts</button>
+      <div class="px-6 pt-3 flex gap-2 border-b border-line-soft flex-shrink-0">
+        <button id="pmTabBtnHardBlock" onclick="switchPmTab('hardBlock')" class="pm-tab-btn px-3 py-2 text-xs font-medium border-b-2 border-brand-600 text-brand-700">Hard Block Keywords</button>
+        <button id="pmTabBtnRegex" onclick="switchPmTab('regex')" class="pm-tab-btn px-3 py-2 text-xs font-medium border-b-2 border-transparent text-ink-muted hover:text-ink-hover">Regex Rules</button>
+        <button id="pmTabBtnPrompts" onclick="switchPmTab('prompts')" class="pm-tab-btn px-3 py-2 text-xs font-medium border-b-2 border-transparent text-ink-muted hover:text-ink-hover">Local AI Prompts</button>
       </div>
       <div class="p-6 overflow-y-auto flex-1 bg-white">
         <div id="pmPanelHardBlock" class="pm-panel space-y-3">
           <div class="flex flex-wrap justify-between items-center gap-2">
-            <p class="text-xs text-stone-500">Single-column CSV, one keyword per row. This only manages your custom layer — the built-in Personal/Business keyword lists aren't editable here (see PII Rule Guide).</p>
+            <p class="text-xs text-ink-muted">Single-column CSV, one keyword per row. This only manages your custom layer — the built-in Personal/Business keyword lists aren't editable here (see PII Rule Guide).</p>
             <div class="flex gap-2">
               <input type="file" id="hardBlockCsvFileInput" accept=".csv" class="hidden" onchange="handleHardBlockCsvUpload(event)" />
-              <button onclick="downloadHardBlockCsvTemplate()" class="text-xs bg-white border border-stone-300 px-3 py-1.5 rounded hover:bg-stone-50">Download Template</button>
-              <button onclick="document.getElementById('hardBlockCsvFileInput').click()" class="text-xs bg-white border border-stone-300 px-3 py-1.5 rounded hover:bg-stone-50">Import CSV</button>
+              <button onclick="downloadHardBlockCsvTemplate()" class="text-xs bg-white border border-line-strong px-3 py-1.5 rounded hover:bg-paper-sunken">Download Template</button>
+              <button onclick="document.getElementById('hardBlockCsvFileInput').click()" class="text-xs bg-white border border-line-strong px-3 py-1.5 rounded hover:bg-paper-sunken">Import CSV</button>
             </div>
           </div>
-          <div class="border border-stone-200 rounded-lg overflow-x-auto max-h-64 overflow-y-auto">
+          <div class="border border-line rounded-lg overflow-x-auto max-h-64 overflow-y-auto">
             <table class="w-full text-left text-sm">
-              <thead class="bg-stone-50 sticky top-0"><tr>
-                <th class="px-3 py-2 font-medium text-stone-600 border-b border-stone-200">Keyword</th>
-                <th class="px-3 py-2 font-medium text-stone-600 border-b border-stone-200 w-16 text-center">Delete</th>
+              <thead class="bg-paper-sunken sticky top-0"><tr>
+                <th class="px-3 py-2 font-medium text-ink-secondary border-b border-line">Keyword</th>
+                <th class="px-3 py-2 font-medium text-ink-secondary border-b border-line w-16 text-center">Delete</th>
               </tr></thead>
-              <tbody id="hardBlockMgmtTbody" class="divide-y divide-stone-200 bg-white"></tbody>
+              <tbody id="hardBlockMgmtTbody" class="divide-y divide-line bg-white"></tbody>
             </table>
           </div>
         </div>
         <div id="pmPanelRegex" class="pm-panel space-y-3 hidden">
           <div class="flex flex-wrap justify-between items-center gap-2">
-            <p class="text-xs text-stone-500">4-column CSV: TypeTag,RuleName,Pattern,ExampleText. The Pattern column accepts a bare pattern or a full /pattern/flags literal. This only manages your custom layer — the built-in region-specific rules aren't editable here (see PII Rule Guide).</p>
+            <p class="text-xs text-ink-muted">4-column CSV: TypeTag,RuleName,Pattern,ExampleText. The Pattern column accepts a bare pattern or a full /pattern/flags literal. This only manages your custom layer — the built-in region-specific rules aren't editable here (see PII Rule Guide).</p>
             <div class="flex gap-2">
               <input type="file" id="regexCsvFileInput" accept=".csv" class="hidden" onchange="handleRegexCsvUpload(event)" />
-              <button onclick="downloadRegexCsvTemplate()" class="text-xs bg-white border border-stone-300 px-3 py-1.5 rounded hover:bg-stone-50">Download Template</button>
-              <button onclick="document.getElementById('regexCsvFileInput').click()" class="text-xs bg-white border border-stone-300 px-3 py-1.5 rounded hover:bg-stone-50">Import CSV</button>
+              <button onclick="downloadRegexCsvTemplate()" class="text-xs bg-white border border-line-strong px-3 py-1.5 rounded hover:bg-paper-sunken">Download Template</button>
+              <button onclick="document.getElementById('regexCsvFileInput').click()" class="text-xs bg-white border border-line-strong px-3 py-1.5 rounded hover:bg-paper-sunken">Import CSV</button>
             </div>
           </div>
-          <div class="border border-stone-200 rounded-lg overflow-x-auto max-h-64 overflow-y-auto">
+          <div class="border border-line rounded-lg overflow-x-auto max-h-64 overflow-y-auto">
             <table class="w-full text-left text-sm min-w-[600px]">
-              <thead class="bg-stone-50 sticky top-0"><tr>
-                <th class="px-3 py-2 font-medium text-stone-600 border-b border-stone-200">Tag</th>
-                <th class="px-3 py-2 font-medium text-stone-600 border-b border-stone-200">Name</th>
-                <th class="px-3 py-2 font-medium text-stone-600 border-b border-stone-200">Pattern</th>
-                <th class="px-3 py-2 font-medium text-stone-600 border-b border-stone-200 w-16 text-center">Delete</th>
+              <thead class="bg-paper-sunken sticky top-0"><tr>
+                <th class="px-3 py-2 font-medium text-ink-secondary border-b border-line">Tag</th>
+                <th class="px-3 py-2 font-medium text-ink-secondary border-b border-line">Name</th>
+                <th class="px-3 py-2 font-medium text-ink-secondary border-b border-line">Pattern</th>
+                <th class="px-3 py-2 font-medium text-ink-secondary border-b border-line w-16 text-center">Delete</th>
               </tr></thead>
-              <tbody id="regexMgmtTbody" class="divide-y divide-stone-200 bg-white"></tbody>
+              <tbody id="regexMgmtTbody" class="divide-y divide-line bg-white"></tbody>
             </table>
           </div>
         </div>
         <div id="pmPanelPrompts" class="pm-panel space-y-4 hidden">
           <div class="space-y-2">
             <div class="flex justify-between items-center">
-              <label class="text-xs font-medium text-stone-600">Channel 1 — entity extraction prompt ({{TEXT}} is replaced with the actual text to scan)</label>
-              <button onclick="resetAiPrompt('channel1')" class="text-xs bg-white border border-stone-300 px-3 py-1 rounded hover:bg-stone-50">Reset to Default</button>
+              <label class="text-xs font-medium text-ink-secondary">Channel 1 — entity extraction prompt ({{TEXT}} is replaced with the actual text to scan)</label>
+              <button onclick="resetAiPrompt('channel1')" class="text-xs bg-white border border-line-strong px-3 py-1 rounded hover:bg-paper-sunken">Reset to Default</button>
             </div>
-            <textarea id="aiPromptChannel1Textarea" oninput="saveAiPromptFromTextarea('channel1')" rows="5" class="w-full text-xs font-mono p-2 border border-stone-300 rounded focus:outline-none focus:border-emerald-500"></textarea>
-            <p id="aiPromptChannel1Warning" class="hidden text-xs text-amber-600">No {{TEXT}} placeholder found — the AI won't receive the actual document text.</p>
+            <textarea id="aiPromptChannel1Textarea" oninput="saveAiPromptFromTextarea('channel1')" rows="5" class="w-full text-xs font-mono p-2 border border-line-strong rounded focus:outline-none focus:border-brand-500"></textarea>
+            <p id="aiPromptChannel1Warning" class="hidden text-xs text-warning-600">No {{TEXT}} placeholder found — the AI won't receive the actual document text.</p>
           </div>
           <div class="space-y-2">
             <div class="flex justify-between items-center">
-              <label class="text-xs font-medium text-stone-600">Channel 2 — risk assessment prompt (Personal persona)</label>
-              <button onclick="resetAiPrompt('channel2Personal')" class="text-xs bg-white border border-stone-300 px-3 py-1 rounded hover:bg-stone-50">Reset to Default</button>
+              <label class="text-xs font-medium text-ink-secondary">Channel 2 — risk assessment prompt (Personal persona)</label>
+              <button onclick="resetAiPrompt('channel2Personal')" class="text-xs bg-white border border-line-strong px-3 py-1 rounded hover:bg-paper-sunken">Reset to Default</button>
             </div>
-            <textarea id="aiPromptChannel2PersonalTextarea" oninput="saveAiPromptFromTextarea('channel2Personal')" rows="5" class="w-full text-xs font-mono p-2 border border-stone-300 rounded focus:outline-none focus:border-emerald-500"></textarea>
-            <p id="aiPromptChannel2PersonalWarning" class="hidden text-xs text-amber-600">No {{TEXT}} placeholder found — the AI won't receive the actual document text.</p>
+            <textarea id="aiPromptChannel2PersonalTextarea" oninput="saveAiPromptFromTextarea('channel2Personal')" rows="5" class="w-full text-xs font-mono p-2 border border-line-strong rounded focus:outline-none focus:border-brand-500"></textarea>
+            <p id="aiPromptChannel2PersonalWarning" class="hidden text-xs text-warning-600">No {{TEXT}} placeholder found — the AI won't receive the actual document text.</p>
           </div>
           <div class="space-y-2">
             <div class="flex justify-between items-center">
-              <label class="text-xs font-medium text-stone-600">Channel 2 — risk assessment prompt (Business persona)</label>
-              <button onclick="resetAiPrompt('channel2Business')" class="text-xs bg-white border border-stone-300 px-3 py-1 rounded hover:bg-stone-50">Reset to Default</button>
+              <label class="text-xs font-medium text-ink-secondary">Channel 2 — risk assessment prompt (Business persona)</label>
+              <button onclick="resetAiPrompt('channel2Business')" class="text-xs bg-white border border-line-strong px-3 py-1 rounded hover:bg-paper-sunken">Reset to Default</button>
             </div>
-            <textarea id="aiPromptChannel2BusinessTextarea" oninput="saveAiPromptFromTextarea('channel2Business')" rows="5" class="w-full text-xs font-mono p-2 border border-stone-300 rounded focus:outline-none focus:border-emerald-500"></textarea>
-            <p id="aiPromptChannel2BusinessWarning" class="hidden text-xs text-amber-600">No {{TEXT}} placeholder found — the AI won't receive the actual document text.</p>
+            <textarea id="aiPromptChannel2BusinessTextarea" oninput="saveAiPromptFromTextarea('channel2Business')" rows="5" class="w-full text-xs font-mono p-2 border border-line-strong rounded focus:outline-none focus:border-brand-500"></textarea>
+            <p id="aiPromptChannel2BusinessWarning" class="hidden text-xs text-warning-600">No {{TEXT}} placeholder found — the AI won't receive the actual document text.</p>
           </div>
         </div>
       </div>
-      <div class="border-t border-stone-100 bg-stone-50 flex-shrink-0">
+      <div class="border-t border-line-soft bg-paper-sunken flex-shrink-0">
         <details class="hidden sm:block group">
-          <summary class="px-6 py-3 text-xs font-semibold text-stone-600 cursor-pointer hover:bg-stone-100 select-none flex items-center justify-between">
+          <summary class="px-6 py-3 text-xs font-semibold text-ink-secondary cursor-pointer hover:bg-paper-hover select-none flex items-center justify-between">
             <span>Advanced Settings: Auto-load Config File</span>
-            <span class="text-stone-400 transition-transform group-open:rotate-180">▾</span>
+            <span class="text-ink-faint transition-transform group-open:rotate-180">▾</span>
           </summary>
           <div class="px-6 pb-4 space-y-3">
-            <p id="autoConfigNetworkNotice" class="hidden text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded p-2 leading-relaxed">
+            <p id="autoConfigNetworkNotice" class="hidden text-xs text-warning-700 bg-warning-50 border border-warning-200 rounded p-2 leading-relaxed">
               This feature only takes effect when you download this page as a local HTML file and open it directly. You're currently browsing it via a URL — "Export as Auto-load File" still downloads the config file, but it will only auto-apply once you also download this page and keep the config file next to it.
             </p>
             <div class="flex flex-wrap gap-2">
-              <button id="exportAutoConfigBtn" onclick="exportAutoConfig()" title="Package the current in-memory custom rules and prompts into an auto-load config file" class="px-4 py-2 bg-emerald-700 hover:bg-emerald-800 text-white rounded-lg text-sm font-semibold transition-colors">Export as Auto-load File</button>
-              <button id="reloadConfigBtn" onclick="reloadConfig()" title="Discard manual edits and re-apply built-in defaults plus the same-folder auto-load config file" class="bg-white hover:bg-stone-50 border border-stone-300 text-stone-700 px-4 py-2 rounded-lg text-sm font-medium transition-colors">Reload Config</button>
+              <button id="exportAutoConfigBtn" onclick="exportAutoConfig()" title="Package the current in-memory custom rules and prompts into an auto-load config file" class="px-4 py-2 bg-brand-700 hover:bg-brand-800 text-white rounded-lg text-sm font-semibold transition-colors">Export as Auto-load File</button>
+              <button id="reloadConfigBtn" onclick="reloadConfig()" title="Discard manual edits and re-apply built-in defaults plus the same-folder auto-load config file" class="bg-white hover:bg-paper-sunken border border-line-strong text-ink-hover px-4 py-2 rounded-lg text-sm font-medium transition-colors">Reload Config</button>
             </div>
           </div>
         </details>
         <div class="px-6 py-3 flex justify-end">
-          <button onclick="closeModal('protectionManagerModal')" class="px-4 py-2 bg-white border border-stone-300 text-stone-700 rounded-lg text-sm font-medium hover:bg-stone-50 transition-colors">Close</button>
+          <button onclick="closeModal('protectionManagerModal')" class="px-4 py-2 bg-white border border-line-strong text-ink-hover rounded-lg text-sm font-medium hover:bg-paper-sunken transition-colors">Close</button>
         </div>
       </div>
     </div>
   </div>
 
   <!-- ==================== Import Merge/Replace Modal ==================== -->
-  <div id="importModeModal" class="hidden fixed inset-0 bg-stone-900/40 backdrop-blur-sm z-[60] flex items-center justify-center p-4 opacity-0 transition-opacity duration-300">
-    <div class="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden transform scale-95 transition-transform duration-300 border border-stone-200">
-      <div class="px-6 py-4 border-b border-stone-100 bg-emerald-50/50">
-        <h2 class="text-sm font-bold text-emerald-900">Import Mode</h2>
+  <div id="importModeModal" class="hidden fixed inset-0 bg-scrim/40 backdrop-blur-sm z-[60] flex items-center justify-center p-4 opacity-0 transition-opacity duration-300">
+    <div class="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden transform scale-95 transition-transform duration-300 border border-line">
+      <div class="px-6 py-4 border-b border-line-soft bg-brand-50/50">
+        <h2 class="text-sm font-bold text-brand-900">Import Mode</h2>
       </div>
       <div class="p-6 space-y-3">
-        <p id="importModeMessage" class="text-sm text-stone-700"></p>
-        <div id="importModeErrorList" class="hidden text-xs text-red-600 bg-red-50 border border-red-200 rounded p-2 max-h-32 overflow-y-auto"></div>
+        <p id="importModeMessage" class="text-sm text-ink-hover"></p>
+        <div id="importModeErrorList" class="hidden text-xs text-danger-600 bg-danger-50 border border-danger-200 rounded p-2 max-h-32 overflow-y-auto"></div>
       </div>
-      <div class="px-6 py-4 border-t border-stone-100 bg-stone-50 flex flex-col gap-2">
-        <button onclick="confirmImportMode('merge')" class="px-4 py-2 bg-emerald-700 hover:bg-emerald-800 text-white rounded-lg text-sm font-semibold transition-colors">Merge with Existing</button>
-        <button onclick="confirmImportMode('replace')" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm font-semibold transition-colors">Replace All</button>
-        <button onclick="closeModal('importModeModal')" class="px-4 py-2 bg-white border border-stone-300 text-stone-700 rounded-lg text-sm font-medium hover:bg-stone-50 transition-colors">Cancel</button>
+      <div class="px-6 py-4 border-t border-line-soft bg-paper-sunken flex flex-col gap-2">
+        <button onclick="confirmImportMode('merge')" class="px-4 py-2 bg-brand-700 hover:bg-brand-800 text-white rounded-lg text-sm font-semibold transition-colors">Merge with Existing</button>
+        <button onclick="confirmImportMode('replace')" class="px-4 py-2 bg-danger-600 hover:bg-danger-700 text-white rounded-lg text-sm font-semibold transition-colors">Replace All</button>
+        <button onclick="closeModal('importModeModal')" class="px-4 py-2 bg-white border border-line-strong text-ink-hover rounded-lg text-sm font-medium hover:bg-paper-sunken transition-colors">Cancel</button>
       </div>
     </div>
   </div>
 
   <!-- ==================== Global Tooltip ==================== -->
-  <div id="globalTooltip" class="fixed z-[100] px-2 py-1 bg-stone-800 text-white text-[10px] rounded whitespace-nowrap shadow-lg pointer-events-none transition-opacity duration-150 opacity-0 hidden"></div>
+  <div id="globalTooltip" class="fixed z-[100] px-2 py-1 bg-ink text-white text-[10px] rounded whitespace-nowrap shadow-lg pointer-events-none transition-opacity duration-150 opacity-0 hidden"></div>
 
   <script>
     // ==========================================
@@ -929,15 +1040,15 @@
         else m.classList.remove('highlight-active');
       });
       document.querySelectorAll(`[data-entity-chip="${val}"]`).forEach(chip => {
-        if (isHover) chip.classList.add('ring-2', 'ring-emerald-500', 'scale-105', 'z-10', 'relative');
-        else chip.classList.remove('ring-2', 'ring-emerald-500', 'scale-105', 'z-10', 'relative');
+        if (isHover) chip.classList.add('ring-2', 'ring-brand-500', 'scale-105', 'z-10', 'relative');
+        else chip.classList.remove('ring-2', 'ring-brand-500', 'scale-105', 'z-10', 'relative');
       });
       document.querySelectorAll(`[data-report-row="${val}"]`).forEach(row => {
         if (isHover) {
-          row.classList.add('bg-emerald-50');
+          row.classList.add('bg-brand-50');
           row.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         } else {
-          row.classList.remove('bg-emerald-50');
+          row.classList.remove('bg-brand-50');
         }
       });
     }
@@ -945,9 +1056,9 @@
       document.querySelectorAll('[data-token]').forEach(el => {
         if (el.getAttribute('data-token') !== token) return;
         if (isHover) {
-          el.classList.add("ring-2", "ring-emerald-500", "scale-105", "z-10", "relative");
+          el.classList.add("ring-2", "ring-brand-500", "scale-105", "z-10", "relative");
         } else {
-          el.classList.remove("ring-2", "ring-emerald-500", "scale-105", "z-10", "relative");
+          el.classList.remove("ring-2", "ring-brand-500", "scale-105", "z-10", "relative");
         }
       });
     }
@@ -1238,7 +1349,7 @@
     function sourceBadgeHtml(source) {
       const label = SOURCE_BADGE_LABELS[source] || source || '';
       if (!label) return '';
-      return ` <span class="badge-source badge-${source}" style="font-size:10px;padding:1px 6px;border-radius:9999px;background:#e7e5e4;color:#57534e;margin-left:4px;white-space:nowrap;">${label}</span>`;
+      return ` <span class="badge-source badge-${source}" style="font-size:10px;padding:1px 6px;border-radius:9999px;background:var(--stone-200);color:var(--stone-600);margin-left:4px;white-space:nowrap;">${label}</span>`;
     }
 
     // ==========================================
@@ -1384,8 +1495,8 @@
     function switchPmTab(tab) {
       const panels = { hardBlock: 'pmPanelHardBlock', regex: 'pmPanelRegex', prompts: 'pmPanelPrompts' };
       const buttons = { hardBlock: 'pmTabBtnHardBlock', regex: 'pmTabBtnRegex', prompts: 'pmTabBtnPrompts' };
-      const activeCls = ['border-emerald-600', 'text-emerald-700'];
-      const inactiveCls = ['border-transparent', 'text-stone-500'];
+      const activeCls = ['border-brand-600', 'text-brand-700'];
+      const inactiveCls = ['border-transparent', 'text-ink-muted'];
       Object.keys(panels).forEach(key => {
         document.getElementById(panels[key]).classList.toggle('hidden', key !== tab);
         const btn = document.getElementById(buttons[key]);
@@ -1401,10 +1512,10 @@
         <tr>
           <td class="px-3 py-2">${escapeHtml(entry.value)}${sourceBadgeHtml(entry.source)}</td>
           <td class="px-3 py-2 text-center">
-            <button onclick="deleteHardBlockEntry('${escapeHtml(escapeForInlineJs(entry.value))}')" class="text-red-500 hover:text-red-700 text-xs">Delete</button>
+            <button onclick="deleteHardBlockEntry('${escapeHtml(escapeForInlineJs(entry.value))}')" class="text-danger-500 hover:text-danger-700 text-xs">Delete</button>
           </td>
         </tr>
-      `).join('') || `<tr><td colspan="2" class="px-3 py-4 text-center text-stone-400 text-xs">No custom hard-block keywords yet</td></tr>`;
+      `).join('') || `<tr><td colspan="2" class="px-3 py-4 text-center text-ink-faint text-xs">No custom hard-block keywords yet</td></tr>`;
     }
 
     function renderRegexMgmtTable() {
@@ -1416,10 +1527,10 @@
           <td class="px-3 py-2">${escapeHtml(rule.name)}${sourceBadgeHtml(rule.source)}</td>
           <td class="px-3 py-2 font-mono text-[10px] break-all">${escapeHtml(`/${rule.pattern}/${rule.flags}`)}</td>
           <td class="px-3 py-2 text-center">
-            <button onclick="deleteRegexEntry('${escapeHtml(escapeForInlineJs(rule.pattern))}')" class="text-red-500 hover:text-red-700 text-xs">Delete</button>
+            <button onclick="deleteRegexEntry('${escapeHtml(escapeForInlineJs(rule.pattern))}')" class="text-danger-500 hover:text-danger-700 text-xs">Delete</button>
           </td>
         </tr>
-      `).join('') || `<tr><td colspan="4" class="px-3 py-4 text-center text-stone-400 text-xs">No custom regex rules yet</td></tr>`;
+      `).join('') || `<tr><td colspan="4" class="px-3 py-4 text-center text-ink-faint text-xs">No custom regex rules yet</td></tr>`;
     }
 
     function deleteHardBlockEntry(value) {
@@ -1595,8 +1706,8 @@
       document.getElementById('viewPhase1').classList.toggle('hidden', tabId !== 1);
       document.getElementById('viewPhase2').classList.toggle('hidden', tabId !== 2);
 
-      const activeCls = ['bg-white', 'shadow-sm', 'text-emerald-700', 'font-semibold'];
-      const inactiveCls = ['text-stone-500', 'font-medium', 'hover:text-stone-700'];
+      const activeCls = ['bg-white', 'shadow-sm', 'text-brand-700', 'font-semibold'];
+      const inactiveCls = ['text-ink-muted', 'font-medium', 'hover:text-ink-hover'];
 
       const btns = [document.getElementById('tabBtn1'), document.getElementById('tabBtn2')];
 
@@ -1637,7 +1748,7 @@
         <tr>
           <td class="px-4 py-2">${rule.name}${sourceBadgeHtml(rule.source)}</td>
           <td class="px-4 py-2 font-mono text-xs">${rule.type}_X</td>
-          <td class="px-4 py-2 text-stone-500">${rule.example || ''}</td>
+          <td class="px-4 py-2 text-ink-muted">${rule.example || ''}</td>
           <td class="px-4 py-2 font-mono text-[10px] break-all">${escapeHtml(`/${rule.pattern}/${rule.flags}`)}</td>
         </tr>
       `).join('');
@@ -1712,17 +1823,17 @@
     function createEditRow(keyword = '', type = '') {
       editCsvRowCount++;
       const tr = document.createElement('tr');
-      tr.className = "hover:bg-stone-50/50 transition-colors group";
+      tr.className = "hover:bg-paper-sunken/50 transition-colors group";
       tr.innerHTML = `
-        <td class="px-3 py-1.5 text-center text-stone-400 font-mono text-xs border-r border-stone-100">${editCsvRowCount}</td>
-        <td class="px-3 py-1.5 border-r border-stone-100">
-          <input type="text" class="csv-kw-input w-full p-1.5 bg-transparent border border-transparent focus:border-emerald-300 focus:bg-white rounded outline-none transition-all" value="${escapeHtml(keyword)}" placeholder="Enter a keyword">
+        <td class="px-3 py-1.5 text-center text-ink-faint font-mono text-xs border-r border-line-soft">${editCsvRowCount}</td>
+        <td class="px-3 py-1.5 border-r border-line-soft">
+          <input type="text" class="csv-kw-input w-full p-1.5 bg-transparent border border-transparent focus:border-brand-300 focus:bg-white rounded outline-none transition-all" value="${escapeHtml(keyword)}" placeholder="Enter a keyword">
         </td>
-        <td class="px-3 py-1.5 border-r border-stone-100">
-          <input type="text" class="csv-type-input w-full p-1.5 bg-transparent border border-transparent focus:border-emerald-300 focus:bg-white rounded outline-none transition-all font-mono text-xs uppercase" value="${escapeHtml(type)}" placeholder="e.g. NAME">
+        <td class="px-3 py-1.5 border-r border-line-soft">
+          <input type="text" class="csv-type-input w-full p-1.5 bg-transparent border border-transparent focus:border-brand-300 focus:bg-white rounded outline-none transition-all font-mono text-xs uppercase" value="${escapeHtml(type)}" placeholder="e.g. NAME">
         </td>
         <td class="px-3 py-1.5 text-center">
-          <button onclick="handleCsvDeleteRow(this)" class="csv-delete-btn text-stone-400 hover:text-red-600 focus:text-red-600 focus:bg-red-50 focus:outline-none transition-colors rounded p-1" title="Delete this row">
+          <button onclick="handleCsvDeleteRow(this)" class="csv-delete-btn text-ink-faint hover:text-danger-600 focus:text-danger-600 focus:bg-danger-50 focus:outline-none transition-colors rounded p-1" title="Delete this row">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
           </button>
         </td>
@@ -2008,8 +2119,8 @@
                     ? document.getElementById('ollamaModel').value.trim()
                     : document.getElementById('ollamaModelSelect').value;
       const resultEl = document.getElementById('ollamaTestResult');
-      resultEl.classList.remove('hidden', 'text-emerald-600', 'text-red-600', 'text-amber-600');
-      resultEl.classList.add('text-emerald-600');
+      resultEl.classList.remove('hidden', 'text-brand-600', 'text-danger-600', 'text-warning-600');
+      resultEl.classList.add('text-brand-600');
       resultEl.innerText = "Testing connection...";
 
       try {
@@ -2020,14 +2131,14 @@
           if (hasModel) {
             resultEl.innerText = "✅ Connected successfully!";
           } else {
-            resultEl.classList.replace('text-emerald-600', 'text-amber-600');
+            resultEl.classList.replace('text-brand-600', 'text-warning-600');
             resultEl.innerText = `⚠️ Connected, but model [${model}] wasn't found. Make sure you've run "ollama pull".`;
           }
         } else {
           throw new Error("HTTP Failed");
         }
       } catch (e) {
-        resultEl.classList.replace('text-emerald-600', 'text-red-600');
+        resultEl.classList.replace('text-brand-600', 'text-danger-600');
         resultEl.innerText = "❌ Connection failed. Make sure Ollama is running and OLLAMA_ORIGINS is set.";
       }
     }
@@ -2106,11 +2217,11 @@
             const isMasked = tableMasks.has(`${r}_${c}`);
             let cellHtml = '';
             if (isMasked) {
-              cellHtml = `<mark class="bg-emerald-100/80 text-emerald-800 rounded-sm py-0.5 pointer-events-auto" data-table-mask="${r}_${c}" data-entity-val="${escapeHtml(cellText)}">${escapeHtml(cellText)}</mark>`;
+              cellHtml = `<mark class="bg-brand-100/80 text-brand-800 rounded-sm py-0.5 pointer-events-auto" data-table-mask="${r}_${c}" data-entity-val="${escapeHtml(cellText)}">${escapeHtml(cellText)}</mark>`;
             } else {
               cellHtml = renderRange(text, lineCursor, lineCursor + cellText.length);
             }
-            cellHtmls.push(`<span class="outline outline-1 outline-dashed outline-stone-300 pointer-events-none hover:bg-stone-50/50 transition-colors" data-cell="${r}_${c}">${cellHtml}</span>`);
+            cellHtmls.push(`<span class="outline outline-1 outline-dashed outline-line-strong pointer-events-none hover:bg-paper-sunken/50 transition-colors" data-cell="${r}_${c}">${cellHtml}</span>`);
             lineCursor += cellText.length + 1;
           });
           html += cellHtmls.join('\t') + '\n';
@@ -2125,7 +2236,7 @@
 
     // A floating menu instead of a single button
     const selectionBtn = document.createElement('div');
-    selectionBtn.className = 'fixed z-50 bg-stone-800 text-white text-xs rounded-md shadow-lg hidden pointer-events-auto overflow-hidden flex flex-col py-1';
+    selectionBtn.className = 'fixed z-50 bg-ink text-white text-xs rounded-md shadow-lg hidden pointer-events-auto overflow-hidden flex flex-col py-1';
     document.body.appendChild(selectionBtn);
 
     textarea.addEventListener('mouseup', (e) => {
@@ -2171,26 +2282,26 @@
         if (selectedText.length > 1) {
           const existingEnt = activeExtractedEntities.find(ent => ent.value === selectedText);
           if (existingEnt) {
-             html += `<button class="px-3 py-1.5 text-left hover:bg-stone-700 transition-colors w-full" onclick="handleSelectionAction('remove', '${escapeHtml(selectedText)}')">- Un-mask [${existingEnt.reason}] "${escapeHtml(selectedText)}"</button>`;
+             html += `<button class="px-3 py-1.5 text-left hover:bg-ink-hover transition-colors w-full" onclick="handleSelectionAction('remove', '${escapeHtml(selectedText)}')">- Un-mask [${existingEnt.reason}] "${escapeHtml(selectedText)}"</button>`;
           } else {
-             html += `<button class="px-3 py-1.5 text-left hover:bg-stone-700 transition-colors w-full" onclick="handleSelectionAction('add', '${escapeHtml(selectedText)}')">+ Mark "${escapeHtml(selectedText)}" as sensitive</button>`;
+             html += `<button class="px-3 py-1.5 text-left hover:bg-ink-hover transition-colors w-full" onclick="handleSelectionAction('add', '${escapeHtml(selectedText)}')">+ Mark "${escapeHtml(selectedText)}" as sensitive</button>`;
           }
         } else if (start === end) {
           const ent = activeExtractedEntities.find(ent => start > ent.start && start < ent.end);
           if (ent) {
-             html += `<button class="px-3 py-1.5 text-left hover:bg-stone-700 transition-colors w-full" onclick="handleSelectionAction('remove', '${escapeHtml(ent.value)}')">- Un-mask [${ent.reason}] "${escapeHtml(ent.value)}"</button>`;
+             html += `<button class="px-3 py-1.5 text-left hover:bg-ink-hover transition-colors w-full" onclick="handleSelectionAction('remove', '${escapeHtml(ent.value)}')">- Un-mask [${ent.reason}] "${escapeHtml(ent.value)}"</button>`;
           }
           if (isTable) {
-             if (html) html += `<div class="h-px bg-stone-700 my-1 w-full"></div>`;
+             if (html) html += `<div class="h-px bg-ink-hover my-1 w-full"></div>`;
              const isCellMasked = tableMasks.has(`${r}_${c}`);
              if (isCellMasked) {
-                html += `<button class="px-3 py-1.5 text-left hover:bg-stone-700 transition-colors w-full text-emerald-300" onclick="handleTableMask('unmask_cell', ${r}, ${c})">[Table] Un-mask this cell</button>`;
-                html += `<button class="px-3 py-1.5 text-left hover:bg-stone-700 transition-colors w-full text-emerald-300" onclick="handleTableMask('unmask_col', ${blockStart}, ${blockEnd}, ${c})">[Table] Un-mask this column</button>`;
-                html += `<button class="px-3 py-1.5 text-left hover:bg-stone-700 transition-colors w-full text-emerald-300" onclick="handleTableMask('unmask_row', ${r}, ${cellCount})">[Table] Un-mask this row</button>`;
+                html += `<button class="px-3 py-1.5 text-left hover:bg-ink-hover transition-colors w-full text-brand-300" onclick="handleTableMask('unmask_cell', ${r}, ${c})">[Table] Un-mask this cell</button>`;
+                html += `<button class="px-3 py-1.5 text-left hover:bg-ink-hover transition-colors w-full text-brand-300" onclick="handleTableMask('unmask_col', ${blockStart}, ${blockEnd}, ${c})">[Table] Un-mask this column</button>`;
+                html += `<button class="px-3 py-1.5 text-left hover:bg-ink-hover transition-colors w-full text-brand-300" onclick="handleTableMask('unmask_row', ${r}, ${cellCount})">[Table] Un-mask this row</button>`;
              } else {
-                html += `<button class="px-3 py-1.5 text-left hover:bg-stone-700 transition-colors w-full text-yellow-300" onclick="handleTableMask('mask_cell', ${r}, ${c})">[Table] Mask this cell</button>`;
-                html += `<button class="px-3 py-1.5 text-left hover:bg-stone-700 transition-colors w-full text-yellow-300" onclick="handleTableMask('mask_col', ${blockStart}, ${blockEnd}, ${c})">[Table] Mask this column (${blockEnd - blockStart + 1} rows)</button>`;
-                html += `<button class="px-3 py-1.5 text-left hover:bg-stone-700 transition-colors w-full text-yellow-300" onclick="handleTableMask('mask_row', ${r}, ${cellCount})">[Table] Mask this row (${cellCount} columns)</button>`;
+                html += `<button class="px-3 py-1.5 text-left hover:bg-ink-hover transition-colors w-full text-warning-300" onclick="handleTableMask('mask_cell', ${r}, ${c})">[Table] Mask this cell</button>`;
+                html += `<button class="px-3 py-1.5 text-left hover:bg-ink-hover transition-colors w-full text-warning-300" onclick="handleTableMask('mask_col', ${blockStart}, ${blockEnd}, ${c})">[Table] Mask this column (${blockEnd - blockStart + 1} rows)</button>`;
+                html += `<button class="px-3 py-1.5 text-left hover:bg-ink-hover transition-colors w-full text-warning-300" onclick="handleTableMask('mask_row', ${r}, ${cellCount})">[Table] Mask this row (${cellCount} columns)</button>`;
              }
           }
         }
@@ -2316,7 +2427,7 @@
     function triggerPreview() {
       const text = textarea.value;
       if(!text) {
-        document.getElementById("entityChips").innerHTML = '<span class="text-stone-400 italic text-xs py-1">No data</span>';
+        document.getElementById("entityChips").innerHTML = '<span class="text-ink-faint italic text-xs py-1">No data</span>';
         activeExtractedEntities = [];
         renderHighlights();
         return;
@@ -2324,7 +2435,7 @@
 
       if (text.length > 50000) {
         const chips = document.getElementById("entityChips");
-        chips.innerHTML = '<span class="text-amber-500 italic text-xs py-1">Text is over 50,000 characters — scanning may be slower.</span>';
+        chips.innerHTML = '<span class="text-warning-500 italic text-xs py-1">Text is over 50,000 characters — scanning may be slower.</span>';
       }
 
       activeExtractedEntities = extractStaticEntities(text);
@@ -2341,7 +2452,7 @@
       });
 
       if (uniqueVals.size === 0 && tableMasks.size === 0) {
-        container.innerHTML = '<span class="text-stone-400 italic text-xs py-1">No data</span>';
+        container.innerHTML = '<span class="text-ink-faint italic text-xs py-1">No data</span>';
         return;
       }
 
@@ -2353,17 +2464,17 @@
 
         let bgClass, hoverClass, btnClass;
         if (isCritical) {
-          bgClass = 'bg-red-50 text-red-700 border-red-200';
-          hoverClass = 'bg-red-100';
-          btnClass = 'text-red-400 hover:text-red-600';
+          bgClass = 'bg-danger-50 text-danger-700 border-danger-200';
+          hoverClass = 'bg-danger-100';
+          btnClass = 'text-danger-400 hover:text-danger-600';
         } else if (isAi) {
-          bgClass = 'bg-purple-50 text-purple-700 border-purple-200';
-          hoverClass = 'bg-purple-100';
-          btnClass = 'text-purple-400 hover:text-purple-600';
+          bgClass = 'bg-ai-finding-50 text-ai-finding-700 border-ai-finding-200';
+          hoverClass = 'bg-ai-finding-100';
+          btnClass = 'text-ai-finding-400 hover:text-ai-finding-600';
         } else {
-          bgClass = 'bg-emerald-50 text-emerald-800 border-emerald-200';
-          hoverClass = 'bg-emerald-100';
-          btnClass = 'text-emerald-500 hover:text-emerald-700';
+          bgClass = 'bg-brand-50 text-brand-800 border-brand-200';
+          hoverClass = 'bg-brand-100';
+          btnClass = 'text-brand-500 hover:text-brand-700';
         }
 
         el.className = `${bgClass} px-2 py-0.5 rounded text-xs border flex items-center transition-all cursor-default flex-shrink-0`;
@@ -2395,18 +2506,18 @@
             if (tableMasks.has(`${r}_${c}`) && cellText.trim() !== '') {
               const maskKey = `${r}_${c}`;
               const el = document.createElement('span');
-              el.className = 'bg-indigo-50 text-indigo-700 border-indigo-200 px-2 py-0.5 rounded text-xs border flex items-center transition-all cursor-default flex-shrink-0';
+              el.className = 'bg-accent-ai-50 text-accent-ai-700 border-accent-ai-200 px-2 py-0.5 rounded text-xs border flex items-center transition-all cursor-default flex-shrink-0';
               el.setAttribute('data-table-chip', maskKey);
-              el.innerHTML = `${cellText} <span class="ml-1 text-indigo-400 text-[10px]">Table</span>`;
+              el.innerHTML = `${cellText} <span class="ml-1 text-accent-ai-400 text-[10px]">Table</span>`;
               el.onmouseenter = (e) => {
-                el.classList.add('bg-indigo-100');
-                document.querySelectorAll(`[data-table-mask="${maskKey}"]`).forEach(m => m.classList.add('ring-2', 'ring-indigo-500'));
+                el.classList.add('bg-accent-ai-100');
+                document.querySelectorAll(`[data-table-mask="${maskKey}"]`).forEach(m => m.classList.add('ring-2', 'ring-accent-ai-500'));
                 showGlobalTooltip(e, 'Manual table mask');
               };
               el.onmousemove = (e) => showGlobalTooltip(e, 'Manual table mask');
               el.onmouseleave = () => {
-                el.classList.remove('bg-indigo-100');
-                document.querySelectorAll(`[data-table-mask="${maskKey}"]`).forEach(m => m.classList.remove('ring-2', 'ring-indigo-500'));
+                el.classList.remove('bg-accent-ai-100');
+                document.querySelectorAll(`[data-table-mask="${maskKey}"]`).forEach(m => m.classList.remove('ring-2', 'ring-accent-ai-500'));
                 hideGlobalTooltip();
               };
               container.appendChild(el);
@@ -2417,7 +2528,7 @@
       });
 
       if (container.childElementCount === 0) {
-        container.innerHTML = '<span class="text-stone-400 italic text-xs py-1">No data</span>';
+        container.innerHTML = '<span class="text-ink-faint italic text-xs py-1">No data</span>';
       }
     }
 
@@ -2518,18 +2629,18 @@
 
       const reportContainer = document.getElementById("anonymizeReport");
       if (reportData.length === 0) {
-        reportContainer.innerHTML = '<div class="text-stone-400 italic">No masked items</div>';
+        reportContainer.innerHTML = '<div class="text-ink-faint italic">No masked items</div>';
         return;
       }
       reportContainer.innerHTML = reportData.map(item => `
-        <div class="flex items-center gap-2 py-1 border-b border-stone-100 last:border-0 cursor-default transition-all hover:bg-stone-50"
+        <div class="flex items-center gap-2 py-1 border-b border-line-soft last:border-0 cursor-default transition-all hover:bg-paper-sunken"
              data-report-row="${escapeHtml(item.raw)}"
              onmouseenter="highlightEntityChip('${escapeHtml(item.raw)}', true)"
              onmouseleave="highlightEntityChip('${escapeHtml(item.raw)}', false)">
-          <span class="font-semibold text-stone-800">${escapeHtml(item.raw)}</span>
-          <span class="text-stone-400">→</span>
-          <span class="text-emerald-700">${escapeHtml(item.token)}</span>
-          <span class="text-stone-400 text-[10px] ml-auto">${item.isAi ? '🤖 AI' : escapeHtml(item.reason)}</span>
+          <span class="font-semibold text-ink">${escapeHtml(item.raw)}</span>
+          <span class="text-ink-faint">→</span>
+          <span class="text-brand-700">${escapeHtml(item.token)}</span>
+          <span class="text-ink-faint text-[10px] ml-auto">${item.isAi ? '🤖 AI' : escapeHtml(item.reason)}</span>
         </div>
       `).join('');
     }
@@ -2565,8 +2676,8 @@
       const sysInstEnd = fullText.indexOf("]\n\n");
       const currentText = sysInstEnd !== -1 ? fullText.substring(sysInstEnd + 3) : fullText;
 
-      btn.classList.remove("bg-indigo-600", "hover:bg-indigo-700");
-      btn.classList.add("bg-red-600", "hover:bg-red-700");
+      btn.classList.remove("bg-accent-ai-600", "hover:bg-accent-ai-700");
+      btn.classList.add("bg-danger-600", "hover:bg-danger-700");
       if (spinner) spinner.classList.remove('hidden');
       if (btnText) btnText.textContent = 'AI Scan (1/2 starting) - click to cancel';
 
@@ -2763,8 +2874,8 @@
       } finally {
         clearTimeout(timeoutHandle);
         phase2IsRunning = false;
-        btn.classList.add("bg-indigo-600", "hover:bg-indigo-700");
-        btn.classList.remove("bg-red-600", "hover:bg-red-700");
+        btn.classList.add("bg-accent-ai-600", "hover:bg-accent-ai-700");
+        btn.classList.remove("bg-danger-600", "hover:bg-danger-700");
         if (spinner) spinner.classList.add('hidden');
         if (btnText) btnText.textContent = 'Scan with Local AI';
       }
@@ -2802,7 +2913,7 @@
           const token = seg.token;
           const rawVal = sessionVault[token];
           const isMissing = missingTokens.includes(token);
-          const bgClass = isMissing ? 'bg-red-100 text-red-800 border-red-400' : 'bg-stone-200 text-stone-800 border-stone-300';
+          const bgClass = isMissing ? 'bg-danger-100 text-danger-800 border-danger-400' : 'bg-line text-ink border-line-strong';
           html += `<span class="inline-block px-1.5 py-0.5 mx-0.5 rounded text-xs font-semibold border transition-all cursor-default ${bgClass}" data-token="${escapeHtml(token)}" onmouseenter="showGlobalTooltip(event, 'Tag: ${escapeHtml(token)}'); highlightCrossReference('${escapeHtml(token)}', true)" onmouseleave="hideGlobalTooltip(); highlightCrossReference('${escapeHtml(token)}', false)" onmousemove="showGlobalTooltip(event, 'Tag: ${escapeHtml(token)}')">${escapeHtml(rawVal)}</span>`;
         } else {
           html += escapeHtml(seg.text);
@@ -2815,14 +2926,14 @@
     function renderRestoreChips(missingTokens = []) {
       const container = document.getElementById("restoreChips");
       if (Object.keys(sessionVault).length === 0) {
-        container.innerHTML = '<span class="text-stone-400 italic text-xs">No masking record</span>';
+        container.innerHTML = '<span class="text-ink-faint italic text-xs">No masking record</span>';
         return;
       }
       container.innerHTML = Object.entries(sessionVault).map(([token, raw]) => {
         const isMissing = missingTokens.includes(token);
         const cls = isMissing
-          ? 'bg-red-100 text-red-800 border border-red-300'
-          : 'bg-stone-100 text-stone-700 border border-stone-200';
+          ? 'bg-danger-100 text-danger-800 border border-danger-300'
+          : 'bg-paper-hover text-ink-hover border border-line';
         return `
           <div class="inline-block ${cls} px-2 py-1 rounded text-xs cursor-default transition-all" data-token="${token}" onmouseenter="showGlobalTooltip(event, 'Tag: ${token}'); highlightCrossReference('${token}', true)" onmouseleave="hideGlobalTooltip(); highlightCrossReference('${token}', false)" onmousemove="showGlobalTooltip(event, 'Tag: ${token}')">
             ${escapeHtml(raw)}
@@ -2842,7 +2953,7 @@
       const missing = [];
 
       Object.entries(sessionVault).forEach(([token, rawVal]) => {
-        const span = `<span class="inline-block bg-emerald-50 text-emerald-900 px-1 rounded font-semibold border-b border-emerald-200 transition-all cursor-pointer hover:bg-emerald-100" data-token="${token}" data-mask-state="0" contenteditable="false" onclick="toggleMask(this, '${escapeHtml(rawVal)}')" onmouseenter="showGlobalTooltip(event, 'Tag: ${token} (click to toggle masking)'); highlightCrossReference('${token}', true)" onmouseleave="hideGlobalTooltip(); highlightCrossReference('${token}', false)" onmousemove="showGlobalTooltip(event, 'Tag: ${token} (click to toggle masking)')">${escapeHtml(rawVal)}</span>`;
+        const span = `<span class="inline-block bg-brand-50 text-brand-900 px-1 rounded font-semibold border-b border-brand-200 transition-all cursor-pointer hover:bg-brand-100" data-token="${token}" data-mask-state="0" contenteditable="false" onclick="toggleMask(this, '${escapeHtml(rawVal)}')" onmouseenter="showGlobalTooltip(event, 'Tag: ${token} (click to toggle masking)'); highlightCrossReference('${token}', true)" onmouseleave="hideGlobalTooltip(); highlightCrossReference('${token}', false)" onmousemove="showGlobalTooltip(event, 'Tag: ${token} (click to toggle masking)')">${escapeHtml(rawVal)}</span>`;
         if (replyText.includes(token)) {
           html = html.split(token).join(span);
         } else {
@@ -2863,7 +2974,7 @@
       let restoredLines = html.split('\n');
       html = restoredLines.map(line => {
         if (line.includes('\t')) {
-          return line.split('\t').map(cell => `<span class="outline outline-1 outline-dashed outline-stone-300 rounded-sm hover:bg-stone-50 transition-colors">${cell}</span>`).join('\t');
+          return line.split('\t').map(cell => `<span class="outline outline-1 outline-dashed outline-line-strong rounded-sm hover:bg-paper-sunken transition-colors">${cell}</span>`).join('\t');
         }
         return line;
       }).join('\n');
@@ -2871,8 +2982,8 @@
       document.getElementById("restoredOutputView").innerHTML = html;
 
       const stat = document.getElementById("integrityStatus");
-      if (missing.length > 0) stat.innerHTML = `<span class="text-red-500">⚠ ${missing.length} item(s) missing — see the record on the left</span>`;
-      else stat.innerHTML = `<span class="text-emerald-600">✓ Fully restored</span>`;
+      if (missing.length > 0) stat.innerHTML = `<span class="text-danger-500">⚠ ${missing.length} item(s) missing — see the record on the left</span>`;
+      else stat.innerHTML = `<span class="text-brand-600">✓ Fully restored</span>`;
 
       renderOriginalWithCapsules(missing);
       renderRestoreChips(missing);
@@ -2900,7 +3011,7 @@
       document.getElementById("anonymizedOutput").value = "";
       rawAnonymizedText = "";
       triggerPreview();
-      document.getElementById("anonymizeReport").innerHTML = '<div class="text-stone-400 italic">Not run yet</div>';
+      document.getElementById("anonymizeReport").innerHTML = '<div class="text-ink-faint italic">Not run yet</div>';
       document.getElementById("phase2Btn").classList.add("hidden");
       document.getElementById("copyPromptBtn").disabled = true;
       resetHardBlockState();
