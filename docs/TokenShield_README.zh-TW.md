@@ -38,7 +38,7 @@ TokenShield **不是**重寫 EduShield——它是一個獨立的姊妹檔案，
 | **資料生命週期** | 所有處理（正則比對、替換、還原）均於瀏覽器記憶體中進行；頁面關閉或重整後，`sessionVault`、`customDict` 等全數消滅，不寫入磁碟、不上傳雲端 |
 | **無憑證依賴** | 不需 API Key 或帳號；地端 AI（Ollama）為選用模組，僅連線 `http://localhost:11434`（本機迴路） |
 | **啟動時清空** | `window.addEventListener('load', ...)` 於載入時清空所有 `textarea` 與 `input[type="text"]`（排除 `ollamaUrl`、`ollamaModel`），防止瀏覽器自動填入歷史資料 |
-| **CSS 框架** | Tailwind CSS，三段式降級載入：CDN → 本地 `style.css`（見 [tailwind.config.js](dev/tailwind.config.js) 的 `content: ["../*.html"]`）→ 防呆引導畫面 |
+| **CSS 框架** | Tailwind CSS，三段式降級載入：CDN → 本地 `style.css`（見 [tailwind.config.js](../dev/tailwind.config.js) 的 `content: ["../*.html"]`）→ 防呆引導畫面 |
 | **零持久化設計** | 地區／身分選擇與其他一切狀態皆**不儲存**，詳見下方 2.1 節如何變更啟動預設值 |
 
 ---
@@ -219,15 +219,16 @@ cd dev
 npm install   # 第一次執行才需要
 npm run build:css
 ```
-此指令等同於 `tailwindcss -i ./input.css -o ../style.css --minify`，定義於 [dev/package.json](dev/package.json)。
+此指令等同於 `tailwindcss -i ./input.css -o ../style.css --minify`，定義於 [dev/package.json](../dev/package.json)。
 
 ### 4.5 資料夾結構
 
 ```text
 TokenShield/（專案根目錄）
 ├── TokenShield.html                 <- TokenShield 主程式（本文件主題）
-├── TokenShield_README.md            <- 英文版技術文件（主版本）
-├── TokenShield_README.zh-TW.md      <- 本文件（繁體中文）
+├── docs/
+│   ├── TokenShield_README.md        <- 英文版技術文件（主版本）
+│   └── TokenShield_README.zh-TW.md  <- 本文件（繁體中文）
 ├── README.md / README.zh-TW.md      <- 專案介紹文件
 ├── LICENSE                          <- MIT 授權
 ├── .gitignore / .nojekyll
@@ -253,4 +254,4 @@ TokenShield/（專案根目錄）
 * **姊妹專案**：[oas114/EduShield](https://github.com/oas114/EduShield) — 台灣教育場域專用版，獨立的 GitHub repo
 * **開發者**：OA (oas114)
 * **支持開發者**：[Ko-fi](https://ko-fi.com/oasgrow)
-* **授權**：[MIT](./LICENSE)
+* **授權**：[MIT](../LICENSE)

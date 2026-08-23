@@ -42,7 +42,7 @@ Unlike a one-size-fits-all rule set, TokenShield lets you switch:
 - **Region** (top toolbar): 🇺🇸 US / 🇪🇺 EU (GDPR) / 🇬🇧 UK — each layered on top of an always-on **Global** baseline (email, IP addresses, credit card numbers). Only one region is active at a time, to avoid cross-country format collisions.
 - **Persona** (top toolbar): **Personal** or **Business** — swaps the Hard Block keyword set between personal-privacy terms and corporate-confidentiality terms.
 
-Nothing is saved between sessions — see [TokenShield_README.md](./TokenShield_README.md) for how to change your permanent default by editing two constants in the source.
+Nothing is saved between sessions — see [TokenShield_README.md](./docs/TokenShield_README.md) for how to change your permanent default by editing two constants in the source.
 
 ### Hybrid Defense Engine
 
@@ -93,7 +93,7 @@ The active persona's `HARD_BLOCK_PRESETS` list contains extremely sensitive term
 
 ## Localization & Contributing
 
-TokenShield ships with US / EU / UK region presets — not every country, by design (see [TokenShield_README.md](./TokenShield_README.md) for why). We welcome Pull Requests to:
+TokenShield ships with US / EU / UK region presets — not every country, by design (see [TokenShield_README.md](./docs/TokenShield_README.md) for why). We welcome Pull Requests to:
 - Add a new region preset (regex + a couple of realistic examples)
 - Tighten the approximate EU passport/VAT patterns
 - Contribute new Hard Block terms for the Personal or Business persona
@@ -105,8 +105,8 @@ TokenShield ships with US / EU / UK region presets — not every country, by des
 
 | Document | Description |
 |----------|--------------|
-| 📖 [TokenShield_README.md](./TokenShield_README.md) | Full technical reference — modules, APIs, data structures, developer guide (English, primary) |
-| 📖 [TokenShield_README.zh-TW.md](./TokenShield_README.zh-TW.md) | Full technical reference (Traditional Chinese) |
+| 📖 [TokenShield_README.md](./docs/TokenShield_README.md) | Full technical reference — modules, APIs, data structures, developer guide (English, primary) |
+| 📖 [TokenShield_README.zh-TW.md](./docs/TokenShield_README.zh-TW.md) | Full technical reference (Traditional Chinese) |
 
 ---
 

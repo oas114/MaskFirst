@@ -38,7 +38,7 @@ TokenShield is **not** a rewrite of EduShield — it's a separate sibling file t
 | **Data lifecycle** | All processing (regex matching, token replacement, restore) happens in browser RAM. Everything (`sessionVault`, `customDict`) is destroyed on page close or reload — nothing is written to disk or uploaded. |
 | **No credentials** | No API key or account needed. The local AI (Ollama) integration is optional and only ever connects to `http://localhost:11434` (loopback). |
 | **Clears on load** | `window.addEventListener('load', ...)` clears every `textarea` and `input[type="text"]` (except `ollamaUrl`/`ollamaModel`) on load, preventing browser autofill from leaking a previous session's data. |
-| **CSS framework** | Tailwind CSS, loaded via a 3-tier fallback: CDN first, then the local `style.css` (see [dev/tailwind.config.js](dev/tailwind.config.js)'s `content: ["../*.html"]` glob), then a fail-safe guidance screen if both fail. |
+| **CSS framework** | Tailwind CSS, loaded via a 3-tier fallback: CDN first, then the local `style.css` (see [dev/tailwind.config.js](../dev/tailwind.config.js)'s `content: ["../*.html"]` glob), then a fail-safe guidance screen if both fail. |
 | **No persistence, by design** | Region and Persona selections, like everything else in the app, are **not saved**. See §2.1 below for how to change your startup defaults. |
 
 ---
@@ -219,15 +219,16 @@ cd dev
 npm install   # first time only
 npm run build:css
 ```
-This runs `tailwindcss -i ./input.css -o ../style.css --minify`, per the script in [dev/package.json](dev/package.json).
+This runs `tailwindcss -i ./input.css -o ../style.css --minify`, per the script in [dev/package.json](../dev/package.json).
 
 ### 4.5 Folder structure
 
 ```text
 TokenShield/  (repo root)
 ├── TokenShield.html                 <- TokenShield app (this document's subject)
-├── TokenShield_README.md            <- This document (English-primary)
-├── TokenShield_README.zh-TW.md      <- Traditional Chinese translation
+├── docs/
+│   ├── TokenShield_README.md        <- This document (English-primary)
+│   └── TokenShield_README.zh-TW.md  <- Traditional Chinese translation
 ├── README.md / README.zh-TW.md      <- Project introduction
 ├── LICENSE                          <- MIT License
 ├── .gitignore / .nojekyll
@@ -253,4 +254,4 @@ Region coverage is intentionally limited to US / EU / UK + Global at launch — 
 * **Sibling project**: [oas114/EduShield](https://github.com/oas114/EduShield) — the Taiwan education-focused edition, in its own separate repository
 * **Author**: OA (oas114)
 * **Support**: [Ko-fi](https://ko-fi.com/oasgrow)
-* **License**: [MIT](./LICENSE)
+* **License**: [MIT](../LICENSE)

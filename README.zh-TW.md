@@ -42,7 +42,7 @@ TokenShield 不是單一綁死的規則庫，而是可即時切換：
 - **地區**（頂部工具列）：🇺🇸 美國／🇪🇺 歐盟 (GDPR)／🇬🇧 英國——皆疊加於永遠開啟的 **Global** 底層規則（email、IP 位址、信用卡號）之上。同一時間僅一組地區規則生效，避免跨國格式互相誤判。
 - **身分**（頂部工具列）：**Personal** 或 **Business**——切換 Hard Block 敏感詞庫（個人隱私用詞 vs. 企業機密用詞）。
 
-工作階段之間不會儲存任何選擇——若要永久變更預設值，請參閱 [TokenShield_README.zh-TW.md](./TokenShield_README.zh-TW.md) 說明如何修改原始碼中的兩個常數。
+工作階段之間不會儲存任何選擇——若要永久變更預設值，請參閱 [TokenShield_README.zh-TW.md](./docs/TokenShield_README.zh-TW.md) 說明如何修改原始碼中的兩個常數。
 
 ### 混合式防禦引擎
 
@@ -93,7 +93,7 @@ TokenShield 不是單一綁死的規則庫，而是可即時切換：
 
 ## 在地化與貢獻
 
-TokenShield 目前內建美國／歐盟／英國三組地區規則庫——刻意不涵蓋所有國家（原因請見 [TokenShield_README.zh-TW.md](./TokenShield_README.zh-TW.md)）。歡迎提交 PR：
+TokenShield 目前內建美國／歐盟／英國三組地區規則庫——刻意不涵蓋所有國家（原因請見 [TokenShield_README.zh-TW.md](./docs/TokenShield_README.zh-TW.md)）。歡迎提交 PR：
 - 新增地區規則庫（regex ＋ 幾個真實範例）
 - 收斂近似的歐盟護照／VAT 規則
 - 為 Personal 或 Business 身分模式新增 Hard Block 詞彙
@@ -105,8 +105,8 @@ TokenShield 目前內建美國／歐盟／英國三組地區規則庫——刻�
 
 | 文件 | 說明 |
 |------|------|
-| 📖 [TokenShield_README.md](./TokenShield_README.md) | 完整技術文件——模組、API、資料結構、開發者指南（英文，主版本） |
-| 📖 [TokenShield_README.zh-TW.md](./TokenShield_README.zh-TW.md) | 完整技術文件（繁體中文） |
+| 📖 [TokenShield_README.md](./docs/TokenShield_README.md) | 完整技術文件——模組、API、資料結構、開發者指南（英文，主版本） |
+| 📖 [TokenShield_README.zh-TW.md](./docs/TokenShield_README.zh-TW.md) | 完整技術文件（繁體中文） |
 
 ---
 
