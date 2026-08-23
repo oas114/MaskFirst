@@ -239,9 +239,6 @@
         <button id="manageProtectionBtn" onclick="openProtectionManagerModal()" class="bg-white hover:bg-stone-50 border border-stone-300 text-stone-700 px-2 sm:px-3 py-1.5 rounded-lg text-[10px] sm:text-xs font-medium transition-colors">
           Manage Custom Protection Rules
         </button>
-        <button id="reloadConfigBtn" onclick="reloadConfig()" title="Discard manual edits and re-apply built-in defaults plus the same-folder auto-load config file" class="bg-white hover:bg-stone-50 border border-stone-300 text-stone-700 px-2 sm:px-3 py-1.5 rounded-lg text-[10px] sm:text-xs font-medium transition-colors">
-          Reload Config
-        </button>
       </div>
     </div>
   </header>
@@ -640,8 +637,8 @@
             <li>Click <strong>"Manage Custom Protection Rules"</strong> in the toolbar, then switch to the "Hard Block Keywords" or "Regex Rules" tab.</li>
             <li>Download that tab's CSV template, fill in your keywords or patterns, and save it.</li>
             <li>Click "Import CSV", pick that file, and choose "Merge with Existing" or "Replace All".</li>
-            <li>To have your customizations applied automatically every time you open this file, click "Export as Auto-load File" in the same panel and place the downloaded <code class="bg-white border border-stone-200 px-1 rounded">tokenshield.config.js</code> next to <code class="bg-white border border-stone-200 px-1 rounded">TokenShield.html</code>.</li>
-            <li>To discard manual edits and restore the built-in defaults, click "Reload Config" in the toolbar.</li>
+            <li>To have your customizations applied automatically every time you open this file, expand "Advanced Settings" (desktop only) in the same panel, click "Export as Auto-load File", and place the downloaded <code class="bg-white border border-stone-200 px-1 rounded">tokenshield.config.js</code> next to <code class="bg-white border border-stone-200 px-1 rounded">TokenShield.html</code> — this only takes effect when the page is opened as a local file.</li>
+            <li>To discard manual edits and restore the built-in defaults, open "Manage Custom Protection Rules", expand "Advanced Settings" (desktop only), and click "Reload Config".</li>
           </ol>
         </div>
 
@@ -842,9 +839,25 @@
           </div>
         </div>
       </div>
-      <div class="px-6 py-4 border-t border-stone-100 bg-stone-50 flex justify-between items-center gap-3 flex-shrink-0">
-        <button id="exportAutoConfigBtn" onclick="exportAutoConfig()" title="Package the current in-memory custom rules and prompts into an auto-load config file" class="px-4 py-2 bg-emerald-700 hover:bg-emerald-800 text-white rounded-lg text-sm font-semibold transition-colors">Export as Auto-load File</button>
-        <button onclick="closeModal('protectionManagerModal')" class="px-4 py-2 bg-white border border-stone-300 text-stone-700 rounded-lg text-sm font-medium hover:bg-stone-50 transition-colors">Close</button>
+      <div class="border-t border-stone-100 bg-stone-50 flex-shrink-0">
+        <details class="hidden sm:block group">
+          <summary class="px-6 py-3 text-xs font-semibold text-stone-600 cursor-pointer hover:bg-stone-100 select-none flex items-center justify-between">
+            <span>Advanced Settings: Auto-load Config File</span>
+            <span class="text-stone-400 transition-transform group-open:rotate-180">▾</span>
+          </summary>
+          <div class="px-6 pb-4 space-y-3">
+            <p id="autoConfigNetworkNotice" class="hidden text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded p-2 leading-relaxed">
+              This feature only takes effect when you download this page as a local HTML file and open it directly. You're currently browsing it via a URL — "Export as Auto-load File" still downloads the config file, but it will only auto-apply once you also download this page and keep the config file next to it.
+            </p>
+            <div class="flex flex-wrap gap-2">
+              <button id="exportAutoConfigBtn" onclick="exportAutoConfig()" title="Package the current in-memory custom rules and prompts into an auto-load config file" class="px-4 py-2 bg-emerald-700 hover:bg-emerald-800 text-white rounded-lg text-sm font-semibold transition-colors">Export as Auto-load File</button>
+              <button id="reloadConfigBtn" onclick="reloadConfig()" title="Discard manual edits and re-apply built-in defaults plus the same-folder auto-load config file" class="bg-white hover:bg-stone-50 border border-stone-300 text-stone-700 px-4 py-2 rounded-lg text-sm font-medium transition-colors">Reload Config</button>
+            </div>
+          </div>
+        </details>
+        <div class="px-6 py-3 flex justify-end">
+          <button onclick="closeModal('protectionManagerModal')" class="px-4 py-2 bg-white border border-stone-300 text-stone-700 rounded-lg text-sm font-medium hover:bg-stone-50 transition-colors">Close</button>
+        </div>
       </div>
     </div>
   </div>
@@ -1485,6 +1498,10 @@
     loadAutoConfig(() => {
       document.getElementById('dictCountLabel').innerText = `Dictionary: ${customDict.length}`;
     });
+    if (location.protocol !== 'file:') {
+      const autoConfigNetworkNotice = document.getElementById('autoConfigNetworkNotice');
+      if (autoConfigNetworkNotice) autoConfigNetworkNotice.classList.remove('hidden');
+    }
 
     // ==========================================
     // UI control & tab switching

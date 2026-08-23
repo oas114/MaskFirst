@@ -159,7 +159,7 @@ window.TOKENSHIELD_AUTO_CONFIG = {
   aiPrompts: { channel1: "...{{TEXT}}", channel2Personal: "...{{TEXT}}", channel2Business: "...{{TEXT}}" }
 };
 ```
-The toolbar's "**Reload Config**" button (with a confirmation prompt) resets all four dimensions to built-in defaults and re-runs the auto-load step — discarding this session's manual edits. The panel's "**Export as Auto-load File**" button packages the current in-memory state (all four dimensions, all merge/override results, excluding `ai-session`-tagged roster entries) into the same format, downloaded as the fixed filename `tokenshield.config.js`.
+Both actions live inside a collapsible "Advanced Settings: Auto-load Config File" section at the bottom of the "Manage Custom Protection Rules" panel — hidden below desktop viewport widths (the same-folder workflow isn't practical on mobile), and showing an inline notice when the page is loaded via a URL instead of a local file, since the feature only takes effect for local `file://` usage. The "**Reload Config**" button there (with a confirmation prompt) resets all four dimensions to built-in defaults and re-runs the auto-load step — discarding this session's manual edits. The "**Export as Auto-load File**" button packages the current in-memory state (all four dimensions, all merge/override results, excluding `ai-session`-tagged roster entries) into the same format, downloaded as the fixed filename `tokenshield.config.js`.
 
 > [!NOTE]
 > This mechanism only ever touches rule/prompt configuration — never the actual document content typed into the app. The existing zero-persistence promise (everything destroyed on page close/reload, see §1.2) is untouched for `sessionVault` and the input textareas.

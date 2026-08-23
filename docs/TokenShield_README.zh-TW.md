@@ -159,7 +159,7 @@ window.TOKENSHIELD_AUTO_CONFIG = {
   aiPrompts: { channel1: "...{{TEXT}}", channel2Personal: "...{{TEXT}}", channel2Business: "...{{TEXT}}" }
 };
 ```
-工具列的「**Reload Config**」按鈕（會先跳出確認對話框）把四個維度重置回內建預設值，再重新執行一次自動載入，用來捨棄當次手動調整。面板裡的「**Export as Auto-load File**」按鈕則會把目前記憶體中四個維度的最新狀態（含所有合併/覆蓋結果，排除 `ai-session` 標籤的暫存名冊項目）打包成同樣格式，下載成固定檔名 `tokenshield.config.js`。
+這兩個按鈕都收在「管理自訂防護規則」面板底部的「Advanced Settings: Auto-load Config File」摺疊區塊裡——手機寬度會直接隱藏（同資料夾流程在手機上不實用），透過網址瀏覽時區塊內會顯示提示，說明此功能僅限本機檔案模式生效。其中「**Reload Config**」按鈕（會先跳出確認對話框）把四個維度重置回內建預設值，再重新執行一次自動載入，用來捨棄當次手動調整。「**Export as Auto-load File**」按鈕則會把目前記憶體中四個維度的最新狀態（含所有合併/覆蓋結果，排除 `ai-session` 標籤的暫存名冊項目）打包成同樣格式，下載成固定檔名 `tokenshield.config.js`。
 
 > [!NOTE]
 > 此機制只處理規則/提示詞設定，完全不涉及使用者實際輸入的文件內容——`sessionVault`、輸入文字框等仍完全遵循 1.2 節提到的既有零持久化承諾，頁面關閉或重整後立即消失。
