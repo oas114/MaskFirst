@@ -110,6 +110,17 @@ TokenShield ships with US / EU / UK region presets — not every country, by des
 
 ---
 
+## Roadmap
+
+TokenShield is under active development. Planned directions include (in priority order):
+
+1. **Additional Region Presets**: Taiwan and Japan PII rule libraries, alongside the existing US / EU / UK presets.
+2. **Persistent Mask Mapping Storage**: A way to save the mask ↔ original mapping so a session can be resumed later.
+3. **File Upload Masking**: Direct masking support for uploaded Excel, Word, and PDF files, not just pasted text.
+4. **Enterprise-grade Features**: Audit logs and related governance features for the Business persona.
+
+---
+
 ## License & Author
 
 - **License**: [MIT License](./LICENSE)
