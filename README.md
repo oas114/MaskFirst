@@ -15,9 +15,11 @@
 
 ## Why TokenShield?
 
-Individuals and businesses face the same dilemma as everyone else in the generative-AI era: you want to use AI (ChatGPT, Claude, etc.) to work faster, but you can't risk exposing personal data, client records, or confidential business information in the process.
+When you paste an employee performance review, an HR incident report, or a client email into ChatGPT to polish the wording, do you actually know what happens to that text afterward?
 
-**TokenShield** solves this with a complete privacy-safe AI workflow: **Mask → Send → Restore** — entirely inside your browser, without sending a single byte to any server.
+Most people don't — and the answer depends on which AI, and which plan, you're using.
+
+**TokenShield** removes the guesswork. Mask the sensitive parts before you send anything — the original data never leaves your device. **Mask → Send → Restore**, entirely inside your browser.
 
 TokenShield is the international, individual/business-focused sibling of [EduShield](https://github.com/oas114/EduShield), which targets Taiwan's education sector specifically. Both share the same zero-trust engine; TokenShield swaps in an English UI, switchable regional rule presets, and a Personal/Business persona toggle.
 
