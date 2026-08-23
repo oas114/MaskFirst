@@ -6,12 +6,10 @@ ATTENTION ALL AI ASSISTANTS:
 If you modify `TokenShield.html` and your modifications include ANY changes, additions, or removals of Tailwind CSS utility classes, you MUST recompile the local CSS fallback file.
 Failure to do so will break the application for users in offline environments.
 
-IMPORTANT: as of the parent-workspace-folder restructure, the Tailwind build tooling (`dev/`) is SHARED and lives ONE LEVEL UP from this repo, not inside it — this repo (`TokenShield/`) is a sibling of `EduShield/`, both under the same parent workspace folder.
-
 To recompile:
-1. Open a terminal, navigate to the shared `dev/` folder in the parent workspace folder (one level up from this repo root).
+1. Open a terminal, navigate to the `dev/` folder inside the project root.
 2. Run the build script: `npm run build:css`
-(This compiles a master `style.css` in the parent folder AND automatically copies it into both `TokenShield/style.css` and `EduShield/style.css` — see the parent folder's `CLAUDE.md` for the full convention.)
+(This will output the updated `style.css` to the project root.)
 [AI_SYSTEM_INSTRUCTIONS_END]
 -->
 
@@ -40,7 +38,7 @@ TokenShield **不是**重寫 EduShield——它是一個獨立的姊妹檔案，
 | **資料生命週期** | 所有處理（正則比對、替換、還原）均於瀏覽器記憶體中進行；頁面關閉或重整後，`sessionVault`、`customDict` 等全數消滅，不寫入磁碟、不上傳雲端 |
 | **無憑證依賴** | 不需 API Key 或帳號；地端 AI（Ollama）為選用模組，僅連線 `http://localhost:11434`（本機迴路） |
 | **啟動時清空** | `window.addEventListener('load', ...)` 於載入時清空所有 `textarea` 與 `input[type="text"]`（排除 `ollamaUrl`、`ollamaModel`），防止瀏覽器自動填入歷史資料 |
-| **CSS 框架** | Tailwind CSS，三段式降級載入：CDN → 本地 `style.css`（由母資料夾層級的共用 Tailwind 建置流程編譯，見 4.4 節）→ 防呆引導畫面 |
+| **CSS 框架** | Tailwind CSS，三段式降級載入：CDN → 本地 `style.css`（見 [tailwind.config.js](dev/tailwind.config.js) 的 `content: ["../*.html"]`）→ 防呆引導畫面 |
 | **零持久化設計** | 地區／身分選擇與其他一切狀態皆**不儲存**，詳見下方 2.1 節如何變更啟動預設值 |
 
 ---
@@ -176,33 +174,31 @@ EduShield 沒有的新增功能：系統設定視窗新增「Local AI Prompt Lib
 於 `REGEX_PRESETS` 新增一個鍵值（例如加拿大用 `ca`），並在 HTML 中的 `#regionSelect` 加入對應 `<option>`。新地區規則與現有三組一樣，會疊加於 `global` 之上。
 
 ### 4.4 重新編譯 `style.css`
-`TokenShield.html` 與 `EduShield.html` **共用同一套 Tailwind 建置流程**，但各自保留一份獨立的編譯後 `style.css`。共用的 `dev/` 資料夾位於**母資料夾層級**（本 repo 的上一層，與姊妹 repo `EduShield/` 同層），不屬於任何一個 git repo。其 `tailwind.config.js` 同時掃描兩個 app：`content: ["../EduShield/*.html", "../TokenShield/*.html"]`。修改任一 app 的 Tailwind class 後：
+Tailwind 建置工具就在本 repo 自己的 `dev/` 資料夾內，不依賴任何外部專案。修改 `TokenShield.html` 的 Tailwind class 後：
 ```powershell
-cd ../dev
+cd dev
+npm install   # 第一次執行才需要
 npm run build:css
 ```
-此指令等同於 `tailwindcss -i ./input.css -o ../style.css --minify && node copy-css.js`——先在母資料夾編譯出 master `style.css`，再由 `copy-css.js` 複製進 `../TokenShield/style.css` 與 `../EduShield/style.css` 兩份。**這個複製步驟不可省略**——每個 repo 實際部署／上傳 GitHub 的，是物理存在於自己資料夾內的那一份。
+此指令等同於 `tailwindcss -i ./input.css -o ../style.css --minify`，定義於 [dev/package.json](dev/package.json)。
 
-### 4.5 資料夾結構（母資料夾架構）
+### 4.5 資料夾結構
 
 ```text
-（母資料夾，非 git repo）/
-├── dev/                               <- 共用 Tailwind 建置工具（不屬於任一 repo）
-│   ├── input.css / tailwind.config.js / package.json / copy-css.js
-├── style.css                          <- 母層 master 編譯輸出
-├── public/                            <- 給 oasgrow.com 用，另一個機制部署
-│   ├── TokenShield/index.html         <- 英文互動式手冊／展示頁
-│   └── EduShield/index.html           <- EduShield 互動式手冊（中文）
-├── TokenShield/                       <- ✅ 本 repo
-│   ├── TokenShield.html               <- TokenShield 主程式（本文件主題）
-│   ├── TokenShield_README.md          <- 英文版技術文件（主版本）
-│   ├── TokenShield_README.zh-TW.md    <- 本文件（繁體中文）
-│   └── style.css                      <- 已編譯的 Tailwind 備援樣式表（從母層複製進來）
-└── EduShield/                         <- 姊妹 repo（台灣教育版，獨立 GitHub repo）
+TokenShield/（專案根目錄）
+├── TokenShield.html                 <- TokenShield 主程式（本文件主題）
+├── TokenShield_README.md            <- 英文版技術文件（主版本）
+├── TokenShield_README.zh-TW.md      <- 本文件（繁體中文）
+├── README.md / README.zh-TW.md      <- 專案介紹文件
+├── LICENSE                          <- MIT 授權
+├── .gitignore / .nojekyll
+├── style.css                        <- ✅ 已編譯的 Tailwind 備援樣式表（已加入版控）
+└── dev/                             <- Tailwind 建置工具
+    ├── input.css / tailwind.config.js / package.json
 ```
 
 > [!NOTE]
-> 發佈給使用者時，只需提供本 repo 的 `TokenShield.html` 與 `style.css` 兩個檔案。`dev/` 已搬到本 repo 之外，僅供開發使用。
+> 發佈給使用者時，只需提供 `TokenShield.html` 與 `style.css` 兩個檔案。`dev/` 資料夾僅供開發使用。
 
 ---
 

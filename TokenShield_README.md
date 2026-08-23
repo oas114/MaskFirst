@@ -6,12 +6,10 @@ ATTENTION ALL AI ASSISTANTS:
 If you modify `TokenShield.html` and your modifications include ANY changes, additions, or removals of Tailwind CSS utility classes, you MUST recompile the local CSS fallback file.
 Failure to do so will break the application for users in offline environments.
 
-IMPORTANT: as of the parent-workspace-folder restructure, the Tailwind build tooling (`dev/`) is SHARED and lives ONE LEVEL UP from this repo, not inside it — this repo (`TokenShield/`) is a sibling of `EduShield/`, both under the same parent workspace folder.
-
 To recompile:
-1. Open a terminal, navigate to the shared `dev/` folder in the parent workspace folder (one level up from this repo root).
+1. Open a terminal, navigate to the `dev/` folder inside the project root.
 2. Run the build script: `npm run build:css`
-(This compiles a master `style.css` in the parent folder AND automatically copies it into both `TokenShield/style.css` and `EduShield/style.css` — see the parent folder's `CLAUDE.md` for the full convention.)
+(This will output the updated `style.css` to the project root.)
 [AI_SYSTEM_INSTRUCTIONS_END]
 -->
 
@@ -40,7 +38,7 @@ TokenShield is **not** a rewrite of EduShield — it's a separate sibling file t
 | **Data lifecycle** | All processing (regex matching, token replacement, restore) happens in browser RAM. Everything (`sessionVault`, `customDict`) is destroyed on page close or reload — nothing is written to disk or uploaded. |
 | **No credentials** | No API key or account needed. The local AI (Ollama) integration is optional and only ever connects to `http://localhost:11434` (loopback). |
 | **Clears on load** | `window.addEventListener('load', ...)` clears every `textarea` and `input[type="text"]` (except `ollamaUrl`/`ollamaModel`) on load, preventing browser autofill from leaking a previous session's data. |
-| **CSS framework** | Tailwind CSS, loaded via a 3-tier fallback: CDN first, then the local `style.css` (compiled by a shared, parent-workspace-level Tailwind pipeline — see §4.4), then a fail-safe guidance screen if both fail. |
+| **CSS framework** | Tailwind CSS, loaded via a 3-tier fallback: CDN first, then the local `style.css` (see [dev/tailwind.config.js](dev/tailwind.config.js)'s `content: ["../*.html"]` glob), then a fail-safe guidance screen if both fail. |
 | **No persistence, by design** | Region and Persona selections, like everything else in the app, are **not saved**. See §2.1 below for how to change your startup defaults. |
 
 ---
@@ -176,33 +174,31 @@ Find `REGEX_PRESETS`, and add `{ type: "TAG_NAME", regex: /your-regex/g, name: "
 Add a new key to `REGEX_PRESETS` (e.g. `ca` for Canada), then add a matching `<option>` to `#regionSelect` in the HTML. Rules in a new region are layered on top of `global` exactly like the existing three.
 
 ### 4.4 Rebuilding `style.css`
-`TokenShield.html` and `EduShield.html` **share one Tailwind build pipeline**, but each repo keeps its own compiled `style.css`. The shared `dev/` folder lives at the **parent workspace folder level** (one level up from this repo, alongside the `EduShield/` sibling repo) — it is not part of either git repo. Its `tailwind.config.js` scans both apps: `content: ["../EduShield/*.html", "../TokenShield/*.html"]`. After changing Tailwind classes in either app:
+The Tailwind build tooling lives in this repo's own `dev/` folder — no external dependency on any other project. After changing Tailwind classes in `TokenShield.html`:
 ```powershell
-cd ../dev
+cd dev
+npm install   # first time only
 npm run build:css
 ```
-This runs `tailwindcss -i ./input.css -o ../style.css --minify && node copy-css.js` — it compiles a master `style.css` in the parent folder, then `copy-css.js` copies it into both `../TokenShield/style.css` and `../EduShield/style.css`. **This copy step is required** — a repo only ships the copy that physically lives inside it.
+This runs `tailwindcss -i ./input.css -o ../style.css --minify`, per the script in [dev/package.json](dev/package.json).
 
-### 4.5 Folder structure (parent workspace layout)
+### 4.5 Folder structure
 
 ```text
-(parent workspace folder, not a git repo)/
-├── dev/                              <- Shared Tailwind build tooling (not part of either repo)
-│   ├── input.css / tailwind.config.js / package.json / copy-css.js
-├── style.css                         <- Parent-level master compiled output
-├── public/                           <- For oasgrow.com, deployed by a separate mechanism
-│   ├── TokenShield/index.html        <- English interactive manual / landing page
-│   └── EduShield/index.html          <- EduShield's interactive manual (Chinese)
-├── TokenShield/                      <- ✅ This repo
-│   ├── TokenShield.html              <- TokenShield app (this document's subject)
-│   ├── TokenShield_README.md         <- This document (English-primary)
-│   ├── TokenShield_README.zh-TW.md   <- Traditional Chinese translation
-│   └── style.css                     <- Compiled Tailwind fallback (copied in from the parent build)
-└── EduShield/                        <- Sibling repo (Taiwan education edition, independent GitHub repo)
+TokenShield/  (repo root)
+├── TokenShield.html                 <- TokenShield app (this document's subject)
+├── TokenShield_README.md            <- This document (English-primary)
+├── TokenShield_README.zh-TW.md      <- Traditional Chinese translation
+├── README.md / README.zh-TW.md      <- Project introduction
+├── LICENSE                          <- MIT License
+├── .gitignore / .nojekyll
+├── style.css                        <- ✅ Compiled Tailwind fallback (checked in)
+└── dev/                             <- Tailwind build tooling
+    ├── input.css / tailwind.config.js / package.json
 ```
 
 > [!NOTE]
-> When distributing to end users, only this repo's `TokenShield.html` and `style.css` are needed. `dev/` lives outside this repo and is for development only.
+> When distributing to end users, only `TokenShield.html` and `style.css` are needed. Everything under `dev/` is for development only.
 
 ---
 
