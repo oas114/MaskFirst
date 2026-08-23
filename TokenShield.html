@@ -1259,7 +1259,7 @@
     };
     function copyLocalPrompt(which) {
       const text = LOCAL_AI_PROMPTS[which];
-      if (text) navigator.clipboard.writeText(text).then(() => alert(`Copied the ${which === 'business' ? 'Business' : 'Personal'} local AI prompt template!`));
+      if (text) navigator.clipboard.writeText(text).then(() => showToast(`Copied the ${which === 'business' ? 'Business' : 'Personal'} local AI prompt template!`, 'success'));
     }
 
     // ==========================================
@@ -1422,8 +1422,9 @@
       document.head.appendChild(s);
     }
 
-    function reloadConfig() {
-      if (!confirm('Reloading will discard any manually edited custom rules and dictionary entries, then re-apply the built-in defaults plus the auto-load config file (if present). Continue?')) return;
+    async function reloadConfig() {
+      const ok = await showConfirmModal('Reloading will discard any manually edited custom rules and dictionary entries, then re-apply the built-in defaults plus the auto-load config file (if present). Continue?', { danger: true, okLabel: 'Reload' });
+      if (!ok) return;
       initCustomProtectionState();
       loadAutoConfig(() => {
         document.getElementById('dictCountLabel').innerText = `Dictionary: ${customDict.length}`;
@@ -1431,7 +1432,7 @@
         renderRegexMgmtTable();
         renderAiPromptTextareas();
         triggerPreview();
-        alert('Configuration reloaded.');
+        showToast('Configuration reloaded.', 'success');
       });
     }
 
@@ -1558,7 +1559,7 @@
     let pendingImport = null; // { dimension: 'roster'|'hardBlock'|'regex', rows: [...] }
 
     function openImportDialog(dimension, rows) {
-      if (!rows.length) { alert('The file has no usable rows.'); return; }
+      if (!rows.length) { showToast('The file has no usable rows.', 'warning'); return; }
       pendingImport = { dimension, rows };
 
       const dimensionLabel = { roster: 'dictionary entries', hardBlock: 'hard-block keywords', regex: 'regex rules' }[dimension];
@@ -1608,7 +1609,7 @@
       pendingImport = null;
       closeModal('importModeModal');
       triggerPreview();
-      alert('Import complete.');
+      showToast('Import complete.', 'success');
     }
 
     function handleHardBlockCsvUpload(event) {
@@ -1740,6 +1741,49 @@
       setTimeout(() => m.classList.add('hidden'), 300);
     }
 
+    // Generic confirm modal (replaces window.confirm) — returns a Promise<boolean>.
+    let _genericConfirmResolve = null;
+    function showConfirmModal(message, opts = {}) {
+      const { title = 'Please Confirm', okLabel = 'OK', cancelLabel = 'Cancel', danger = false } = opts;
+      document.getElementById('genericConfirmTitle').textContent = title;
+      document.getElementById('genericConfirmMessage').textContent = message;
+      document.getElementById('genericConfirmCancelBtn').textContent = cancelLabel;
+      const okBtn = document.getElementById('genericConfirmOkBtn');
+      okBtn.textContent = okLabel;
+      okBtn.className = danger
+        ? 'px-4 py-2 bg-danger-600 hover:bg-danger-700 text-white rounded-lg text-sm font-semibold shadow-sm transition-colors'
+        : 'px-4 py-2 bg-brand-700 hover:bg-brand-800 text-white rounded-lg text-sm font-semibold shadow-sm transition-colors';
+      openModal('genericConfirmModal');
+      return new Promise(resolve => { _genericConfirmResolve = resolve; });
+    }
+    function _resolveGenericConfirm(result) {
+      closeModal('genericConfirmModal');
+      if (_genericConfirmResolve) { _genericConfirmResolve(result); _genericConfirmResolve = null; }
+    }
+
+    // Toast notifications (replaces window.alert) — fire-and-forget, non-blocking.
+    const TOAST_STYLES = {
+      info: 'border-line text-ink',
+      success: 'border-brand-200 text-ink',
+      danger: 'border-danger-200 text-danger-800',
+      warning: 'border-warning-200 text-warning-800',
+    };
+    function showToast(message, variant = 'info') {
+      const container = document.getElementById('toastContainer');
+      const el = document.createElement('div');
+      el.className = `pointer-events-auto max-w-sm w-full bg-white ${TOAST_STYLES[variant] || TOAST_STYLES.info} border rounded-lg shadow-lg px-4 py-3 text-sm flex items-start gap-2 transition-all duration-300 opacity-0 translate-y-2`;
+      el.innerHTML = `<span class="flex-1 whitespace-pre-line">${escapeHtml(message)}</span><button class="text-ink-faint hover:text-ink-hover flex-shrink-0 font-medium" aria-label="Close">&times;</button>`;
+      el.querySelector('button').onclick = () => removeToast(el);
+      container.appendChild(el);
+      requestAnimationFrame(() => { el.classList.remove('opacity-0', 'translate-y-2'); });
+      el._timer = setTimeout(() => removeToast(el), 4000);
+    }
+    function removeToast(el) {
+      clearTimeout(el._timer);
+      el.classList.add('opacity-0');
+      setTimeout(() => el.remove(), 300);
+    }
+
     function openSettings() { openModal('settingsModal'); }
     function closeSettings() { closeModal('settingsModal'); }
     function openGuide() {
@@ -1811,7 +1855,7 @@
           document.getElementById("aiReplyInput").value = text;
         }
       } catch (err) {
-        alert("Couldn't read the clipboard. Please allow clipboard access in your browser, or paste manually with Ctrl+V.");
+        showToast("Couldn't read the clipboard. Please allow clipboard access in your browser, or paste manually with Ctrl+V.", 'danger');
       }
     }
 
@@ -2034,7 +2078,7 @@
     function applyOnlineCsv() {
       const data = getOnlineCsvData();
       if (data.length === 0) {
-        alert("The table is empty — no keywords entered!");
+        showToast("The table is empty — no keywords entered!", 'warning');
         return;
       }
 
@@ -2044,7 +2088,7 @@
       });
 
       document.getElementById('dictCountLabel').innerText = `Dictionary: ${customDict.length}`;
-      alert(`Applied ${customDict.length} custom dictionary entries!`);
+      showToast(`Applied ${customDict.length} custom dictionary entries!`, 'success');
       closeEditCsvModal();
       triggerPreview();
     }
@@ -2052,7 +2096,7 @@
     function downloadOnlineCsv() {
       const data = getOnlineCsvData();
       if (data.length === 0) {
-        alert("The table is empty — nothing to export!");
+        showToast("The table is empty — nothing to export!", 'warning');
         return;
       }
 
@@ -2667,7 +2711,7 @@
         const checkRes = await fetch(`${url}/api/tags`);
         if (!checkRes.ok) throw new Error();
       } catch (err) {
-        alert("Couldn't connect. Local AI (Ollama) may not be running or CORS isn't configured. Please start Ollama first.");
+        showToast("Couldn't connect. Local AI (Ollama) may not be running or CORS isn't configured. Please start Ollama first.", 'danger');
         phase2IsRunning = false;
         return;
       }
@@ -2681,9 +2725,9 @@
       if (spinner) spinner.classList.remove('hidden');
       if (btnText) btnText.textContent = 'AI Scan (1/2 starting) - click to cancel';
 
-      let timeoutHandle = setTimeout(() => {
-        const keepGoing = confirm(`The AI response has taken longer than 3 minutes.\n\nClick "OK" to abort, or "Cancel" to keep waiting.`);
-        if (keepGoing) controller.abort();
+      let timeoutHandle = setTimeout(async () => {
+        const shouldAbort = await showConfirmModal('The AI response has taken longer than 3 minutes.', { title: 'Still Waiting', okLabel: 'Abort', cancelLabel: 'Keep Waiting' });
+        if (shouldAbort) controller.abort();
       }, 3 * 60 * 1000);
 
       const maxAllowedLength = Math.max(3000, currentText.length * 3);
@@ -2859,17 +2903,17 @@
 
         if (criticalReasons.length > 0) {
             triggerHardBlock(criticalReasons);
-            alert(`Scan complete!\nAdded ${newCount} new masked entities.\nA sensitive-risk finding was detected — copy has been force-locked!`);
+            showToast(`Scan complete!\nAdded ${newCount} new masked entities.\nA sensitive-risk finding was detected — copy has been force-locked!`, 'warning');
         } else {
-            alert(`Scan complete! Added ${newCount} new masked entities. No additional sensitive risks found.`);
+            showToast(`Scan complete! Added ${newCount} new masked entities. No additional sensitive risks found.`, 'success');
         }
 
       } catch (err) {
         if (err.name === 'AbortError') {
-          alert('AI scan was cancelled.');
+          showToast('AI scan was cancelled.', 'info');
         } else {
           console.error(err);
-          alert("AI scan failed:\n" + err.message);
+          showToast("AI scan failed:\n" + err.message, 'danger');
         }
       } finally {
         clearTimeout(timeoutHandle);
@@ -2943,8 +2987,8 @@
 
     function processRestore() {
       let replyText = document.getElementById("aiReplyInput").value;
-      if (!replyText.trim()) return alert("Please paste the external AI reply first.");
-      if (Object.keys(sessionVault).length === 0) return alert("No masking record yet — please run de-identification in the \"De-identify\" tab first.");
+      if (!replyText.trim()) return showToast("Please paste the external AI reply first.", 'warning');
+      if (Object.keys(sessionVault).length === 0) return showToast("No masking record yet — please run de-identification in the \"De-identify\" tab first.", 'warning');
 
       // Automatically strip the system-instruction prefix the AI may have echoed back, plus trailing blank lines.
       replyText = replyText.replace(/^\[SYSTEM INSTRUCTION: This text has been de-identified\. Preserve all \{\{TAG_X\}\} tokens exactly as they are, and keep the original table formatting \(Tab characters\)!\]\s*/, "");
@@ -2993,7 +3037,7 @@
 
     function copyAnonymizedPrompt() {
       const text = document.getElementById("anonymizedOutput").value;
-      if(text) navigator.clipboard.writeText(text).then(() => alert("Masked prompt copied!"));
+      if(text) navigator.clipboard.writeText(text).then(() => showToast("Masked prompt copied!", 'success'));
     }
     function clearRestoredResult() {
       document.getElementById("restoredOutputView").innerHTML = "";
@@ -3004,7 +3048,7 @@
 
     function copyRestoredResult() {
       const text = document.getElementById("restoredOutputView").innerText;
-      if(text) navigator.clipboard.writeText(text).then(() => alert("Restored text copied!"));
+      if(text) navigator.clipboard.writeText(text).then(() => showToast("Restored text copied!", 'success'));
     }
     function clearLeftInput() {
       textarea.value = "";
@@ -3045,5 +3089,25 @@
     });
 
   </script>
+
+  <!-- ==================== Generic Confirm Modal (JS-driven) ==================== -->
+  <div id="genericConfirmModal" class="hidden fixed inset-0 bg-scrim/40 backdrop-blur-sm z-[110] flex items-center justify-center p-4 opacity-0 transition-opacity duration-300">
+    <div class="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden transform scale-95 transition-transform duration-300 flex flex-col max-h-full border border-line">
+      <div class="px-6 py-4 border-b border-line-soft flex justify-between items-center bg-paper-sunken flex-shrink-0">
+        <h2 id="genericConfirmTitle" class="text-sm font-bold text-ink">Please Confirm</h2>
+        <button onclick="_resolveGenericConfirm(false)" class="text-ink-faint hover:text-ink-hover font-medium text-lg">&times;</button>
+      </div>
+      <div class="p-6 overflow-y-auto">
+        <p id="genericConfirmMessage" class="text-sm text-ink-hover whitespace-pre-line"></p>
+      </div>
+      <div class="px-6 py-4 border-t border-line-soft bg-paper-sunken flex justify-end gap-3 flex-shrink-0">
+        <button id="genericConfirmCancelBtn" onclick="_resolveGenericConfirm(false)" class="px-4 py-2 bg-white border border-line-strong text-ink-hover rounded-lg text-sm font-medium hover:bg-paper-sunken transition-colors">Cancel</button>
+        <button id="genericConfirmOkBtn" onclick="_resolveGenericConfirm(true)" class="px-4 py-2 bg-brand-700 hover:bg-brand-800 text-white rounded-lg text-sm font-semibold shadow-sm transition-colors">OK</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast notifications (replaces window.alert) -->
+  <div id="toastContainer" class="fixed bottom-4 right-4 z-[120] flex flex-col gap-2 items-end pointer-events-none"></div>
 </body>
 </html>
