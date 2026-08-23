@@ -36,6 +36,10 @@ TokenShield is a **single static HTML file**. There is no backend, no database, 
 | **Network** | Fully optional. Works completely offline. Local AI (Ollama) connects only to `http://localhost:11434` (loopback). |
 | **Startup Safety** | All input fields are cleared on load to prevent browser autofill from leaking previous session data. |
 
+### How Do I Know This Is Actually Safe? Ask an AI.
+
+You don't need to read code, and you shouldn't just take our word for it. TokenShield is a single HTML file with no background network calls and no dependencies to install — copy the entire source of `TokenShield.html` and paste it into any AI you already use (ChatGPT, Claude, etc.), then ask it directly: "Does this page send any user input to a server?" Let the AI verify it for you, rather than trusting the developer's claims alone. The in-app "PII Rule Guide" carries the same reminder.
+
 ### Region & Persona Presets
 
 Unlike a one-size-fits-all rule set, TokenShield lets you switch:
