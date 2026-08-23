@@ -48,6 +48,10 @@ Unlike a one-size-fits-all rule set, TokenShield lets you switch:
 
 Nothing is saved between sessions — see [TokenShield_README.md](./docs/TokenShield_README.md) for how to change your permanent default by editing two constants in the source.
 
+### Display Language
+
+A separate **language selector** (top toolbar) switches the interface between **English / 繁體中文 / 日本語**, independent from the Region ruleset above — Region decides which regex rule set is active, language only decides what the interface text looks like, so e.g. a Taiwan-based business processing EU data can still run the EU ruleset while reading the UI in Traditional Chinese. Your choice is remembered across sessions via `localStorage`, and defaults to English.
+
 ### Hybrid Defense Engine
 
 **Layer 1 — Static Regex Fast-Match**: built-in `REGEX_PRESETS` cover national IDs, phone numbers, IBANs, credit cards, and more — see the in-app "PII Rule Guide" for the full, currently-active list.
@@ -121,7 +125,6 @@ TokenShield is under active development. Planned directions include (in priority
 1. **Persistent Mask Mapping Storage**: A way to save the mask ↔ original mapping so a session can be resumed later.
 2. **File Upload Masking**: Direct masking support for uploaded Excel, Word, and PDF files, not just pasted text.
 3. **Enterprise-grade Features**: Audit logs and related governance features for the Business persona.
-4. **Independent UI Language Toggle**: The Region selector (US/EU/UK/TW/JP) currently only switches which regex ruleset is active — the interface itself is English-only regardless of region. Add a separate language toggle so the display language isn't tied to which regional ruleset is selected.
 
 ---
 

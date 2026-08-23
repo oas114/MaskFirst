@@ -169,6 +169,46 @@
             });
 
             // Insert the fail-safe screen
+            // This runs before the main app script (and its I18N dictionary) has loaded, so it
+            // picks a display language independently: saved preference first, then browser language.
+            var failSafeLang = (function () {
+              try {
+                var stored = localStorage.getItem('tokenshield_display_lang');
+                if (stored === 'zh' || stored === 'ja' || stored === 'en') return stored;
+              } catch (e) {}
+              var nav = (navigator.language || '').toLowerCase();
+              if (nav.indexOf('zh') === 0) return 'zh';
+              if (nav.indexOf('ja') === 0) return 'ja';
+              return 'en';
+            })();
+            var FAIL_SAFE_TEXT = {
+              en: {
+                title: 'Startup Failed (No Network Connection)',
+                body: 'This device appears to be <strong>offline</strong>, and the local stylesheet <code style="background:#f5f5f4;border-radius:4px;padding:2px 6px;font-size:.85em;">style.css</code> could not be found.',
+                step1: 'Go to the project release page and download <code style="background:#f5f5f4;border-radius:4px;padding:2px 4px;font-size:.85em;">style.css</code>.',
+                step2: 'Place <code style="background:#f5f5f4;border-radius:4px;padding:2px 4px;font-size:.85em;">style.css</code> in the <strong>same folder</strong> as <code style="background:#f5f5f4;border-radius:4px;padding:2px 4px;font-size:.85em;">TokenShield.html</code>.',
+                step3: 'Reload this page (<kbd style="border:1px solid #d4d4d4;border-radius:4px;padding:1px 6px;background:#fafaf9;">F5</kbd>).',
+                reload: 'Reload'
+              },
+              zh: {
+                title: '啟動失敗（沒有網路連線）',
+                body: '這台裝置目前似乎<strong>離線</strong>，且找不到本機樣式表 <code style="background:#f5f5f4;border-radius:4px;padding:2px 6px;font-size:.85em;">style.css</code>。',
+                step1: '前往專案的發布頁面下載 <code style="background:#f5f5f4;border-radius:4px;padding:2px 4px;font-size:.85em;">style.css</code>。',
+                step2: '把 <code style="background:#f5f5f4;border-radius:4px;padding:2px 4px;font-size:.85em;">style.css</code> 放在與 <code style="background:#f5f5f4;border-radius:4px;padding:2px 4px;font-size:.85em;">TokenShield.html</code> <strong>相同的資料夾</strong>中。',
+                step3: '重新整理此頁面（<kbd style="border:1px solid #d4d4d4;border-radius:4px;padding:1px 6px;background:#fafaf9;">F5</kbd>）。',
+                reload: '重新整理'
+              },
+              ja: {
+                title: '起動に失敗しました（ネットワーク接続なし）',
+                body: 'この端末は<strong>オフライン</strong>のようで、ローカルのスタイルシート <code style="background:#f5f5f4;border-radius:4px;padding:2px 6px;font-size:.85em;">style.css</code> も見つかりませんでした。',
+                step1: 'プロジェクトのリリースページから <code style="background:#f5f5f4;border-radius:4px;padding:2px 4px;font-size:.85em;">style.css</code> をダウンロードしてください。',
+                step2: '<code style="background:#f5f5f4;border-radius:4px;padding:2px 4px;font-size:.85em;">style.css</code> を <code style="background:#f5f5f4;border-radius:4px;padding:2px 4px;font-size:.85em;">TokenShield.html</code> と<strong>同じフォルダ</strong>に置いてください。',
+                step3: 'このページを再読み込みしてください（<kbd style="border:1px solid #d4d4d4;border-radius:4px;padding:1px 6px;background:#fafaf9;">F5</kbd>）。',
+                reload: '再読み込み'
+              }
+            };
+            var FS = FAIL_SAFE_TEXT[failSafeLang];
+
             var overlay = document.createElement('div');
             overlay.style.cssText = [
               'position:fixed', 'inset:0', 'z-index:99999',
@@ -179,17 +219,17 @@
             overlay.innerHTML = [
               '<div style="max-width:560px;background:#fff;border:2px solid #f59e0b;border-radius:12px;padding:2.5rem;box-shadow:0 10px 40px rgba(0,0,0,.12);text-align:center;">',
               '  <div style="font-size:3rem;line-height:1;margin-bottom:1rem;">⚠️</div>',
-              '  <h1 style="font-size:1.25rem;font-weight:700;color:#92400e;margin:0 0 .75rem;">Startup Failed (No Network Connection)</h1>',
+              '  <h1 style="font-size:1.25rem;font-weight:700;color:#92400e;margin:0 0 .75rem;">' + FS.title + '</h1>',
               '  <p style="color:#44403c;line-height:1.7;margin:0 0 1.25rem;">',
-              '    This device appears to be <strong>offline</strong>, and the local stylesheet <code style="background:#f5f5f4;border-radius:4px;padding:2px 6px;font-size:.85em;">style.css</code> could not be found.',
+              '    ' + FS.body,
               '  </p>',
               '  <ol style="text-align:left;color:#44403c;line-height:1.9;margin:0 0 1.5rem;padding-left:1.4rem;">',
-              '    <li>Go to the project release page and download <code style="background:#f5f5f4;border-radius:4px;padding:2px 4px;font-size:.85em;">style.css</code>.</li>',
-              '    <li>Place <code style="background:#f5f5f4;border-radius:4px;padding:2px 4px;font-size:.85em;">style.css</code> in the <strong>same folder</strong> as <code style="background:#f5f5f4;border-radius:4px;padding:2px 4px;font-size:.85em;">TokenShield.html</code>.</li>',
-              '    <li>Reload this page (<kbd style="border:1px solid #d4d4d4;border-radius:4px;padding:1px 6px;background:#fafaf9;">F5</kbd>).</li>',
+              '    <li>' + FS.step1 + '</li>',
+              '    <li>' + FS.step2 + '</li>',
+              '    <li>' + FS.step3 + '</li>',
               '  </ol>',
               '  <button onclick="location.reload()" style="background:#f59e0b;color:#fff;border:none;border-radius:8px;padding:.65rem 1.5rem;font-size:.95rem;font-weight:600;cursor:pointer;transition:background .2s;" onmouseover="this.style.background=\'#d97706\'" onmouseout="this.style.background=\'#f59e0b\'">',
-              '    🔄&nbsp; Reload',
+              '    🔄&nbsp; ' + FS.reload,
               '  </button>',
               '</div>'
             ].join('');
@@ -305,14 +345,14 @@
               <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
             </svg>
           </div>
-          <h1 class="font-bold text-lg tracking-tight">TokenShield <span class="font-normal text-ink-muted text-sm ml-1 hidden sm:inline">Privacy Shield for AI</span></h1>
+          <h1 class="font-bold text-lg tracking-tight">TokenShield <span class="font-normal text-ink-muted text-sm ml-1 hidden sm:inline" data-i18n="headerTagline">Privacy Shield for AI</span></h1>
         </div>
         <!-- Tab switcher -->
         <div class="flex flex-wrap bg-paper-hover p-1 rounded-lg gap-1 ml-auto lg:ml-0">
-          <button id="tabBtn1" onclick="switchTab(1)" class="px-3 sm:px-5 py-1.5 text-xs sm:text-sm font-semibold rounded-md bg-white shadow-sm text-brand-700 transition-all">
+          <button id="tabBtn1" onclick="switchTab(1)" class="px-3 sm:px-5 py-1.5 text-xs sm:text-sm font-semibold rounded-md bg-white shadow-sm text-brand-700 transition-all" data-i18n="tabDeidentify">
             De-identify
           </button>
-          <button id="tabBtn2" onclick="switchTab(2)" class="px-3 sm:px-5 py-1.5 text-xs sm:text-sm font-medium rounded-md text-ink-muted hover:text-ink-hover transition-all">
+          <button id="tabBtn2" onclick="switchTab(2)" class="px-3 sm:px-5 py-1.5 text-xs sm:text-sm font-medium rounded-md text-ink-muted hover:text-ink-hover transition-all" data-i18n="tabRestore">
             Restore
           </button>
         </div>
@@ -320,36 +360,42 @@
 
       <div class="flex flex-wrap items-center gap-2 sm:gap-3 text-[10px] sm:text-sm">
         <div class="flex items-center gap-1.5">
-          <label class="sr-only" for="regionSelect">Region ruleset</label>
-          <select id="regionSelect" onchange="switchRegion(this.value)" title="Regional PII ruleset — only one is active at a time, plus the always-on Global baseline" class="bg-white hover:bg-paper-sunken border border-line-strong text-ink-hover px-2 py-1.5 rounded-lg text-[10px] sm:text-xs font-medium transition-colors focus:outline-none focus:ring-1 focus:ring-brand-500">
+          <label class="sr-only" for="langSelect" data-i18n="langSelectLabel">Display language</label>
+          <select id="langSelect" onchange="switchLanguage(this.value)" title="Display language — independent from the Region ruleset below" data-i18n-title="langSelectTitle" class="bg-white hover:bg-paper-sunken border border-line-strong text-ink-hover px-2 py-1.5 rounded-lg text-[10px] sm:text-xs font-medium transition-colors focus:outline-none focus:ring-1 focus:ring-brand-500">
+            <option value="en">English</option>
+            <option value="zh">繁體中文</option>
+            <option value="ja">日本語</option>
+          </select>
+          <label class="sr-only" for="regionSelect" data-i18n="regionSelectLabel">Region ruleset</label>
+          <select id="regionSelect" onchange="switchRegion(this.value)" title="Regional PII ruleset — only one is active at a time, plus the always-on Global baseline" data-i18n-title="regionSelectTitle" class="bg-white hover:bg-paper-sunken border border-line-strong text-ink-hover px-2 py-1.5 rounded-lg text-[10px] sm:text-xs font-medium transition-colors focus:outline-none focus:ring-1 focus:ring-brand-500">
             <option value="us">🇺🇸 US</option>
             <option value="eu">🇪🇺 EU (GDPR)</option>
             <option value="uk">🇬🇧 UK</option>
             <option value="tw">🇹🇼 TW</option>
             <option value="jp">🇯🇵 JP</option>
           </select>
-          <label class="sr-only" for="personaSelect">Persona</label>
-          <select id="personaSelect" onchange="switchPersona(this.value)" title="Hard Block keyword set — Personal privacy terms vs. Business confidentiality terms" class="bg-white hover:bg-paper-sunken border border-line-strong text-ink-hover px-2 py-1.5 rounded-lg text-[10px] sm:text-xs font-medium transition-colors focus:outline-none focus:ring-1 focus:ring-brand-500">
-            <option value="personal">Personal</option>
-            <option value="business">Business</option>
+          <label class="sr-only" for="personaSelect" data-i18n="personaSelectLabel">Persona</label>
+          <select id="personaSelect" onchange="switchPersona(this.value)" title="Hard Block keyword set — Personal privacy terms vs. Business confidentiality terms" data-i18n-title="personaSelectTitle" class="bg-white hover:bg-paper-sunken border border-line-strong text-ink-hover px-2 py-1.5 rounded-lg text-[10px] sm:text-xs font-medium transition-colors focus:outline-none focus:ring-1 focus:ring-brand-500">
+            <option value="personal" data-i18n="personaPersonal">Personal</option>
+            <option value="business" data-i18n="personaBusiness">Business</option>
           </select>
         </div>
         <div class="flex items-center gap-2">
           <input type="file" id="csvFileInput" accept=".csv" class="hidden" onchange="handleCsvUpload(event)" />
-          <button onclick="document.getElementById('csvFileInput').click()" class="bg-white hover:bg-paper-sunken border border-line-strong text-ink-hover px-2 sm:px-3 py-1.5 rounded-lg text-[10px] sm:text-xs font-medium transition-colors">
+          <button onclick="document.getElementById('csvFileInput').click()" class="bg-white hover:bg-paper-sunken border border-line-strong text-ink-hover px-2 sm:px-3 py-1.5 rounded-lg text-[10px] sm:text-xs font-medium transition-colors" data-i18n="btnImportCsv">
             Import Custom Dictionary (CSV)
           </button>
           <button id="dictCountLabel" onclick="openEditCsvModal()" class="bg-white hover:bg-paper-hover text-ink-secondary px-2 sm:px-3 py-1.5 rounded-lg text-[10px] sm:text-xs font-mono transition-colors border border-line-strong">
             Dictionary: 0
           </button>
         </div>
-        <button onclick="openGuide()" class="bg-white hover:bg-paper-sunken border border-line-strong text-ink-hover px-2 sm:px-3 py-1.5 rounded-lg text-[10px] sm:text-xs font-medium transition-colors">
+        <button onclick="openGuide()" class="bg-white hover:bg-paper-sunken border border-line-strong text-ink-hover px-2 sm:px-3 py-1.5 rounded-lg text-[10px] sm:text-xs font-medium transition-colors" data-i18n="btnPiiGuide">
           PII Rule Guide
         </button>
-        <button onclick="openSettings()" class="bg-white hover:bg-paper-sunken border border-line-strong text-ink-hover px-2 sm:px-3 py-1.5 rounded-lg text-[10px] sm:text-xs font-medium transition-colors">
+        <button onclick="openSettings()" class="bg-white hover:bg-paper-sunken border border-line-strong text-ink-hover px-2 sm:px-3 py-1.5 rounded-lg text-[10px] sm:text-xs font-medium transition-colors" data-i18n="btnSettings">
           Settings
         </button>
-        <button id="manageProtectionBtn" onclick="openProtectionManagerModal()" class="bg-white hover:bg-paper-sunken border border-line-strong text-ink-hover px-2 sm:px-3 py-1.5 rounded-lg text-[10px] sm:text-xs font-medium transition-colors">
+        <button id="manageProtectionBtn" onclick="openProtectionManagerModal()" class="bg-white hover:bg-paper-sunken border border-line-strong text-ink-hover px-2 sm:px-3 py-1.5 rounded-lg text-[10px] sm:text-xs font-medium transition-colors" data-i18n="btnManageRules">
           Manage Custom Protection Rules
         </button>
       </div>
@@ -358,10 +404,10 @@
 
   <!-- Hard block warning banner -->
   <div id="hardBlockBanner" class="hidden flex-shrink-0 bg-danger-50 border-b border-danger-200 px-4 py-2.5 shadow-inner flex flex-wrap gap-2 items-center justify-between z-10">
-    <div class="text-xs font-medium text-danger-700 flex-1">
+    <div class="text-xs font-medium text-danger-700 flex-1" data-i18n="hardBlockBannerText">
       Warning: extremely sensitive terms detected. The copy function has been locked to prevent accidental exposure.
     </div>
-    <button onclick="openUnlockModal()" class="bg-white border border-danger-200 text-danger-700 hover:bg-danger-100 px-3 py-1 rounded text-xs font-bold transition-colors shadow-sm whitespace-nowrap">
+    <button onclick="openUnlockModal()" class="bg-white border border-danger-200 text-danger-700 hover:bg-danger-100 px-3 py-1 rounded text-xs font-bold transition-colors shadow-sm whitespace-nowrap" data-i18n="hardBlockBannerBtn">
       View Details & Unlock
     </button>
   </div>
@@ -375,29 +421,29 @@
       <!-- Left: data input & pre-scan -->
       <section class="flex-1 bg-white rounded-xl border border-line shadow-sm flex flex-col min-h-[50vh] lg:min-h-0">
         <div class="p-3 border-b border-line-soft flex justify-between items-center bg-paper-sunken/50 flex-shrink-0">
-          <label class="font-semibold text-sm text-ink">Original Data Input</label>
-          <button onclick="clearLeftInput()" class="text-xs text-ink-muted hover:text-ink transition-colors">Clear</button>
+          <label class="font-semibold text-sm text-ink" data-i18n="v1OriginalInputLabel">Original Data Input</label>
+          <button onclick="clearLeftInput()" class="text-xs text-ink-muted hover:text-ink transition-colors" data-i18n="commonClear">Clear</button>
         </div>
 
         <!-- Highlight editor core -->
         <div class="flex-1 relative bg-white min-h-[40vh] lg:min-h-0">
           <div class="editor-container absolute inset-0 w-full h-full">
             <div id="backdrop" class="editor-backdrop"></div>
-            <textarea id="rawInput" class="editor-textarea" spellcheck="false" placeholder="Paste a document, email, or spreadsheet here... Select text for a quick 'mark as sensitive' menu."></textarea>
+            <textarea id="rawInput" class="editor-textarea" spellcheck="false" placeholder="Paste a document, email, or spreadsheet here... Select text for a quick 'mark as sensitive' menu." data-i18n-placeholder="v1RawInputPlaceholder"></textarea>
           </div>
         </div>
 
         <!-- Detected-item chips -->
         <div class="p-3 border-t border-line-soft bg-white flex-shrink-0">
-          <div class="text-xs font-medium text-ink-muted mb-2">Detected Items (click to un-mask)</div>
+          <div class="text-xs font-medium text-ink-muted mb-2" data-i18n="v1DetectedItemsLabel">Detected Items (click to un-mask)</div>
           <div id="entityChips" class="flex flex-wrap gap-1.5 max-h-24 overflow-y-auto p-1 -m-1">
-            <span class="text-ink-faint italic text-xs py-1">No data</span>
+            <span class="text-ink-faint italic text-xs py-1" data-i18n="commonNoData">No data</span>
           </div>
         </div>
 
         <div class="p-4 border-t border-line-soft bg-paper-sunken flex-shrink-0">
           <button id="phase1Btn" onclick="processAnonymizePhase1()" class="w-full bg-brand-700 hover:bg-brand-800 text-white font-semibold py-2.5 px-4 rounded-lg shadow-sm transition-colors text-sm flex items-center justify-center gap-2">
-            <span id="phase1BtnText">Execute De-identification</span>
+            <span id="phase1BtnText" data-i18n="v1BtnExecute">Execute De-identification</span>
           </button>
         </div>
       </section>
@@ -406,27 +452,27 @@
       <section class="flex-1 bg-white rounded-xl border border-line shadow-sm flex flex-col min-h-[50vh] lg:min-h-0">
 
         <div class="p-3 border-b border-line-soft bg-paper-sunken/50 flex-shrink-0">
-          <label class="font-semibold text-sm text-ink">Masking Details</label>
+          <label class="font-semibold text-sm text-ink" data-i18n="v1MaskingDetailsLabel">Masking Details</label>
         </div>
 
         <div id="anonymizeReport" class="flex-shrink-0 h-1/3 overflow-y-auto p-4 text-xs space-y-1.5 font-mono text-ink-hover bg-white border-b border-line-soft">
-          <div class="text-ink-faint italic">Not run yet</div>
+          <div class="text-ink-faint italic" data-i18n="commonNotRunYet">Not run yet</div>
         </div>
 
         <div class="p-3 bg-paper-sunken/50 flex-shrink-0">
-          <label class="font-semibold text-sm text-ink">De-identified Data</label>
+          <label class="font-semibold text-sm text-ink" data-i18n="v1DeidentifiedDataLabel">De-identified Data</label>
         </div>
 
         <div class="flex-1 relative min-h-[40vh] lg:min-h-0 flex flex-col">
-          <textarea id="anonymizedOutput" readonly class="flex-1 w-full lg:absolute lg:inset-0 lg:h-full p-4 text-sm bg-white text-ink-secondary resize-none font-mono focus:outline-none overflow-y-auto" style="tab-size: 4; field-sizing: content;" placeholder="Output will appear here after running de-identification..."></textarea>
+          <textarea id="anonymizedOutput" readonly class="flex-1 w-full lg:absolute lg:inset-0 lg:h-full p-4 text-sm bg-white text-ink-secondary resize-none font-mono focus:outline-none overflow-y-auto" style="tab-size: 4; field-sizing: content;" placeholder="Output will appear here after running de-identification..." data-i18n-placeholder="v1OutputPlaceholder"></textarea>
         </div>
 
         <div class="p-4 bg-paper-sunken border-t border-line-soft flex-shrink-0 flex gap-3">
           <button id="phase2Btn" onclick="processAnonymizePhase2()" class="hidden flex-1 bg-accent-ai-600 hover:bg-accent-ai-700 text-white font-semibold py-2.5 px-4 rounded-lg shadow-sm transition-colors text-sm flex items-center justify-center gap-2">
             <svg id="phase2Spinner" class="hidden animate-spin w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4l3-3-3-3v4a8 8 0 100 16v-4l-3 3 3 3v-4a8 8 0 01-8-8z"></path></svg>
-            <span id="phase2BtnText" class="whitespace-nowrap truncate">Scan with Local AI</span>
+            <span id="phase2BtnText" class="whitespace-nowrap truncate" data-i18n="v1BtnScanLocalAi">Scan with Local AI</span>
           </button>
-          <button id="copyPromptBtn" onclick="copyAnonymizedPrompt()" disabled class="flex-1 bg-ink hover:bg-ink-hover disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold py-2.5 px-4 rounded-lg shadow-sm transition-colors text-sm text-center">
+          <button id="copyPromptBtn" onclick="copyAnonymizedPrompt()" disabled class="flex-1 bg-ink hover:bg-ink-hover disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold py-2.5 px-4 rounded-lg shadow-sm transition-colors text-sm text-center" data-i18n="v1BtnCopyMasked">
             Copy Masked Data
           </button>
         </div>
@@ -441,15 +487,15 @@
       <!-- Left: read-only original & chips -->
       <section class="flex-1 bg-white rounded-xl border border-line shadow-sm flex flex-col min-h-[40vh] lg:min-h-0">
         <div class="p-3 border-b border-line-soft bg-paper-sunken/50 flex-shrink-0">
-          <label class="font-semibold text-sm text-ink">Original Data & Masking Record</label>
+          <label class="font-semibold text-sm text-ink" data-i18n="v2OriginalRecordLabel">Original Data & Masking Record</label>
         </div>
 
-        <div id="readOnlyOriginal" class="flex-1 p-4 text-sm bg-white font-mono text-ink-muted overflow-y-auto whitespace-pre-wrap min-h-0 leading-[2.25]" style="tab-size: 4;">
+        <div id="readOnlyOriginal" class="flex-1 p-4 text-sm bg-white font-mono text-ink-muted overflow-y-auto whitespace-pre-wrap min-h-0 leading-[2.25]" style="tab-size: 4;" data-i18n="v2ReadOnlyPlaceholder">
           Please run de-identification in the "De-identify" view first.
         </div>
 
         <div class="p-3 border-t border-line-soft bg-white flex-shrink-0">
-          <div class="text-xs font-medium text-ink-muted mb-2">Masked Items (hover to see the tag)</div>
+          <div class="text-xs font-medium text-ink-muted mb-2" data-i18n="v2MaskedItemsLabel">Masked Items (hover to see the tag)</div>
           <div id="restoreChips" class="flex flex-wrap gap-2 max-h-24 overflow-y-auto p-1 -m-1">
             <!-- Interactive tooltip chips -->
           </div>
@@ -462,18 +508,18 @@
         <!-- Collapsible: paste AI reply -->
         <div id="aiReplyContainer" class="bg-white rounded-xl border border-line flex flex-col transition-all duration-300 flex-shrink-0 shadow-sm">
           <div class="p-3 border-b border-line-soft flex justify-between items-center bg-paper-sunken/50">
-            <label class="font-semibold text-sm text-ink">External AI Reply</label>
+            <label class="font-semibold text-sm text-ink" data-i18n="v2ExternalAiReplyLabel">External AI Reply</label>
             <div class="flex gap-2">
-              <button onclick="openAiReplyModal()" class="text-xs text-ink-muted hover:text-ink transition-colors">Enlarge View</button>
-              <button onclick="document.getElementById('aiReplyInput').value = ''" class="text-xs text-ink-faint hover:text-ink-secondary">Clear</button>
+              <button onclick="openAiReplyModal()" class="text-xs text-ink-muted hover:text-ink transition-colors" data-i18n="commonEnlargeView">Enlarge View</button>
+              <button onclick="document.getElementById('aiReplyInput').value = ''" class="text-xs text-ink-faint hover:text-ink-secondary" data-i18n="commonClear">Clear</button>
             </div>
           </div>
-          <textarea id="aiReplyInput" class="w-full h-40 p-4 text-sm bg-white border-none resize-none font-mono focus:outline-none transition-all duration-300" style="tab-size: 4;" placeholder="Paste the reply from ChatGPT / Claude here..."></textarea>
+          <textarea id="aiReplyInput" class="w-full h-40 p-4 text-sm bg-white border-none resize-none font-mono focus:outline-none transition-all duration-300" style="tab-size: 4;" placeholder="Paste the reply from ChatGPT / Claude here..." data-i18n-placeholder="commonAiReplyPlaceholder"></textarea>
           <div class="p-3 border-t border-line-soft bg-paper-sunken flex gap-2">
-            <button onclick="pasteFromClipboard()" class="flex-[1] bg-white border border-line-strong hover:bg-paper-sunken text-ink-hover font-medium py-2 px-3 rounded-lg shadow-sm transition-colors text-sm whitespace-nowrap">
+            <button onclick="pasteFromClipboard()" class="flex-[1] bg-white border border-line-strong hover:bg-paper-sunken text-ink-hover font-medium py-2 px-3 rounded-lg shadow-sm transition-colors text-sm whitespace-nowrap" data-i18n="commonPasteClipboard">
               Paste from Clipboard
             </button>
-            <button onclick="processRestore()" class="flex-[2] bg-brand-700 hover:bg-brand-800 text-white font-semibold py-2 px-4 rounded-lg shadow-sm transition-colors text-sm">
+            <button onclick="processRestore()" class="flex-[2] bg-brand-700 hover:bg-brand-800 text-white font-semibold py-2 px-4 rounded-lg shadow-sm transition-colors text-sm" data-i18n="v2BtnRunRestore">
               Run Restore
             </button>
           </div>
@@ -483,9 +529,9 @@
         <div class="flex-1 bg-white rounded-xl border border-line flex flex-col min-h-0 shadow-sm">
           <div class="p-3 border-b border-line-soft bg-paper-sunken/50 flex justify-between items-center flex-shrink-0">
             <div class="flex items-center gap-3">
-              <label class="font-semibold text-sm text-ink">Restore Result</label>
+              <label class="font-semibold text-sm text-ink" data-i18n="v2RestoreResultLabel">Restore Result</label>
               <div class="flex items-center gap-1 text-xs text-ink-muted">
-                <span>Mask symbol:</span>
+                <span data-i18n="v2MaskSymbolLabel">Mask symbol:</span>
                 <input type="text" id="customMaskSymbol" value="■" placeholder="■" maxlength="1" class="w-8 text-center border border-line-strong rounded bg-white focus:outline-none focus:ring-1 focus:ring-brand-500 font-mono text-ink-hover py-0.5 cursor-text shadow-sm">
               </div>
             </div>
@@ -493,10 +539,10 @@
           </div>
           <div id="restoredOutputView" contenteditable="true" class="flex-1 p-4 text-sm bg-white overflow-y-auto font-sans leading-[2.25] whitespace-pre-wrap min-h-0 focus:outline-none focus:ring-2 focus:ring-brand-100 transition-shadow" style="tab-size: 4;"></div>
           <div class="p-3 border-t border-line-soft bg-paper-sunken flex-shrink-0 flex gap-2">
-            <button onclick="clearRestoredResult()" class="flex-[1] bg-white border border-line-strong hover:bg-paper-sunken text-ink-hover font-medium py-2 px-3 rounded-lg shadow-sm transition-colors text-sm whitespace-nowrap">
+            <button onclick="clearRestoredResult()" class="flex-[1] bg-white border border-line-strong hover:bg-paper-sunken text-ink-hover font-medium py-2 px-3 rounded-lg shadow-sm transition-colors text-sm whitespace-nowrap" data-i18n="v2BtnClearResult">
               Clear Result
             </button>
-            <button onclick="copyRestoredResult()" class="flex-[3] bg-ink hover:bg-ink-hover text-white font-semibold py-2 px-4 rounded-lg shadow-sm transition-colors text-sm">
+            <button onclick="copyRestoredResult()" class="flex-[3] bg-ink hover:bg-ink-hover text-white font-semibold py-2 px-4 rounded-lg shadow-sm transition-colors text-sm" data-i18n="v2BtnCopyRestored">
               Copy Restored Text
             </button>
           </div>
@@ -511,18 +557,18 @@
   <div id="aiReplyModal" class="hidden fixed inset-0 bg-scrim/40 backdrop-blur-sm z-50 flex items-center justify-center p-4 opacity-0 transition-opacity duration-300">
     <div class="bg-white rounded-xl shadow-2xl w-full max-w-4xl h-[80vh] flex flex-col transform scale-95 transition-transform duration-300 border border-line">
       <div class="px-6 py-4 border-b border-line-soft flex justify-between items-center bg-paper-sunken flex-shrink-0">
-        <h2 class="text-sm font-bold text-ink">Edit External AI Reply (Enlarged)</h2>
+        <h2 class="text-sm font-bold text-ink" data-i18n="modalAiReplyTitle">Edit External AI Reply (Enlarged)</h2>
         <div class="flex items-center gap-3">
-          <button onclick="pasteFromClipboard(true)" class="text-xs text-brand-700 font-medium hover:text-brand-900">Paste from Clipboard</button>
+          <button onclick="pasteFromClipboard(true)" class="text-xs text-brand-700 font-medium hover:text-brand-900" data-i18n="commonPasteClipboard">Paste from Clipboard</button>
           <button onclick="closeAiReplyModal()" class="text-ink-faint hover:text-ink-secondary font-medium text-lg">&times;</button>
         </div>
       </div>
       <div class="flex-1 relative">
-        <textarea id="aiReplyInputLarge" class="absolute inset-0 w-full h-full p-6 text-sm bg-white border-none resize-none font-mono focus:outline-none" style="tab-size: 4;" placeholder="Paste the reply from ChatGPT / Claude here..."></textarea>
+        <textarea id="aiReplyInputLarge" class="absolute inset-0 w-full h-full p-6 text-sm bg-white border-none resize-none font-mono focus:outline-none" style="tab-size: 4;" placeholder="Paste the reply from ChatGPT / Claude here..." data-i18n-placeholder="commonAiReplyPlaceholder"></textarea>
       </div>
       <div class="px-6 py-4 border-t border-line-soft bg-paper-sunken flex justify-end gap-3 flex-shrink-0">
-        <button onclick="closeAiReplyModal()" class="px-4 py-2 bg-white border border-line-strong text-ink-hover rounded-lg text-sm font-medium hover:bg-paper-sunken transition-colors">Cancel</button>
-        <button onclick="syncAiReplyAndClose()" class="px-4 py-2 bg-brand-700 hover:bg-brand-800 text-white rounded-lg text-sm font-semibold shadow-sm transition-colors">Apply & Restore</button>
+        <button onclick="closeAiReplyModal()" class="px-4 py-2 bg-white border border-line-strong text-ink-hover rounded-lg text-sm font-medium hover:bg-paper-sunken transition-colors" data-i18n="commonCancel">Cancel</button>
+        <button onclick="syncAiReplyAndClose()" class="px-4 py-2 bg-brand-700 hover:bg-brand-800 text-white rounded-lg text-sm font-semibold shadow-sm transition-colors" data-i18n="modalAiReplyApplyBtn">Apply & Restore</button>
       </div>
     </div>
   </div>
@@ -531,7 +577,7 @@
   <div id="settingsModal" class="hidden fixed inset-0 bg-scrim/40 backdrop-blur-sm z-50 flex items-center justify-center p-4 opacity-0 transition-opacity duration-300">
     <div class="bg-white rounded-xl shadow-2xl w-full max-w-2xl overflow-hidden transform scale-95 transition-transform duration-300 flex flex-col max-h-full">
       <div class="px-6 py-4 border-b border-line-soft flex justify-between items-center bg-paper-sunken/50 flex-shrink-0">
-        <h2 class="text-sm font-bold text-ink">Settings & Advanced Features</h2>
+        <h2 class="text-sm font-bold text-ink" data-i18n="modalSettingsTitle">Settings & Advanced Features</h2>
         <button onclick="closeSettings()" class="text-ink-faint hover:text-ink-secondary font-medium text-lg">&times;</button>
       </div>
 
@@ -539,7 +585,7 @@
 
         <!-- Open-source author info -->
         <div class="flex justify-end items-center gap-3 text-xs text-ink-muted pb-2 border-b border-line-soft/60">
-          <div>Author: <strong>OA (oas114)</strong></div>
+          <div data-i18n="settingsAuthorLine">Author: <strong>OA (oas114)</strong></div>
           <span class="text-line-strong">|</span>
           <a href="https://github.com/oas114/TokenShield" target="_blank" rel="noopener noreferrer" class="hover:text-ink transition-colors flex items-center gap-1.5 group">
             <svg class="w-3.5 h-3.5 fill-current opacity-70 group-hover:opacity-100 transition-opacity" viewBox="0 0 24 24"><path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.477 2 2 6.477 2 12c0 4.42 2.865 8.166 6.839 9.489.5.092.682-.217.682-.482 0-.237-.008-.866-.013-1.7-2.782.603-3.369-1.34-3.369-1.34-.454-1.156-1.11-1.462-1.11-1.462-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.831.092-.646.35-1.086.636-1.336-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.578 9.578 0 0112 6.836c.85.004 1.705.114 2.504.336 1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.203 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48C19.138 20.161 22 16.418 22 12c0-5.523-4.477-10-10-10z"/></svg>
@@ -548,17 +594,17 @@
           <span class="text-line-strong">|</span>
           <a href="https://ko-fi.com/oasgrow" target="_blank" rel="noopener noreferrer" class="hover:text-danger-600 transition-colors flex items-center gap-1 text-ink-muted font-medium group">
             <svg class="w-3.5 h-3.5 text-danger-500 opacity-70 group-hover:opacity-100 transition-opacity" viewBox="0 0 24 24" fill="currentColor"><path d="M23.881 8.948c-.773-4.085-4.859-4.593-4.859-4.593H.723c-.604 0-.679.798-.679.798s-.082 7.324-.022 11.822c.164 2.424 2.586 2.672 2.586 2.672s8.267-.023 11.966-.049c2.438-.426 2.683-2.566 2.658-3.734 4.352.24 7.422-2.831 6.649-6.916zm-11.062 3.511c-1.246 1.453-4.011 3.976-4.011 3.976s-.121.119-.31.023c-.076-.057-.108-.09-.108-.09-.443-.441-3.368-3.049-4.051-3.954-1.094-1.465-1.085-3.275.088-4.4C5.586 6.892 7.393 7.323 8.5 8.5c1.092-1.127 2.923-1.644 4.093-.457 1.157 1.17 1.157 3.238.226 4.416zm10.158 1.25c-.217 2.148-2.604 2.846-2.604 2.846s-1.424.037-2.658.077c.394-1.411.411-2.909.411-2.909l2.428-.016c.365-.008.572-.34.426-.642-.376-.842-1.348-1.054-1.348-1.054h-1.579c.006-.356.035-.717.035-1.082 0 0 1.258-.008 1.954-.037 1.343-.053 2.008-.946 2.008-.946 1.111-.806 1.09-2.571 1.09-2.571s-.027-1.107-1.098-1.595c-.868-.396-1.895-.296-1.895-.296h-1.666c-.053-.393-.111-.795-.178-1.189 0 0 3.328.067 4.15.539 1.637.935 1.542 2.502 1.542 2.502s.101 2.086-.889 3.21c0 0-.171.186-.184.186z"/></svg>
-            Support on Ko-fi
+            <span data-i18n="settingsKofiLink">Support on Ko-fi</span>
           </a>
         </div>
 
         <div class="space-y-3">
-          <h3 class="font-semibold text-sm text-ink">Region & Persona Presets</h3>
-          <p class="text-xs text-ink-muted leading-relaxed">
+          <h3 class="font-semibold text-sm text-ink" data-i18n="settingsRegionPersonaHeading">Region & Persona Presets</h3>
+          <p class="text-xs text-ink-muted leading-relaxed" data-i18n="settingsRegionPersonaBody">
             The <strong>Region</strong> selector (top toolbar) swaps which country/region regex ruleset is layered on top of the always-on <strong>Global</strong> baseline (email, IP addresses, credit card numbers, generic dates). Only one region is active at a time to avoid cross-country format collisions (e.g. a bare 9-digit number shouldn't simultaneously be treated as a US SSN and something else).
             The <strong>Persona</strong> selector swaps the Hard Block keyword set between <strong>Personal</strong> privacy terms and <strong>Business</strong> confidentiality terms.
           </p>
-          <p class="text-xs text-warning-700 bg-warning-50 border border-warning-200 rounded-lg p-3 leading-relaxed">
+          <p class="text-xs text-warning-700 bg-warning-50 border border-warning-200 rounded-lg p-3 leading-relaxed" data-i18n="settingsRegionPersonaWarning">
             <strong>Nothing here is saved.</strong> TokenShield destroys all state on reload by design, so your Region/Persona choice resets every time you open the file. If you always work in one region or persona, open <code class="bg-white border border-warning-200 px-1 rounded">TokenShield.html</code> in a text editor, search for <code class="bg-white border border-warning-200 px-1 rounded">DEFAULT_REGION</code> and <code class="bg-white border border-warning-200 px-1 rounded">DEFAULT_PERSONA</code> near the top of the <code class="bg-white border border-warning-200 px-1 rounded">&lt;script&gt;</code> block, and change the value — that becomes your new startup default.
           </p>
         </div>
@@ -566,16 +612,16 @@
         <hr class="border-line-soft">
 
         <div class="space-y-3">
-          <h3 class="font-semibold text-sm text-ink">Custom Dictionary (CSV)</h3>
-          <p class="text-xs text-ink-muted leading-relaxed">
+          <h3 class="font-semibold text-sm text-ink" data-i18n="settingsCustomDictHeading">Custom Dictionary (CSV)</h3>
+          <p class="text-xs text-ink-muted leading-relaxed" data-i18n="settingsCustomDictBody">
             Batch-import your own keywords, names, or project codenames. Download the template and fill it out using the "Keyword,Category" format. <strong>Category is optional</strong> — it defaults to CUSTOM if left blank. The system generates matching tags automatically (e.g. NAME_1, CUSTOM_1).<br>
             <span class="text-warning-700 font-medium">Note: keyword values cannot contain commas — this will break CSV parsing. If a term itself contains a comma, use "Build Dictionary Online" instead.</span>
           </p>
           <div class="flex gap-2">
-            <button onclick="downloadCsvTemplate()" class="text-xs bg-paper-hover hover:bg-line text-ink-hover px-4 py-2 rounded-md font-medium transition-colors border border-line">
+            <button onclick="downloadCsvTemplate()" class="text-xs bg-paper-hover hover:bg-line text-ink-hover px-4 py-2 rounded-md font-medium transition-colors border border-line" data-i18n="commonDownloadCsvTemplate">
               Download CSV Template
             </button>
-            <button onclick="closeSettings(); openEditCsvModal();" class="text-xs bg-brand-50 hover:bg-brand-100 text-brand-800 px-4 py-2 rounded-md font-medium transition-colors border border-brand-200">
+            <button onclick="closeSettings(); openEditCsvModal();" class="text-xs bg-brand-50 hover:bg-brand-100 text-brand-800 px-4 py-2 rounded-md font-medium transition-colors border border-brand-200" data-i18n="settingsBtnBuildDictOnline">
               Build / Edit Dictionary Online
             </button>
           </div>
@@ -584,24 +630,24 @@
         <hr class="border-line-soft">
 
         <div class="space-y-4">
-          <h3 class="font-semibold text-sm text-ink">Local AI Prompt Library</h3>
-          <p class="text-xs text-ink-muted leading-relaxed">
+          <h3 class="font-semibold text-sm text-ink" data-i18n="settingsPromptLibHeading">Local AI Prompt Library</h3>
+          <p class="text-xs text-ink-muted leading-relaxed" data-i18n="settingsPromptLibBody">
             Ready-to-copy system prompts for local models (Ollama, LM Studio, etc.). Paste one of these ahead of your masked text so the model's own instructions also stay privacy-aware — reinforcing that nothing, including your prompt phrasing, needs to leave this machine.
           </p>
           <div class="grid sm:grid-cols-2 gap-3">
             <div class="border border-line rounded-lg p-3 bg-paper-sunken/50">
               <div class="flex justify-between items-center mb-1.5">
-                <span class="text-xs font-semibold text-ink-hover">Personal</span>
-                <button onclick="copyLocalPrompt('personal')" class="text-[10px] bg-white border border-line-strong hover:bg-paper-hover text-ink-secondary px-2 py-1 rounded transition-colors">Copy</button>
+                <span class="text-xs font-semibold text-ink-hover" data-i18n="personaPersonal">Personal</span>
+                <button onclick="copyLocalPrompt('personal')" class="text-[10px] bg-white border border-line-strong hover:bg-paper-hover text-ink-secondary px-2 py-1 rounded transition-colors" data-i18n="commonCopy">Copy</button>
               </div>
-              <p class="text-[10px] text-ink-muted leading-relaxed font-mono line-clamp-4">For personal documents — reminds the model that names/contacts are tokenized and must stay untouched.</p>
+              <p class="text-[10px] text-ink-muted leading-relaxed font-mono line-clamp-4" data-i18n="settingsPromptPersonalDesc">For personal documents — reminds the model that names/contacts are tokenized and must stay untouched.</p>
             </div>
             <div class="border border-line rounded-lg p-3 bg-paper-sunken/50">
               <div class="flex justify-between items-center mb-1.5">
-                <span class="text-xs font-semibold text-ink-hover">Business</span>
-                <button onclick="copyLocalPrompt('business')" class="text-[10px] bg-white border border-line-strong hover:bg-paper-hover text-ink-secondary px-2 py-1 rounded transition-colors">Copy</button>
+                <span class="text-xs font-semibold text-ink-hover" data-i18n="personaBusiness">Business</span>
+                <button onclick="copyLocalPrompt('business')" class="text-[10px] bg-white border border-line-strong hover:bg-paper-hover text-ink-secondary px-2 py-1 rounded transition-colors" data-i18n="commonCopy">Copy</button>
               </div>
-              <p class="text-[10px] text-ink-muted leading-relaxed font-mono line-clamp-4">For business documents — frames the content as confidential/trade-secret material.</p>
+              <p class="text-[10px] text-ink-muted leading-relaxed font-mono line-clamp-4" data-i18n="settingsPromptBusinessDesc">For business documents — frames the content as confidential/trade-secret material.</p>
             </div>
           </div>
         </div>
@@ -609,16 +655,16 @@
         <hr class="border-line-soft">
 
         <div class="space-y-4">
-          <h3 class="font-semibold text-sm text-ink">Local AI (Ollama) Connection Setup</h3>
+          <h3 class="font-semibold text-sm text-ink" data-i18n="settingsOllamaHeading">Local AI (Ollama) Connection Setup</h3>
 
-          <div class="bg-brand-50 border border-brand-200 rounded-lg p-3 text-xs text-brand-900 leading-relaxed">
+          <div class="bg-brand-50 border border-brand-200 rounded-lg p-3 text-xs text-brand-900 leading-relaxed" data-i18n="settingsOllamaInstallBox">
             <strong>Don't have Ollama installed yet?</strong><br>
             Download it from the <a href="https://ollama.com/download" target="_blank" class="underline font-bold text-brand-700 hover:text-brand-900">official Ollama website</a> and install it. Then open a terminal (Command Prompt / PowerShell / Terminal) and run the following command to install the default model:<br>
             <code class="block mt-1 bg-white border border-brand-200 px-2 py-1 rounded font-mono text-ink">ollama run qwen2.5:3b</code>
           </div>
 
           <!-- Explanation and risk warning -->
-          <div class="bg-warning-50 border border-warning-200 rounded-lg p-3 text-xs text-warning-800 leading-relaxed">
+          <div class="bg-warning-50 border border-warning-200 rounded-lg p-3 text-xs text-warning-800 leading-relaxed" data-i18n="settingsOllamaRiskBox">
             <strong class="text-warning-900">Why is this setting needed? And a risk warning</strong><br>
             Ollama blocks all web page access by default (a security protection). You need to add an "environment variable" named <code>OLLAMA_ORIGINS</code> set to <code>*</code> so Ollama allows this local TokenShield page to connect.<br><br>
             <strong class="text-danger-700">⚠️ Security risk notice:</strong><br>
@@ -628,67 +674,67 @@
 
           <!-- Setup steps -->
           <div class="space-y-4">
-            <p class="text-xs font-semibold text-ink-hover">Setup steps (one-time; persists across reboots after that)</p>
+            <p class="text-xs font-semibold text-ink-hover" data-i18n="settingsOllamaStepsHeading">Setup steps (one-time; persists across reboots after that)</p>
 
             <div class="space-y-4 text-xs text-ink-secondary">
 
               <div class="flex gap-3 items-start">
                 <span class="flex-shrink-0 w-5 h-5 bg-ink text-white rounded-full flex items-center justify-center font-bold text-[10px] mt-0.5">1</span>
                 <div>
-                  <p class="font-medium text-ink-hover mb-1">Quit Ollama first</p>
-                  <p>Find the Ollama icon in your <strong>system tray</strong> (bottom-right, near the clock), <strong>right-click</strong> it, and choose "<strong>Quit Ollama</strong>" to fully close it.</p>
+                  <p class="font-medium text-ink-hover mb-1" data-i18n="settingsStep1Title">Quit Ollama first</p>
+                  <p data-i18n="settingsStep1Body">Find the Ollama icon in your <strong>system tray</strong> (bottom-right, near the clock), <strong>right-click</strong> it, and choose "<strong>Quit Ollama</strong>" to fully close it.</p>
                 </div>
               </div>
 
               <div class="flex gap-3 items-start">
                 <span class="flex-shrink-0 w-5 h-5 bg-ink text-white rounded-full flex items-center justify-center font-bold text-[10px] mt-0.5">2</span>
                 <div>
-                  <p class="font-medium text-ink-hover mb-1">Open your OS's "Environment Variables" dialog</p>
-                  <p><strong>Windows:</strong> click Start, search "<strong>Edit environment variables for your account</strong>", and open it. Or press <code class="bg-paper-hover px-1 rounded">Win + R</code>, type <code class="bg-paper-hover px-1 rounded">sysdm.cpl</code>, press Enter, then "Advanced" → "Environment Variables".</p>
-                  <p class="text-ink-faint mt-1"><strong>macOS/Linux:</strong> set <code class="bg-paper-hover px-1 rounded">OLLAMA_ORIGINS=*</code> in your shell profile (e.g. <code class="bg-paper-hover px-1 rounded">~/.zshrc</code>) or launch Ollama with the variable set for the session.</p>
+                  <p class="font-medium text-ink-hover mb-1" data-i18n="settingsStep2Title">Open your OS's "Environment Variables" dialog</p>
+                  <p data-i18n="settingsStep2BodyWin"><strong>Windows:</strong> click Start, search "<strong>Edit environment variables for your account</strong>", and open it. Or press <code class="bg-paper-hover px-1 rounded">Win + R</code>, type <code class="bg-paper-hover px-1 rounded">sysdm.cpl</code>, press Enter, then "Advanced" → "Environment Variables".</p>
+                  <p class="text-ink-faint mt-1" data-i18n="settingsStep2BodyMac"><strong>macOS/Linux:</strong> set <code class="bg-paper-hover px-1 rounded">OLLAMA_ORIGINS=*</code> in your shell profile (e.g. <code class="bg-paper-hover px-1 rounded">~/.zshrc</code>) or launch Ollama with the variable set for the session.</p>
                 </div>
               </div>
 
               <div class="flex gap-3 items-start">
                 <span class="flex-shrink-0 w-5 h-5 bg-ink text-white rounded-full flex items-center justify-center font-bold text-[10px] mt-0.5">3</span>
                 <div>
-                  <p class="font-medium text-ink-hover mb-1">Add a new entry under "User variables"</p>
-                  <p>Click "<strong>New...</strong>" under the <strong>upper half (your personal account variables)</strong> and enter:</p>
+                  <p class="font-medium text-ink-hover mb-1" data-i18n="settingsStep3Title">Add a new entry under "User variables"</p>
+                  <p data-i18n="settingsStep3Body">Click "<strong>New...</strong>" under the <strong>upper half (your personal account variables)</strong> and enter:</p>
                   <div class="mt-2 bg-paper-sunken border border-line rounded-lg overflow-hidden">
                     <div class="flex items-center gap-3 px-3 py-2 border-b border-line">
-                      <span class="text-ink-muted w-24 flex-shrink-0 font-medium">Variable name</span>
+                      <span class="text-ink-muted w-24 flex-shrink-0 font-medium" data-i18n="settingsVarNameLabel">Variable name</span>
                       <code class="bg-white border border-line-strong px-2 py-0.5 rounded font-mono text-ink">OLLAMA_ORIGINS</code>
                     </div>
                     <div class="flex items-start gap-3 px-3 py-2">
-                      <span class="text-ink-muted w-24 flex-shrink-0 font-medium mt-0.5">Variable value</span>
+                      <span class="text-ink-muted w-24 flex-shrink-0 font-medium mt-0.5" data-i18n="settingsVarValueLabel">Variable value</span>
                       <code class="bg-white border border-line-strong px-2 py-0.5 rounded font-mono text-ink break-all leading-relaxed">*</code>
                     </div>
                   </div>
-                  <p class="text-ink-faint mt-2">Click OK, then OK again to close the dialog.</p>
+                  <p class="text-ink-faint mt-2" data-i18n="settingsStep3Footer">Click OK, then OK again to close the dialog.</p>
                 </div>
               </div>
 
               <div class="flex gap-3 items-start">
                 <span class="flex-shrink-0 w-5 h-5 bg-ink text-white rounded-full flex items-center justify-center font-bold text-[10px] mt-0.5">4</span>
                 <div>
-                  <p class="font-medium text-ink-hover mb-1">Restart Ollama</p>
-                  <p>Reopen the Ollama app from the Start menu, wait for the tray icon to appear, then come back here and click "<strong>Test Connection</strong>" to confirm.</p>
+                  <p class="font-medium text-ink-hover mb-1" data-i18n="settingsStep4Title">Restart Ollama</p>
+                  <p data-i18n="settingsStep4Body">Reopen the Ollama app from the Start menu, wait for the tray icon to appear, then come back here and click "<strong>Test Connection</strong>" to confirm.</p>
                 </div>
               </div>
 
               <div class="flex gap-3 items-start bg-paper-sunken border border-line rounded-lg p-3">
                 <span class="text-ink-faint">↩</span>
                 <div>
-                  <p class="font-medium text-ink-hover mb-0.5">How do I undo this later?</p>
-                  <p class="text-ink-muted">Repeat step 2, find the <code class="bg-paper-hover px-1 rounded font-mono">OLLAMA_ORIGINS</code> entry under "User variables", select it, click "<strong>Delete</strong>", and restart Ollama.</p>
+                  <p class="font-medium text-ink-hover mb-0.5" data-i18n="settingsUndoTitle">How do I undo this later?</p>
+                  <p class="text-ink-muted" data-i18n="settingsUndoBody">Repeat step 2, find the <code class="bg-paper-hover px-1 rounded font-mono">OLLAMA_ORIGINS</code> entry under "User variables", select it, click "<strong>Delete</strong>", and restart Ollama.</p>
                 </div>
               </div>
 
               <div class="flex gap-3 items-start bg-paper-sunken border border-line rounded-lg p-3">
                 <span class="text-ink-faint font-bold text-xs mt-0.5">i</span>
                 <div>
-                  <p class="font-medium text-ink-hover mb-0.5">How do I stop Ollama from auto-starting?</p>
-                  <p class="text-ink-muted">On Windows: open Task Manager (right-click the taskbar) → "Startup apps" tab → find Ollama → set to "Disabled" so it won't launch in the background at boot.</p>
+                  <p class="font-medium text-ink-hover mb-0.5" data-i18n="settingsAutostartTitle">How do I stop Ollama from auto-starting?</p>
+                  <p class="text-ink-muted" data-i18n="settingsAutostartBody">On Windows: open Task Manager (right-click the taskbar) → "Startup apps" tab → find Ollama → set to "Disabled" so it won't launch in the background at boot.</p>
                 </div>
               </div>
 
@@ -699,23 +745,23 @@
 
           <!-- API settings -->
           <div class="space-y-2">
-            <p class="text-xs font-semibold text-ink-hover">Connection & Model Settings</p>
+            <p class="text-xs font-semibold text-ink-hover" data-i18n="settingsConnModelHeading">Connection & Model Settings</p>
             <div>
-              <label class="block text-xs text-ink-muted mb-1">API URL</label>
+              <label class="block text-xs text-ink-muted mb-1" data-i18n="settingsApiUrlLabel">API URL</label>
               <input type="text" id="ollamaUrl" value="http://localhost:11434" class="w-full text-sm p-2 bg-white border border-line-strong rounded-md focus:ring-1 focus:ring-brand-500 outline-none">
             </div>
             <div>
-              <label class="block text-xs text-ink-muted mb-1">Model Name</label>
+              <label class="block text-xs text-ink-muted mb-1" data-i18n="settingsModelNameLabel">Model Name</label>
               <select id="ollamaModelSelect" onchange="toggleCustomModel()" class="w-full text-sm p-2 bg-white border border-line-strong rounded-md focus:ring-1 focus:ring-brand-500 outline-none">
-                <option value="qwen2.5:3b" selected>qwen2.5:3b (default)</option>
+                <option value="qwen2.5:3b" selected data-i18n="settingsModelDefault">qwen2.5:3b (default)</option>
                 <option value="qwen2.5:1.5b">qwen2.5:1.5b</option>
                 <option value="llama3.1">llama3.1</option>
-                <option value="custom">Custom (type your own)</option>
+                <option value="custom" data-i18n="settingsModelCustom">Custom (type your own)</option>
               </select>
-              <input type="text" id="ollamaModel" value="qwen2.5:3b" class="hidden mt-2 w-full text-sm p-2 bg-white border border-line-strong rounded-md focus:ring-1 focus:ring-brand-500 outline-none" placeholder="Enter model name">
-              <p class="text-[10px] text-ink-faint mt-1">※ Make sure you've pulled this model via Ollama. Developers can edit these default options directly in the source (TokenShield.html).</p>
+              <input type="text" id="ollamaModel" value="qwen2.5:3b" class="hidden mt-2 w-full text-sm p-2 bg-white border border-line-strong rounded-md focus:ring-1 focus:ring-brand-500 outline-none" placeholder="Enter model name" data-i18n-placeholder="settingsModelInputPlaceholder">
+              <p class="text-[10px] text-ink-faint mt-1" data-i18n="settingsModelHint">※ Make sure you've pulled this model via Ollama. Developers can edit these default options directly in the source (TokenShield.html).</p>
             </div>
-            <button onclick="testOllamaConnection()" class="text-xs bg-brand-50 hover:bg-brand-100 text-brand-800 px-4 py-2 rounded-md font-medium transition-colors border border-brand-200">
+            <button onclick="testOllamaConnection()" class="text-xs bg-brand-50 hover:bg-brand-100 text-brand-800 px-4 py-2 rounded-md font-medium transition-colors border border-brand-200" data-i18n="settingsBtnTestConnection">
               Test Connection
             </button>
             <div id="ollamaTestResult" class="text-xs mt-1 hidden"></div>
@@ -729,34 +775,34 @@
   <div id="guideModal" class="hidden fixed inset-0 bg-scrim/40 backdrop-blur-sm z-50 flex items-center justify-center p-4 opacity-0 transition-opacity duration-300">
     <div class="bg-white rounded-xl shadow-2xl w-full max-w-5xl overflow-hidden transform scale-95 transition-transform duration-300 flex flex-col max-h-full">
       <div class="px-6 py-4 border-b border-line-soft flex justify-between items-center bg-paper-sunken/50 flex-shrink-0">
-        <h2 class="text-sm font-bold text-ink">PII Rule Guide</h2>
+        <h2 class="text-sm font-bold text-ink" data-i18n="modalGuideTitle">PII Rule Guide</h2>
         <button onclick="closeGuide()" class="text-ink-faint hover:text-ink-secondary font-medium text-lg">&times;</button>
       </div>
 
       <div class="p-6 overflow-y-auto">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
-          <p class="text-sm text-ink-secondary">
+          <p class="text-sm text-ink-secondary" data-i18n="guideIntro">
             TokenShield ships with a set of regex rules to detect sensitive personal and business data. The table below shows the rules currently active for your selected <strong>Region</strong> (plus the always-on Global baseline) — switch Region in the top toolbar to see a different set.
           </p>
-          <button onclick="toggleGuideInstructions()" class="bg-brand-50 text-brand-800 border border-brand-200 hover:bg-brand-100 px-3 py-1.5 rounded text-xs font-semibold transition-colors whitespace-nowrap">
+          <button onclick="toggleGuideInstructions()" class="bg-brand-50 text-brand-800 border border-brand-200 hover:bg-brand-100 px-3 py-1.5 rounded text-xs font-semibold transition-colors whitespace-nowrap" data-i18n="guideHowToEditBtn">
             How to edit these rules
           </button>
         </div>
 
         <div class="bg-brand-50 border border-brand-200 rounded-lg p-4 mb-4 text-xs text-ink-hover leading-relaxed">
-          <p class="font-bold text-ink text-sm mb-1">Not sure this file is actually safe? Ask an AI.</p>
-          <p>TokenShield is a single HTML file — no server, no background network calls. You don't need to read code yourself: paste the entire <code class="bg-white border border-line px-1 rounded">TokenShield.html</code> source into any AI (ChatGPT, Claude, etc.) and ask it directly: "Does this page send any user input anywhere?" Let the AI verify it for you, instead of just taking the developer's word for it.</p>
+          <p class="font-bold text-ink text-sm mb-1" data-i18n="guideSafeAskAiTitle">Not sure this file is actually safe? Ask an AI.</p>
+          <p data-i18n="guideSafeAskAiBody">TokenShield is a single HTML file — no server, no background network calls. You don't need to read code yourself: paste the entire <code class="bg-white border border-line px-1 rounded">TokenShield.html</code> source into any AI (ChatGPT, Claude, etc.) and ask it directly: "Does this page send any user input anywhere?" Let the AI verify it for you, instead of just taking the developer's word for it.</p>
         </div>
 
         <div id="guideInstructions" class="hidden bg-paper-sunken border border-line rounded-lg p-4 mb-4 text-xs text-ink-hover leading-relaxed space-y-2">
-          <p class="font-bold text-ink text-sm">How do I add my own PII rules and Hard Block keywords?</p>
-          <p>You don't need to hand-edit the HTML source — use the "Manage Custom Protection Rules" button in the toolbar instead:</p>
+          <p class="font-bold text-ink text-sm" data-i18n="guideHowToAddTitle">How do I add my own PII rules and Hard Block keywords?</p>
+          <p data-i18n="guideHowToAddIntro">You don't need to hand-edit the HTML source — use the "Manage Custom Protection Rules" button in the toolbar instead:</p>
           <ol class="list-decimal list-inside space-y-1 ml-1 text-ink-secondary">
-            <li>Click <strong>"Manage Custom Protection Rules"</strong> in the toolbar, then switch to the "Hard Block Keywords" or "Regex Rules" tab.</li>
-            <li>Download that tab's CSV template, fill in your keywords or patterns, and save it.</li>
-            <li>Click "Import CSV", pick that file, and choose "Merge with Existing" or "Replace All".</li>
-            <li>To have your customizations applied automatically every time you open this file, expand "Advanced Settings" (desktop only) in the same panel, click "Export as Auto-load File", and place the downloaded <code class="bg-white border border-line px-1 rounded">tokenshield.config.js</code> next to <code class="bg-white border border-line px-1 rounded">TokenShield.html</code> — this only takes effect when the page is opened as a local file.</li>
-            <li>To discard manual edits and restore the built-in defaults, open "Manage Custom Protection Rules", expand "Advanced Settings" (desktop only), and click "Reload Config".</li>
+            <li data-i18n="guideStep1">Click <strong>"Manage Custom Protection Rules"</strong> in the toolbar, then switch to the "Hard Block Keywords" or "Regex Rules" tab.</li>
+            <li data-i18n="guideStep2">Download that tab's CSV template, fill in your keywords or patterns, and save it.</li>
+            <li data-i18n="guideStep3">Click "Import CSV", pick that file, and choose "Merge with Existing" or "Replace All".</li>
+            <li data-i18n="guideStep4">To have your customizations applied automatically every time you open this file, expand "Advanced Settings" (desktop only) in the same panel, click "Export as Auto-load File", and place the downloaded <code class="bg-white border border-line px-1 rounded">tokenshield.config.js</code> next to <code class="bg-white border border-line px-1 rounded">TokenShield.html</code> — this only takes effect when the page is opened as a local file.</li>
+            <li data-i18n="guideStep5">To discard manual edits and restore the built-in defaults, open "Manage Custom Protection Rules", expand "Advanced Settings" (desktop only), and click "Reload Config".</li>
           </ol>
         </div>
 
@@ -765,10 +811,10 @@
             <table class="w-full text-sm text-left min-w-[700px]">
               <thead class="bg-paper-sunken text-ink-secondary border-b border-line">
                 <tr>
-                  <th class="px-4 py-2 font-medium w-1/6">Data Category</th>
-                  <th class="px-4 py-2 font-medium w-1/6">Replacement Tag</th>
-                  <th class="px-4 py-2 font-medium w-1/4">Example</th>
-                  <th class="px-4 py-2 font-medium w-5/12">Regular Expression</th>
+                  <th class="px-4 py-2 font-medium w-1/6" data-i18n="guideColCategory">Data Category</th>
+                  <th class="px-4 py-2 font-medium w-1/6" data-i18n="guideColTag">Replacement Tag</th>
+                  <th class="px-4 py-2 font-medium w-1/4" data-i18n="guideColExample">Example</th>
+                  <th class="px-4 py-2 font-medium w-5/12" data-i18n="guideColRegex">Regular Expression</th>
                 </tr>
               </thead>
               <tbody id="guideTableBody" class="divide-y divide-line-soft text-ink-hover">
@@ -778,9 +824,9 @@
           </div>
 
           <div class="bg-danger-50 p-4 rounded-lg border border-danger-100">
-            <h4 class="text-sm font-bold text-danger-700 mb-1">Extremely Sensitive Terms (Hard Block)</h4>
+            <h4 class="text-sm font-bold text-danger-700 mb-1" data-i18n="guideHardBlockHeading">Extremely Sensitive Terms (Hard Block)</h4>
             <p class="text-xs text-danger-600">
-              If the source text contains any of the following terms (from the currently selected Persona), TokenShield locks the copy function to prevent accidental exposure:<br>
+              <span data-i18n="guideHardBlockIntro">If the source text contains any of the following terms (from the currently selected Persona), TokenShield locks the copy function to prevent accidental exposure:</span><br>
               <span id="guideHardBlockList" class="font-medium text-danger-700 leading-relaxed"></span>
             </p>
           </div>
@@ -795,31 +841,31 @@
       <div class="px-6 py-4 border-b border-danger-100 flex justify-between items-center bg-danger-50 flex-shrink-0">
         <h2 class="text-sm font-bold text-danger-800 flex items-center gap-2">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
-          Sensitive Information Block Warning
+          <span data-i18n="modalUnlockTitle">Sensitive Information Block Warning</span>
         </h2>
         <button onclick="closeUnlockModal()" class="text-danger-400 hover:text-danger-600 font-medium text-lg">&times;</button>
       </div>
 
       <div class="p-6 overflow-y-auto space-y-4">
-        <p class="text-sm text-ink-hover">TokenShield detected text that may contain extremely sensitive information. To protect the people involved, copy/export has been temporarily locked.</p>
+        <p class="text-sm text-ink-hover" data-i18n="unlockIntro">TokenShield detected text that may contain extremely sensitive information. To protect the people involved, copy/export has been temporarily locked.</p>
 
         <div class="bg-paper-sunken p-4 rounded-lg border border-line">
-          <h3 class="text-xs font-bold text-ink-muted mb-2 uppercase tracking-wider">Block Reason(s)</h3>
+          <h3 class="text-xs font-bold text-ink-muted mb-2 uppercase tracking-wider" data-i18n="unlockReasonsHeading">Block Reason(s)</h3>
           <ul id="unlockReasonList" class="list-disc list-inside text-sm text-ink space-y-1.5 font-medium">
             <!-- Injected dynamically -->
           </ul>
         </div>
 
-        <p class="text-xs text-ink-muted leading-relaxed mt-4">
+        <p class="text-xs text-ink-muted leading-relaxed mt-4" data-i18n="unlockFooterHint">
           If you've confirmed this information is safe to release, or believe this is a false positive, you can force-unlock it.
         </p>
       </div>
 
       <div class="px-6 py-4 border-t border-line-soft bg-paper-sunken flex justify-end gap-3">
-        <button onclick="closeUnlockModal()" class="px-4 py-2 bg-white border border-line-strong text-ink-hover rounded-lg text-sm font-medium hover:bg-paper-sunken transition-colors">
+        <button onclick="closeUnlockModal()" class="px-4 py-2 bg-white border border-line-strong text-ink-hover rounded-lg text-sm font-medium hover:bg-paper-sunken transition-colors" data-i18n="unlockBtnKeepLocked">
           Keep Locked (Safe)
         </button>
-        <button onclick="confirmUnlock()" class="px-4 py-2 bg-danger-600 hover:bg-danger-700 text-white rounded-lg text-sm font-semibold shadow-sm transition-colors flex items-center gap-2">
+        <button onclick="confirmUnlock()" class="px-4 py-2 bg-danger-600 hover:bg-danger-700 text-white rounded-lg text-sm font-semibold shadow-sm transition-colors flex items-center gap-2" data-i18n="unlockBtnConfirm">
           I Confirm No Risk, Unlock
         </button>
       </div>
@@ -829,23 +875,23 @@
   <div id="editCsvModal" class="hidden fixed inset-0 bg-scrim/40 backdrop-blur-sm z-50 flex items-center justify-center p-4 opacity-0 transition-opacity duration-300">
     <div class="bg-white rounded-xl shadow-2xl w-full max-w-3xl overflow-hidden transform scale-95 transition-transform duration-300 flex flex-col max-h-full border border-line">
       <div class="px-6 py-4 border-b border-line-soft flex justify-between items-center bg-brand-50/50 flex-shrink-0">
-        <h2 class="text-sm font-bold text-brand-900">Custom Dictionary Manager (View / Edit / Build)</h2>
+        <h2 class="text-sm font-bold text-brand-900" data-i18n="modalEditCsvTitle">Custom Dictionary Manager (View / Edit / Build)</h2>
         <button onclick="closeEditCsvModal()" class="text-ink-faint hover:text-ink-secondary font-medium text-lg">&times;</button>
       </div>
       <div class="p-6 overflow-y-auto flex-1 bg-white space-y-4">
         <div class="flex flex-col gap-3">
           <div class="flex justify-between items-end">
-            <p class="text-xs text-ink-muted">
+            <p class="text-xs text-ink-muted" data-i18n="editCsvIntro">
               Type directly into the table below, or <strong class="text-ink-hover">copy two columns from Excel and paste into any cell</strong> — the table expands automatically.<br>
               Empty rows are ignored when you apply.
             </p>
-            <button onclick="addCsvEditRow()" class="text-xs bg-paper-hover hover:bg-line text-ink-hover px-3 py-1.5 rounded font-medium transition-colors border border-line">
+            <button onclick="addCsvEditRow()" class="text-xs bg-paper-hover hover:bg-line text-ink-hover px-3 py-1.5 rounded font-medium transition-colors border border-line" data-i18n="editCsvBtnAddRow">
               + Add Row Manually
             </button>
           </div>
           <div class="flex gap-3 bg-paper-sunken p-2 rounded-lg border border-line">
-            <input type="text" id="csvFilterKw" oninput="filterCsvEditRows()" placeholder="Filter by keyword..." class="w-1/2 text-sm p-1.5 border border-line-strong rounded focus:outline-none focus:border-brand-500 bg-white">
-            <input type="text" id="csvFilterType" oninput="filterCsvEditRows()" placeholder="Filter by category..." class="w-1/2 text-sm p-1.5 border border-line-strong rounded focus:outline-none focus:border-brand-500 bg-white">
+            <input type="text" id="csvFilterKw" oninput="filterCsvEditRows()" placeholder="Filter by keyword..." class="w-1/2 text-sm p-1.5 border border-line-strong rounded focus:outline-none focus:border-brand-500 bg-white" data-i18n-placeholder="editCsvFilterKwPlaceholder">
+            <input type="text" id="csvFilterType" oninput="filterCsvEditRows()" placeholder="Filter by category..." class="w-1/2 text-sm p-1.5 border border-line-strong rounded focus:outline-none focus:border-brand-500 bg-white" data-i18n-placeholder="editCsvFilterTypePlaceholder">
           </div>
         </div>
 
@@ -854,9 +900,9 @@
             <thead class="bg-paper-sunken">
               <tr>
                 <th class="px-3 py-2 font-medium text-ink-secondary w-12 text-center border-b border-r border-line">#</th>
-                <th class="px-3 py-2 font-medium text-ink-secondary w-1/2 border-b border-r border-line">Keyword (required)</th>
-                <th class="px-3 py-2 font-medium text-ink-secondary w-1/3 border-b border-r border-line">Category (optional, e.g. NAME)</th>
-                <th class="px-3 py-2 font-medium text-ink-secondary w-16 border-b border-line text-center">Delete</th>
+                <th class="px-3 py-2 font-medium text-ink-secondary w-1/2 border-b border-r border-line" data-i18n="editCsvColKeyword">Keyword (required)</th>
+                <th class="px-3 py-2 font-medium text-ink-secondary w-1/3 border-b border-r border-line" data-i18n="editCsvColCategory">Category (optional, e.g. NAME)</th>
+                <th class="px-3 py-2 font-medium text-ink-secondary w-16 border-b border-line text-center" data-i18n="commonDelete">Delete</th>
               </tr>
             </thead>
             <tbody id="csvEditTbody" class="divide-y divide-line bg-white">
@@ -868,9 +914,9 @@
       <div class="px-6 py-4 border-t border-line-soft bg-paper-sunken flex justify-end gap-3 flex-shrink-0">
         <button onclick="downloadOnlineCsv()" class="px-4 py-2 bg-white border border-line-strong text-ink-hover rounded-lg text-sm font-medium hover:bg-paper-sunken transition-colors flex items-center gap-1">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-          Download as CSV
+          <span data-i18n="editCsvBtnDownload">Download as CSV</span>
         </button>
-        <button onclick="applyOnlineCsv()" class="px-4 py-2 bg-brand-700 hover:bg-brand-800 text-white rounded-lg text-sm font-semibold shadow-sm transition-colors flex items-center gap-2">
+        <button onclick="applyOnlineCsv()" class="px-4 py-2 bg-brand-700 hover:bg-brand-800 text-white rounded-lg text-sm font-semibold shadow-sm transition-colors flex items-center gap-2" data-i18n="editCsvBtnApply">
           Apply to System
         </button>
       </div>
@@ -881,29 +927,29 @@
   <div id="protectionManagerModal" class="hidden fixed inset-0 bg-scrim/40 backdrop-blur-sm z-50 flex items-center justify-center p-4 opacity-0 transition-opacity duration-300">
     <div class="bg-white rounded-xl shadow-2xl w-full max-w-4xl overflow-hidden transform scale-95 transition-transform duration-300 flex flex-col max-h-full border border-line">
       <div class="px-6 py-4 border-b border-line-soft flex justify-between items-center bg-brand-50/50 flex-shrink-0">
-        <h2 class="text-sm font-bold text-brand-900">Manage Custom Protection Rules</h2>
+        <h2 class="text-sm font-bold text-brand-900" data-i18n="modalPmTitle">Manage Custom Protection Rules</h2>
         <button onclick="closeModal('protectionManagerModal')" class="text-ink-faint hover:text-ink-secondary font-medium text-lg">&times;</button>
       </div>
       <div class="px-6 pt-3 flex gap-2 border-b border-line-soft flex-shrink-0">
-        <button id="pmTabBtnHardBlock" onclick="switchPmTab('hardBlock')" class="pm-tab-btn px-3 py-2 text-xs font-medium border-b-2 border-brand-600 text-brand-700">Hard Block Keywords</button>
-        <button id="pmTabBtnRegex" onclick="switchPmTab('regex')" class="pm-tab-btn px-3 py-2 text-xs font-medium border-b-2 border-transparent text-ink-muted hover:text-ink-hover">Regex Rules</button>
-        <button id="pmTabBtnPrompts" onclick="switchPmTab('prompts')" class="pm-tab-btn px-3 py-2 text-xs font-medium border-b-2 border-transparent text-ink-muted hover:text-ink-hover">Local AI Prompts</button>
+        <button id="pmTabBtnHardBlock" onclick="switchPmTab('hardBlock')" class="pm-tab-btn px-3 py-2 text-xs font-medium border-b-2 border-brand-600 text-brand-700" data-i18n="pmTabHardBlock">Hard Block Keywords</button>
+        <button id="pmTabBtnRegex" onclick="switchPmTab('regex')" class="pm-tab-btn px-3 py-2 text-xs font-medium border-b-2 border-transparent text-ink-muted hover:text-ink-hover" data-i18n="pmTabRegex">Regex Rules</button>
+        <button id="pmTabBtnPrompts" onclick="switchPmTab('prompts')" class="pm-tab-btn px-3 py-2 text-xs font-medium border-b-2 border-transparent text-ink-muted hover:text-ink-hover" data-i18n="pmTabPrompts">Local AI Prompts</button>
       </div>
       <div class="p-6 overflow-y-auto flex-1 bg-white">
         <div id="pmPanelHardBlock" class="pm-panel space-y-3">
           <div class="flex flex-wrap justify-between items-center gap-2">
-            <p class="text-xs text-ink-muted">Single-column CSV, one keyword per row. This only manages your custom layer — the built-in Personal/Business keyword lists aren't editable here (see PII Rule Guide).</p>
+            <p class="text-xs text-ink-muted" data-i18n="pmHardBlockIntro">Single-column CSV, one keyword per row. This only manages your custom layer — the built-in Personal/Business keyword lists aren't editable here (see PII Rule Guide).</p>
             <div class="flex gap-2">
               <input type="file" id="hardBlockCsvFileInput" accept=".csv" class="hidden" onchange="handleHardBlockCsvUpload(event)" />
-              <button onclick="downloadHardBlockCsvTemplate()" class="text-xs bg-white border border-line-strong px-3 py-1.5 rounded hover:bg-paper-sunken">Download Template</button>
-              <button onclick="document.getElementById('hardBlockCsvFileInput').click()" class="text-xs bg-white border border-line-strong px-3 py-1.5 rounded hover:bg-paper-sunken">Import CSV</button>
+              <button onclick="downloadHardBlockCsvTemplate()" class="text-xs bg-white border border-line-strong px-3 py-1.5 rounded hover:bg-paper-sunken" data-i18n="pmBtnDownloadTemplate">Download Template</button>
+              <button onclick="document.getElementById('hardBlockCsvFileInput').click()" class="text-xs bg-white border border-line-strong px-3 py-1.5 rounded hover:bg-paper-sunken" data-i18n="pmBtnImportCsv">Import CSV</button>
             </div>
           </div>
           <div class="border border-line rounded-lg overflow-x-auto max-h-64 overflow-y-auto">
             <table class="w-full text-left text-sm">
               <thead class="bg-paper-sunken sticky top-0"><tr>
-                <th class="px-3 py-2 font-medium text-ink-secondary border-b border-line">Keyword</th>
-                <th class="px-3 py-2 font-medium text-ink-secondary border-b border-line w-16 text-center">Delete</th>
+                <th class="px-3 py-2 font-medium text-ink-secondary border-b border-line" data-i18n="pmColKeyword">Keyword</th>
+                <th class="px-3 py-2 font-medium text-ink-secondary border-b border-line w-16 text-center" data-i18n="commonDelete">Delete</th>
               </tr></thead>
               <tbody id="hardBlockMgmtTbody" class="divide-y divide-line bg-white"></tbody>
             </table>
@@ -911,20 +957,20 @@
         </div>
         <div id="pmPanelRegex" class="pm-panel space-y-3 hidden">
           <div class="flex flex-wrap justify-between items-center gap-2">
-            <p class="text-xs text-ink-muted">4-column CSV: TypeTag,RuleName,Pattern,ExampleText. The Pattern column accepts a bare pattern or a full /pattern/flags literal. This only manages your custom layer — the built-in region-specific rules aren't editable here (see PII Rule Guide).</p>
+            <p class="text-xs text-ink-muted" data-i18n="pmRegexIntro">4-column CSV: TypeTag,RuleName,Pattern,ExampleText. The Pattern column accepts a bare pattern or a full /pattern/flags literal. This only manages your custom layer — the built-in region-specific rules aren't editable here (see PII Rule Guide).</p>
             <div class="flex gap-2">
               <input type="file" id="regexCsvFileInput" accept=".csv" class="hidden" onchange="handleRegexCsvUpload(event)" />
-              <button onclick="downloadRegexCsvTemplate()" class="text-xs bg-white border border-line-strong px-3 py-1.5 rounded hover:bg-paper-sunken">Download Template</button>
-              <button onclick="document.getElementById('regexCsvFileInput').click()" class="text-xs bg-white border border-line-strong px-3 py-1.5 rounded hover:bg-paper-sunken">Import CSV</button>
+              <button onclick="downloadRegexCsvTemplate()" class="text-xs bg-white border border-line-strong px-3 py-1.5 rounded hover:bg-paper-sunken" data-i18n="pmBtnDownloadTemplate">Download Template</button>
+              <button onclick="document.getElementById('regexCsvFileInput').click()" class="text-xs bg-white border border-line-strong px-3 py-1.5 rounded hover:bg-paper-sunken" data-i18n="pmBtnImportCsv">Import CSV</button>
             </div>
           </div>
           <div class="border border-line rounded-lg overflow-x-auto max-h-64 overflow-y-auto">
             <table class="w-full text-left text-sm min-w-[600px]">
               <thead class="bg-paper-sunken sticky top-0"><tr>
-                <th class="px-3 py-2 font-medium text-ink-secondary border-b border-line">Tag</th>
-                <th class="px-3 py-2 font-medium text-ink-secondary border-b border-line">Name</th>
-                <th class="px-3 py-2 font-medium text-ink-secondary border-b border-line">Pattern</th>
-                <th class="px-3 py-2 font-medium text-ink-secondary border-b border-line w-16 text-center">Delete</th>
+                <th class="px-3 py-2 font-medium text-ink-secondary border-b border-line" data-i18n="pmColTag">Tag</th>
+                <th class="px-3 py-2 font-medium text-ink-secondary border-b border-line" data-i18n="pmColName">Name</th>
+                <th class="px-3 py-2 font-medium text-ink-secondary border-b border-line" data-i18n="pmColPattern">Pattern</th>
+                <th class="px-3 py-2 font-medium text-ink-secondary border-b border-line w-16 text-center" data-i18n="commonDelete">Delete</th>
               </tr></thead>
               <tbody id="regexMgmtTbody" class="divide-y divide-line bg-white"></tbody>
             </table>
@@ -933,48 +979,48 @@
         <div id="pmPanelPrompts" class="pm-panel space-y-4 hidden">
           <div class="space-y-2">
             <div class="flex justify-between items-center">
-              <label class="text-xs font-medium text-ink-secondary">Channel 1 — entity extraction prompt ({{TEXT}} is replaced with the actual text to scan)</label>
-              <button onclick="resetAiPrompt('channel1')" class="text-xs bg-white border border-line-strong px-3 py-1 rounded hover:bg-paper-sunken">Reset to Default</button>
+              <label class="text-xs font-medium text-ink-secondary" data-i18n="pmChannel1Label">Channel 1 — entity extraction prompt ({{TEXT}} is replaced with the actual text to scan)</label>
+              <button onclick="resetAiPrompt('channel1')" class="text-xs bg-white border border-line-strong px-3 py-1 rounded hover:bg-paper-sunken" data-i18n="pmBtnResetDefault">Reset to Default</button>
             </div>
             <textarea id="aiPromptChannel1Textarea" oninput="saveAiPromptFromTextarea('channel1')" rows="5" class="w-full text-xs font-mono p-2 border border-line-strong rounded focus:outline-none focus:border-brand-500"></textarea>
-            <p id="aiPromptChannel1Warning" class="hidden text-xs text-warning-600">No {{TEXT}} placeholder found — the AI won't receive the actual document text.</p>
+            <p id="aiPromptChannel1Warning" class="hidden text-xs text-warning-600" data-i18n="pmNoPlaceholderWarning">No {{TEXT}} placeholder found — the AI won't receive the actual document text.</p>
           </div>
           <div class="space-y-2">
             <div class="flex justify-between items-center">
-              <label class="text-xs font-medium text-ink-secondary">Channel 2 — risk assessment prompt (Personal persona)</label>
-              <button onclick="resetAiPrompt('channel2Personal')" class="text-xs bg-white border border-line-strong px-3 py-1 rounded hover:bg-paper-sunken">Reset to Default</button>
+              <label class="text-xs font-medium text-ink-secondary" data-i18n="pmChannel2PersonalLabel">Channel 2 — risk assessment prompt (Personal persona)</label>
+              <button onclick="resetAiPrompt('channel2Personal')" class="text-xs bg-white border border-line-strong px-3 py-1 rounded hover:bg-paper-sunken" data-i18n="pmBtnResetDefault">Reset to Default</button>
             </div>
             <textarea id="aiPromptChannel2PersonalTextarea" oninput="saveAiPromptFromTextarea('channel2Personal')" rows="5" class="w-full text-xs font-mono p-2 border border-line-strong rounded focus:outline-none focus:border-brand-500"></textarea>
-            <p id="aiPromptChannel2PersonalWarning" class="hidden text-xs text-warning-600">No {{TEXT}} placeholder found — the AI won't receive the actual document text.</p>
+            <p id="aiPromptChannel2PersonalWarning" class="hidden text-xs text-warning-600" data-i18n="pmNoPlaceholderWarning">No {{TEXT}} placeholder found — the AI won't receive the actual document text.</p>
           </div>
           <div class="space-y-2">
             <div class="flex justify-between items-center">
-              <label class="text-xs font-medium text-ink-secondary">Channel 2 — risk assessment prompt (Business persona)</label>
-              <button onclick="resetAiPrompt('channel2Business')" class="text-xs bg-white border border-line-strong px-3 py-1 rounded hover:bg-paper-sunken">Reset to Default</button>
+              <label class="text-xs font-medium text-ink-secondary" data-i18n="pmChannel2BusinessLabel">Channel 2 — risk assessment prompt (Business persona)</label>
+              <button onclick="resetAiPrompt('channel2Business')" class="text-xs bg-white border border-line-strong px-3 py-1 rounded hover:bg-paper-sunken" data-i18n="pmBtnResetDefault">Reset to Default</button>
             </div>
             <textarea id="aiPromptChannel2BusinessTextarea" oninput="saveAiPromptFromTextarea('channel2Business')" rows="5" class="w-full text-xs font-mono p-2 border border-line-strong rounded focus:outline-none focus:border-brand-500"></textarea>
-            <p id="aiPromptChannel2BusinessWarning" class="hidden text-xs text-warning-600">No {{TEXT}} placeholder found — the AI won't receive the actual document text.</p>
+            <p id="aiPromptChannel2BusinessWarning" class="hidden text-xs text-warning-600" data-i18n="pmNoPlaceholderWarning">No {{TEXT}} placeholder found — the AI won't receive the actual document text.</p>
           </div>
         </div>
       </div>
       <div class="border-t border-line-soft bg-paper-sunken flex-shrink-0">
         <details class="hidden sm:block group">
           <summary class="px-6 py-3 text-xs font-semibold text-ink-secondary cursor-pointer hover:bg-paper-hover select-none flex items-center justify-between">
-            <span>Advanced Settings: Auto-load Config File</span>
+            <span data-i18n="pmAdvancedSettingsHeading">Advanced Settings: Auto-load Config File</span>
             <span class="text-ink-faint transition-transform group-open:rotate-180">▾</span>
           </summary>
           <div class="px-6 pb-4 space-y-3">
-            <p id="autoConfigNetworkNotice" class="hidden text-xs text-warning-700 bg-warning-50 border border-warning-200 rounded p-2 leading-relaxed">
+            <p id="autoConfigNetworkNotice" class="hidden text-xs text-warning-700 bg-warning-50 border border-warning-200 rounded p-2 leading-relaxed" data-i18n="pmAutoConfigNetworkNotice">
               This feature only takes effect when you download this page as a local HTML file and open it directly. You're currently browsing it via a URL — "Export as Auto-load File" still downloads the config file, but it will only auto-apply once you also download this page and keep the config file next to it.
             </p>
             <div class="flex flex-wrap gap-2">
-              <button id="exportAutoConfigBtn" onclick="exportAutoConfig()" title="Package the current in-memory custom rules and prompts into an auto-load config file" class="px-4 py-2 bg-brand-700 hover:bg-brand-800 text-white rounded-lg text-sm font-semibold transition-colors">Export as Auto-load File</button>
-              <button id="reloadConfigBtn" onclick="reloadConfig()" title="Discard manual edits and re-apply built-in defaults plus the same-folder auto-load config file" class="bg-white hover:bg-paper-sunken border border-line-strong text-ink-hover px-4 py-2 rounded-lg text-sm font-medium transition-colors">Reload Config</button>
+              <button id="exportAutoConfigBtn" onclick="exportAutoConfig()" title="Package the current in-memory custom rules and prompts into an auto-load config file" data-i18n-title="pmExportBtnTitle" class="px-4 py-2 bg-brand-700 hover:bg-brand-800 text-white rounded-lg text-sm font-semibold transition-colors" data-i18n="pmBtnExportAutoConfig">Export as Auto-load File</button>
+              <button id="reloadConfigBtn" onclick="reloadConfig()" title="Discard manual edits and re-apply built-in defaults plus the same-folder auto-load config file" data-i18n-title="pmReloadBtnTitle" class="bg-white hover:bg-paper-sunken border border-line-strong text-ink-hover px-4 py-2 rounded-lg text-sm font-medium transition-colors" data-i18n="pmBtnReloadConfig">Reload Config</button>
             </div>
           </div>
         </details>
         <div class="px-6 py-3 flex justify-end">
-          <button onclick="closeModal('protectionManagerModal')" class="px-4 py-2 bg-white border border-line-strong text-ink-hover rounded-lg text-sm font-medium hover:bg-paper-sunken transition-colors">Close</button>
+          <button onclick="closeModal('protectionManagerModal')" class="px-4 py-2 bg-white border border-line-strong text-ink-hover rounded-lg text-sm font-medium hover:bg-paper-sunken transition-colors" data-i18n="commonClose">Close</button>
         </div>
       </div>
     </div>
@@ -984,16 +1030,16 @@
   <div id="importModeModal" class="hidden fixed inset-0 bg-scrim/40 backdrop-blur-sm z-[60] flex items-center justify-center p-4 opacity-0 transition-opacity duration-300">
     <div class="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden transform scale-95 transition-transform duration-300 border border-line">
       <div class="px-6 py-4 border-b border-line-soft bg-brand-50/50">
-        <h2 class="text-sm font-bold text-brand-900">Import Mode</h2>
+        <h2 class="text-sm font-bold text-brand-900" data-i18n="modalImportModeTitle">Import Mode</h2>
       </div>
       <div class="p-6 space-y-3">
         <p id="importModeMessage" class="text-sm text-ink-hover"></p>
         <div id="importModeErrorList" class="hidden text-xs text-danger-600 bg-danger-50 border border-danger-200 rounded p-2 max-h-32 overflow-y-auto"></div>
       </div>
       <div class="px-6 py-4 border-t border-line-soft bg-paper-sunken flex flex-col gap-2">
-        <button onclick="confirmImportMode('merge')" class="px-4 py-2 bg-brand-700 hover:bg-brand-800 text-white rounded-lg text-sm font-semibold transition-colors">Merge with Existing</button>
-        <button onclick="confirmImportMode('replace')" class="px-4 py-2 bg-danger-600 hover:bg-danger-700 text-white rounded-lg text-sm font-semibold transition-colors">Replace All</button>
-        <button onclick="closeModal('importModeModal')" class="px-4 py-2 bg-white border border-line-strong text-ink-hover rounded-lg text-sm font-medium hover:bg-paper-sunken transition-colors">Cancel</button>
+        <button onclick="confirmImportMode('merge')" class="px-4 py-2 bg-brand-700 hover:bg-brand-800 text-white rounded-lg text-sm font-semibold transition-colors" data-i18n="importModeBtnMerge">Merge with Existing</button>
+        <button onclick="confirmImportMode('replace')" class="px-4 py-2 bg-danger-600 hover:bg-danger-700 text-white rounded-lg text-sm font-semibold transition-colors" data-i18n="importModeBtnReplace">Replace All</button>
+        <button onclick="closeModal('importModeModal')" class="px-4 py-2 bg-white border border-line-strong text-ink-hover rounded-lg text-sm font-medium hover:bg-paper-sunken transition-colors" data-i18n="commonCancel">Cancel</button>
       </div>
     </div>
   </div>
@@ -1012,6 +1058,319 @@
         .replace(/>/g, "&gt;")
         .replace(/"/g, "&quot;")
         .replace(/'/g, "&#039;");
+    }
+
+    // ==========================================
+    // Internationalization (i18n) — independent from Region/Persona.
+    // Region/Persona select which rule data is active; this only controls display language.
+    // ==========================================
+    const LANG_STORAGE_KEY = 'tokenshield_display_lang';
+    let currentLang = localStorage.getItem(LANG_STORAGE_KEY) || 'en';
+
+    const I18N = {
+      // ---- Header / nav ----
+      headerTagline: { en: 'Privacy Shield for AI', zh: 'AI 隱私防護盾', ja: 'AIのためのプライバシーシールド' },
+      tabDeidentify: { en: 'De-identify', zh: '去識別化', ja: '匿名化' },
+      tabRestore: { en: 'Restore', zh: '還原', ja: '復元' },
+      langSelectLabel: { en: 'Display language', zh: '顯示語言', ja: '表示言語' },
+      langSelectTitle: { en: 'Display language — independent from the Region ruleset below', zh: '顯示語言──與下方的地區規則庫彼此獨立', ja: '表示言語──下の地域ルールセットとは独立しています' },
+      regionSelectLabel: { en: 'Region ruleset', zh: '地區規則庫', ja: '地域ルールセット' },
+      regionSelectTitle: { en: 'Regional PII ruleset — only one is active at a time, plus the always-on Global baseline', zh: '地區個資規則庫──同時間只會啟用一個地區，並疊加永遠啟用的全球基準規則', ja: '地域別PIIルールセット──常時有効なグローバル基準に加え、一度に1つの地域のみ有効になります' },
+      personaSelectLabel: { en: 'Persona', zh: '身分模式', ja: 'ペルソナ' },
+      personaSelectTitle: { en: 'Hard Block keyword set — Personal privacy terms vs. Business confidentiality terms', zh: '硬阻斷關鍵字集──個人隱私用語 vs. 企業機密用語', ja: 'ハードブロックキーワードセット──個人のプライバシー用語 と 企業の機密用語' },
+      personaPersonal: { en: 'Personal', zh: '個人', ja: '個人' },
+      personaBusiness: { en: 'Business', zh: '企業', ja: 'ビジネス' },
+      btnImportCsv: { en: 'Import Custom Dictionary (CSV)', zh: '匯入自訂字典（CSV）', ja: 'カスタム辞書をインポート（CSV）' },
+      dictCountLabel: { en: 'Dictionary: {count}', zh: '字典：{count}', ja: '辞書：{count}' },
+      btnPiiGuide: { en: 'PII Rule Guide', zh: '個資規則說明', ja: 'PIIルールガイド' },
+      btnSettings: { en: 'Settings', zh: '設定', ja: '設定' },
+      btnManageRules: { en: 'Manage Custom Protection Rules', zh: '管理自訂防護規則', ja: 'カスタム保護ルールを管理' },
+      hardBlockBannerText: { en: 'Warning: extremely sensitive terms detected. The copy function has been locked to prevent accidental exposure.', zh: '警告：偵測到極度敏感的用語，複製功能已被鎖定以避免不慎外流。', ja: '警告：極めて機微な用語が検出されました。誤った漏洩を防ぐため、コピー機能をロックしました。' },
+      hardBlockBannerBtn: { en: 'View Details & Unlock', zh: '查看詳情並解鎖', ja: '詳細を見て解除' },
+      toastAppliedCustomDict: { en: 'Applied {count} custom dictionary entries!', zh: '已套用 {count} 筆自訂字典項目！', ja: 'カスタム辞書エントリを{count}件適用しました！' },
+
+      // ---- Common / shared strings ----
+      commonClear: { en: 'Clear', zh: '清除', ja: 'クリア' },
+      commonNoData: { en: 'No data', zh: '尚無資料', ja: 'データなし' },
+      commonNotRunYet: { en: 'Not run yet', zh: '尚未執行', ja: '未実行' },
+      commonEnlargeView: { en: 'Enlarge View', zh: '放大檢視', ja: '拡大表示' },
+      commonAiReplyPlaceholder: { en: 'Paste the reply from ChatGPT / Claude here...', zh: '在此貼上 ChatGPT／Claude 的回覆……', ja: 'ここにChatGPT／Claudeの返信を貼り付けてください…' },
+      commonPasteClipboard: { en: 'Paste from Clipboard', zh: '從剪貼簿貼上', ja: 'クリップボードから貼り付け' },
+
+      // ---- View 1: De-identification ----
+      v1OriginalInputLabel: { en: 'Original Data Input', zh: '原始資料輸入', ja: '元データ入力' },
+      v1RawInputPlaceholder: { en: "Paste a document, email, or spreadsheet here... Select text for a quick 'mark as sensitive' menu.", zh: '在此貼上文件、電子郵件或試算表內容……選取文字可快速開啟「標記為敏感」選單。', ja: 'ここに文書、メール、表計算データなどを貼り付けてください…テキストを選択すると「機微情報としてマーク」メニューをすぐに開けます。' },
+      v1DetectedItemsLabel: { en: 'Detected Items (click to un-mask)', zh: '已偵測項目（點擊可取消遮蔽）', ja: '検出された項目（クリックでマスク解除）' },
+      v1BtnExecute: { en: 'Execute De-identification', zh: '執行去識別化', ja: '匿名化を実行' },
+      v1MaskingDetailsLabel: { en: 'Masking Details', zh: '遮蔽明細', ja: 'マスキング詳細' },
+      v1DeidentifiedDataLabel: { en: 'De-identified Data', zh: '去識別化後資料', ja: '匿名化後のデータ' },
+      v1OutputPlaceholder: { en: 'Output will appear here after running de-identification...', zh: '執行去識別化後，結果會顯示在這裡……', ja: '匿名化を実行すると、結果がここに表示されます…' },
+      v1BtnScanLocalAi: { en: 'Scan with Local AI', zh: '使用本機 AI 掃描', ja: 'ローカルAIでスキャン' },
+      v1BtnCopyMasked: { en: 'Copy Masked Data', zh: '複製遮蔽後資料', ja: 'マスク済みデータをコピー' },
+
+      // ---- View 2: Restore & Compare ----
+      v2OriginalRecordLabel: { en: 'Original Data & Masking Record', zh: '原始資料與遮蔽紀錄', ja: '元データとマスキング記録' },
+      v2ReadOnlyPlaceholder: { en: 'Please run de-identification in the "De-identify" view first.', zh: '請先在「去識別化」畫面執行去識別化。', ja: 'まず「匿名化」画面で匿名化を実行してください。' },
+      v2MaskedItemsLabel: { en: 'Masked Items (hover to see the tag)', zh: '已遮蔽項目（將滑鼠移到上方可查看標籤）', ja: 'マスク済み項目（ホバーでタグを表示）' },
+      v2ExternalAiReplyLabel: { en: 'External AI Reply', zh: '外部 AI 回覆', ja: '外部AIの返信' },
+      v2BtnRunRestore: { en: 'Run Restore', zh: '執行還原', ja: '復元を実行' },
+      v2RestoreResultLabel: { en: 'Restore Result', zh: '還原結果', ja: '復元結果' },
+      v2MaskSymbolLabel: { en: 'Mask symbol:', zh: '遮蔽符號：', ja: 'マスク記号：' },
+      v2BtnClearResult: { en: 'Clear Result', zh: '清除結果', ja: '結果をクリア' },
+      v2BtnCopyRestored: { en: 'Copy Restored Text', zh: '複製還原後文字', ja: '復元後のテキストをコピー' },
+
+      // ---- Enlarge AI Reply modal ----
+      modalAiReplyTitle: { en: 'Edit External AI Reply (Enlarged)', zh: '編輯外部 AI 回覆（放大檢視）', ja: '外部AIの返信を編集（拡大表示）' },
+      modalAiReplyApplyBtn: { en: 'Apply & Restore', zh: '套用並還原', ja: '適用して復元' },
+      commonCancel: { en: 'Cancel', zh: '取消', ja: 'キャンセル' },
+
+      // ---- Settings modal ----
+      modalSettingsTitle: { en: 'Settings & Advanced Features', zh: '設定與進階功能', ja: '設定と高度な機能' },
+      settingsAuthorLine: { en: `Author: <strong>OA (oas114)</strong>`, zh: `作者：<strong>OA (oas114)</strong>`, ja: `作成者：<strong>OA (oas114)</strong>` },
+      settingsKofiLink: { en: 'Support on Ko-fi', zh: '在 Ko-fi 贊助', ja: 'Ko-fiで支援する' },
+      settingsRegionPersonaHeading: { en: 'Region & Persona Presets', zh: '地區與身分模式預設', ja: '地域とペルソナのプリセット' },
+      settingsRegionPersonaBody: { en: `The <strong>Region</strong> selector (top toolbar) swaps which country/region regex ruleset is layered on top of the always-on <strong>Global</strong> baseline (email, IP addresses, credit card numbers, generic dates). Only one region is active at a time to avoid cross-country format collisions (e.g. a bare 9-digit number shouldn't simultaneously be treated as a US SSN and something else). The <strong>Persona</strong> selector swaps the Hard Block keyword set between <strong>Personal</strong> privacy terms and <strong>Business</strong> confidentiality terms.`, zh: `<strong>地區</strong>選單（頂部工具列）用來切換要疊加在永遠啟用的<strong>全球</strong>基準規則（電子郵件、IP 位址、信用卡卡號、常見日期格式）之上的是哪個國家／地區的正則規則庫。同時間只會啟用一個地區，避免跨國格式互相衝突（例如一組純 9 位數字，不該同時被當成美國社會安全碼又被當成別的東西）。<strong>身分模式</strong>選單則用來切換硬阻斷關鍵字集，在<strong>個人</strong>隱私用語與<strong>企業</strong>機密用語之間切換。`, ja: `<strong>地域</strong>セレクター（上部ツールバー）は、常時有効な<strong>グローバル</strong>基準ルール（メールアドレス、IPアドレス、クレジットカード番号、一般的な日付形式）の上に、どの国・地域の正規表現ルールセットを重ねるかを切り替えます。国ごとの形式が衝突しないよう、一度に有効になる地域は1つだけです（例：9桁の数字だけでは、米国のSSNと他の何かを同時に表すことはできません）。<strong>ペルソナ</strong>セレクターは、ハードブロックのキーワードセットを<strong>個人</strong>のプライバシー用語と<strong>ビジネス</strong>の機密用語との間で切り替えます。` },
+      settingsRegionPersonaWarning: { en: `<strong>Nothing here is saved.</strong> TokenShield destroys all state on reload by design, so your Region/Persona choice resets every time you open the file. If you always work in one region or persona, open <code class="bg-white border border-warning-200 px-1 rounded">TokenShield.html</code> in a text editor, search for <code class="bg-white border border-warning-200 px-1 rounded">DEFAULT_REGION</code> and <code class="bg-white border border-warning-200 px-1 rounded">DEFAULT_PERSONA</code> near the top of the <code class="bg-white border border-warning-200 px-1 rounded">&lt;script&gt;</code> block, and change the value — that becomes your new startup default.`, zh: `<strong>這裡的設定不會被儲存。</strong>TokenShield 的設計就是每次重新整理都會清空所有狀態，所以每次開啟檔案時 Region／Persona 都會重設。如果你固定只用某個地區或身分模式，可以用文字編輯器打開 <code class="bg-white border border-warning-200 px-1 rounded">TokenShield.html</code>，在 <code class="bg-white border border-warning-200 px-1 rounded">&lt;script&gt;</code> 區塊開頭附近搜尋 <code class="bg-white border border-warning-200 px-1 rounded">DEFAULT_REGION</code> 與 <code class="bg-white border border-warning-200 px-1 rounded">DEFAULT_PERSONA</code>，把值改掉──那就會成為你新的預設啟動值。`, ja: `<strong>ここでの設定は保存されません。</strong>TokenShieldは仕様上、再読み込みのたびにすべての状態を破棄するため、Region／Personaの選択も開くたびにリセットされます。いつも同じ地域やペルソナで作業する場合は、テキストエディタで <code class="bg-white border border-warning-200 px-1 rounded">TokenShield.html</code> を開き、<code class="bg-white border border-warning-200 px-1 rounded">&lt;script&gt;</code> ブロックの冒頭付近にある <code class="bg-white border border-warning-200 px-1 rounded">DEFAULT_REGION</code> と <code class="bg-white border border-warning-200 px-1 rounded">DEFAULT_PERSONA</code> を検索して値を変更してください──それが新しい起動時の既定値になります。` },
+      settingsCustomDictHeading: { en: 'Custom Dictionary (CSV)', zh: '自訂字典（CSV）', ja: 'カスタム辞書（CSV）' },
+      settingsCustomDictBody: { en: `Batch-import your own keywords, names, or project codenames. Download the template and fill it out using the "Keyword,Category" format. <strong>Category is optional</strong> — it defaults to CUSTOM if left blank. The system generates matching tags automatically (e.g. NAME_1, CUSTOM_1).<br><span class="text-warning-700 font-medium">Note: keyword values cannot contain commas — this will break CSV parsing. If a term itself contains a comma, use "Build Dictionary Online" instead.</span>`, zh: `批次匯入你自己的關鍵字、姓名或專案代號。下載範本後依「Keyword,Category」格式填寫，<strong>Category 欄位可留空</strong>──留空時預設歸類為 CUSTOM，系統會自動產生對應標籤（例如 NAME_1、CUSTOM_1）。<br><span class="text-warning-700 font-medium">注意：關鍵字內容不能包含逗號，否則會破壞 CSV 解析。如果詞彙本身就含有逗號，請改用「線上建立字典」功能。</span>`, ja: `キーワード、氏名、プロジェクトのコードネームなどを一括インポートできます。テンプレートをダウンロードし、「Keyword,Category」形式で入力してください。<strong>Category列は省略可</strong>──空欄の場合はCUSTOMとして扱われ、システムが自動でタグ（NAME_1、CUSTOM_1など）を生成します。<br><span class="text-warning-700 font-medium">注意：キーワードにカンマを含めることはできません（CSVの解析が壊れます）。カンマを含む語句を登録したい場合は、「オンラインで辞書を作成」を使用してください。</span>` },
+      commonDownloadCsvTemplate: { en: 'Download CSV Template', zh: '下載 CSV 範本', ja: 'CSVテンプレートをダウンロード' },
+      settingsBtnBuildDictOnline: { en: 'Build / Edit Dictionary Online', zh: '線上建立／編輯字典', ja: 'オンラインで辞書を作成／編集' },
+      settingsPromptLibHeading: { en: 'Local AI Prompt Library', zh: '本機 AI 提示詞庫', ja: 'ローカルAIプロンプトライブラリ' },
+      settingsPromptLibBody: { en: `Ready-to-copy system prompts for local models (Ollama, LM Studio, etc.). Paste one of these ahead of your masked text so the model's own instructions also stay privacy-aware — reinforcing that nothing, including your prompt phrasing, needs to leave this machine.`, zh: `提供可直接複製的系統提示詞，適用於本機模型（Ollama、LM Studio 等）。在遮蔽後的文字前貼上其中一段，讓模型本身的指令也具備隱私意識──強調包含提示詞措辭在內的一切內容，都不需要離開這台機器。`, ja: `ローカルモデル（Ollama、LM Studioなど）向けに、そのままコピーして使えるシステムプロンプトです。マスク済みテキストの前にこれらのいずれかを貼り付けることで、モデル自身の指示もプライバシーを意識したものになります──プロンプトの文言も含め、何も外部に出す必要がないことを強調します。` },
+      commonCopy: { en: 'Copy', zh: '複製', ja: 'コピー' },
+      settingsPromptPersonalDesc: { en: 'For personal documents — reminds the model that names/contacts are tokenized and must stay untouched.', zh: '適用於個人文件──提醒模型姓名／聯絡方式已被標記化，必須維持原樣不得更動。', ja: '個人向け文書用──氏名・連絡先がトークン化されていること、それらを変更してはならないことをモデルに念押しします。' },
+      settingsPromptBusinessDesc: { en: 'For business documents — frames the content as confidential/trade-secret material.', zh: '適用於企業文件──將內容定調為機密／營業秘密等級的資料。', ja: 'ビジネス向け文書用──内容を機密情報・営業秘密として扱うよう位置づけます。' },
+      settingsOllamaHeading: { en: 'Local AI (Ollama) Connection Setup', zh: '本機 AI（Ollama）連線設定', ja: 'ローカルAI（Ollama）接続設定' },
+      settingsOllamaInstallBox: { en: `<strong>Don't have Ollama installed yet?</strong><br>Download it from the <a href="https://ollama.com/download" target="_blank" class="underline font-bold text-brand-700 hover:text-brand-900">official Ollama website</a> and install it. Then open a terminal (Command Prompt / PowerShell / Terminal) and run the following command to install the default model:<br><code class="block mt-1 bg-white border border-brand-200 px-2 py-1 rounded font-mono text-ink">ollama run qwen2.5:3b</code>`, zh: `<strong>還沒安裝 Ollama？</strong><br>請前往<a href="https://ollama.com/download" target="_blank" class="underline font-bold text-brand-700 hover:text-brand-900">Ollama 官方網站</a>下載並安裝。安裝完成後開啟終端機（命令提示字元／PowerShell／Terminal），執行以下指令安裝預設模型：<br><code class="block mt-1 bg-white border border-brand-200 px-2 py-1 rounded font-mono text-ink">ollama run qwen2.5:3b</code>`, ja: `<strong>まだOllamaをインストールしていませんか？</strong><br><a href="https://ollama.com/download" target="_blank" class="underline font-bold text-brand-700 hover:text-brand-900">Ollama公式サイト</a>からダウンロードしてインストールしてください。インストール後、ターミナル（コマンドプロンプト／PowerShell／Terminal）を開き、以下のコマンドを実行して既定のモデルをインストールします：<br><code class="block mt-1 bg-white border border-brand-200 px-2 py-1 rounded font-mono text-ink">ollama run qwen2.5:3b</code>` },
+      settingsOllamaRiskBox: { en: `<strong class="text-warning-900">Why is this setting needed? And a risk warning</strong><br>Ollama blocks all web page access by default (a security protection). You need to add an "environment variable" named <code>OLLAMA_ORIGINS</code> set to <code>*</code> so Ollama allows this local TokenShield page to connect.<br><br><strong class="text-danger-700">⚠️ Security risk notice:</strong><br>Setting the origin to <code>*</code> allows any web page to call your local model. This only affects your own user account and doesn't require administrator rights, but it does carry some risk of abuse by other malicious pages.<br><br><strong>We strongly recommend fully quitting Ollama from the system tray when you're not using this tool, or removing the environment variable afterward.</strong>`, zh: `<strong class="text-warning-900">為什麼需要這個設定？以及風險提醒</strong><br>Ollama 預設會封鎖所有網頁的存取（這是一項安全保護機制）。你需要新增一個名為 <code>OLLAMA_ORIGINS</code>、值設為 <code>*</code> 的「環境變數」，Ollama 才會允許這個本機的 TokenShield 頁面連線。<br><br><strong class="text-danger-700">⚠️ 安全風險提醒：</strong><br>將 origin 設為 <code>*</code> 代表任何網頁都能呼叫你的本機模型。這僅影響你自己的使用者帳戶、不需要系統管理員權限，但仍存在被惡意網頁濫用的風險。<br><br><strong>強烈建議在不使用本工具時，於系統匣中完全關閉 Ollama，或事後移除該環境變數。</strong>`, ja: `<strong class="text-warning-900">なぜこの設定が必要か、そしてリスクについての注意</strong><br>Ollamaは既定ですべてのWebページからのアクセスをブロックします（セキュリティ保護のためです）。ローカルのTokenShieldページからの接続を許可するには、<code>OLLAMA_ORIGINS</code>という名前の「環境変数」を追加し、値を<code>*</code>に設定する必要があります。<br><br><strong class="text-danger-700">⚠️ セキュリティリスクに関する注意：</strong><br>originを<code>*</code>に設定すると、どのWebページからでもローカルモデルを呼び出せるようになります。これは自分のユーザーアカウントにのみ影響し、管理者権限は不要ですが、悪意あるページに悪用されるリスクが多少あります。<br><br><strong>本ツールを使用しないときはシステムトレイからOllamaを完全に終了するか、使用後にこの環境変数を削除することを強くお勧めします。</strong>` },
+      settingsOllamaStepsHeading: { en: 'Setup steps (one-time; persists across reboots after that)', zh: '設定步驟（只需設定一次，之後重開機也會保留）', ja: 'セットアップ手順（一度設定すれば、再起動後も保持されます）' },
+      settingsStep1Title: { en: 'Quit Ollama first', zh: '先關閉 Ollama', ja: 'まずOllamaを終了する' },
+      settingsStep1Body: { en: `Find the Ollama icon in your <strong>system tray</strong> (bottom-right, near the clock), <strong>right-click</strong> it, and choose "<strong>Quit Ollama</strong>" to fully close it.`, zh: `在<strong>系統匣</strong>（畫面右下角、時鐘附近）找到 Ollama 圖示，<strong>按右鍵</strong>後選擇「<strong>Quit Ollama</strong>」將它完全關閉。`, ja: `<strong>システムトレイ</strong>（右下、時計の近く）でOllamaのアイコンを見つけて<strong>右クリック</strong>し、「<strong>Quit Ollama</strong>」を選んで完全に終了してください。` },
+      settingsStep2Title: { en: `Open your OS's "Environment Variables" dialog`, zh: '開啟作業系統的「環境變數」設定視窗', ja: 'OSの「環境変数」ダイアログを開く' },
+      settingsStep2BodyWin: { en: `<strong>Windows:</strong> click Start, search "<strong>Edit environment variables for your account</strong>", and open it. Or press <code class="bg-paper-hover px-1 rounded">Win + R</code>, type <code class="bg-paper-hover px-1 rounded">sysdm.cpl</code>, press Enter, then "Advanced" → "Environment Variables".`, zh: `<strong>Windows：</strong>點擊開始功能表，搜尋「<strong>編輯您帳戶的環境變數</strong>」並開啟。或是按下 <code class="bg-paper-hover px-1 rounded">Win + R</code>，輸入 <code class="bg-paper-hover px-1 rounded">sysdm.cpl</code> 後按 Enter，再點「進階」→「環境變數」。`, ja: `<strong>Windows：</strong>スタートをクリックし、「<strong>アカウントの環境変数を編集</strong>」を検索して開きます。または <code class="bg-paper-hover px-1 rounded">Win + R</code> を押して <code class="bg-paper-hover px-1 rounded">sysdm.cpl</code> と入力しEnterキーを押した後、「詳細設定」→「環境変数」を選択します。` },
+      settingsStep2BodyMac: { en: `<strong>macOS/Linux:</strong> set <code class="bg-paper-hover px-1 rounded">OLLAMA_ORIGINS=*</code> in your shell profile (e.g. <code class="bg-paper-hover px-1 rounded">~/.zshrc</code>) or launch Ollama with the variable set for the session.`, zh: `<strong>macOS／Linux：</strong>在你的 shell 設定檔（例如 <code class="bg-paper-hover px-1 rounded">~/.zshrc</code>）中設定 <code class="bg-paper-hover px-1 rounded">OLLAMA_ORIGINS=*</code>，或是在啟動 Ollama 的當次工作階段中設定該變數。`, ja: `<strong>macOS／Linux：</strong>シェルの設定ファイル（例：<code class="bg-paper-hover px-1 rounded">~/.zshrc</code>）に <code class="bg-paper-hover px-1 rounded">OLLAMA_ORIGINS=*</code> を設定するか、その変数を設定した状態でOllamaをセッション単位で起動してください。` },
+      settingsStep3Title: { en: 'Add a new entry under "User variables"', zh: '在「使用者變數」下新增一筆項目', ja: '「ユーザー環境変数」に新しい項目を追加する' },
+      settingsStep3Body: { en: `Click "<strong>New...</strong>" under the <strong>upper half (your personal account variables)</strong> and enter:`, zh: `在<strong>上半部（你個人帳戶的變數）</strong>點擊「<strong>新增...</strong>」，並輸入以下內容：`, ja: `<strong>上半分（個人アカウントの変数）</strong>にある「<strong>新規...</strong>」をクリックし、以下を入力してください：` },
+      settingsVarNameLabel: { en: 'Variable name', zh: '變數名稱', ja: '変数名' },
+      settingsVarValueLabel: { en: 'Variable value', zh: '變數值', ja: '変数値' },
+      settingsStep3Footer: { en: 'Click OK, then OK again to close the dialog.', zh: '點擊確定，再點一次確定以關閉視窗。', ja: 'OKをクリックし、もう一度OKをクリックしてダイアログを閉じます。' },
+      settingsStep4Title: { en: 'Restart Ollama', zh: '重新啟動 Ollama', ja: 'Ollamaを再起動する' },
+      settingsStep4Body: { en: `Reopen the Ollama app from the Start menu, wait for the tray icon to appear, then come back here and click "<strong>Test Connection</strong>" to confirm.`, zh: `從開始功能表重新開啟 Ollama 應用程式，等待系統匣圖示出現後，回到這裡點擊「<strong>測試連線</strong>」確認是否成功。`, ja: `スタートメニューからOllamaアプリを再度開き、トレイアイコンが表示されるのを待ってから、ここに戻って「<strong>接続テスト</strong>」をクリックして確認してください。` },
+      settingsUndoTitle: { en: 'How do I undo this later?', zh: '之後要怎麼還原這個設定？', ja: 'あとで元に戻すには？' },
+      settingsUndoBody: { en: `Repeat step 2, find the <code class="bg-paper-hover px-1 rounded font-mono">OLLAMA_ORIGINS</code> entry under "User variables", select it, click "<strong>Delete</strong>", and restart Ollama.`, zh: `重複步驟 2，在「使用者變數」中找到 <code class="bg-paper-hover px-1 rounded font-mono">OLLAMA_ORIGINS</code> 項目，選取後點擊「<strong>刪除</strong>」，再重新啟動 Ollama。`, ja: `手順2をもう一度行い、「ユーザー環境変数」の中から <code class="bg-paper-hover px-1 rounded font-mono">OLLAMA_ORIGINS</code> を選択して「<strong>削除</strong>」をクリックし、Ollamaを再起動してください。` },
+      settingsAutostartTitle: { en: 'How do I stop Ollama from auto-starting?', zh: '要怎麼讓 Ollama 不要自動啟動？', ja: 'Ollamaの自動起動を止めるには？' },
+      settingsAutostartBody: { en: `On Windows: open Task Manager (right-click the taskbar) → "Startup apps" tab → find Ollama → set to "Disabled" so it won't launch in the background at boot.`, zh: `在 Windows：開啟工作管理員（在工作列按右鍵）→「啟動應用程式」分頁 → 找到 Ollama → 設為「已停用」，開機時就不會在背景自動啟動。`, ja: `Windowsの場合：タスクマネージャーを開き（タスクバーを右クリック）→「スタートアップ アプリ」タブ → Ollamaを見つけて「無効」に設定すると、起動時にバックグラウンドで自動起動しなくなります。` },
+      settingsConnModelHeading: { en: 'Connection & Model Settings', zh: '連線與模型設定', ja: '接続とモデルの設定' },
+      settingsApiUrlLabel: { en: 'API URL', zh: 'API 網址', ja: 'API URL' },
+      settingsModelNameLabel: { en: 'Model Name', zh: '模型名稱', ja: 'モデル名' },
+      settingsModelDefault: { en: 'qwen2.5:3b (default)', zh: 'qwen2.5:3b（預設）', ja: 'qwen2.5:3b（既定）' },
+      settingsModelCustom: { en: 'Custom (type your own)', zh: '自訂（手動輸入）', ja: 'カスタム（自分で入力）' },
+      settingsModelInputPlaceholder: { en: 'Enter model name', zh: '輸入模型名稱', ja: 'モデル名を入力' },
+      settingsModelHint: { en: `※ Make sure you've pulled this model via Ollama. Developers can edit these default options directly in the source (TokenShield.html).`, zh: `※ 請確認你已經透過 Ollama pull 過這個模型。開發者可以直接在原始碼（TokenShield.html）中編輯這些預設選項。`, ja: `※ このモデルをOllamaで事前にpullしていることを確認してください。開発者はソースコード（TokenShield.html）内でこれらの既定オプションを直接編集できます。` },
+      settingsBtnTestConnection: { en: 'Test Connection', zh: '測試連線', ja: '接続テスト' },
+
+      // ---- PII Rule Guide modal ----
+      modalGuideTitle: { en: 'PII Rule Guide', zh: '個資規則說明', ja: 'PIIルールガイド' },
+      guideIntro: { en: `TokenShield ships with a set of regex rules to detect sensitive personal and business data. The table below shows the rules currently active for your selected <strong>Region</strong> (plus the always-on Global baseline) — switch Region in the top toolbar to see a different set.`, zh: `TokenShield 內建一組正則規則，用來偵測敏感的個人與企業資料。下表顯示目前你所選<strong>地區</strong>啟用中的規則（並疊加永遠啟用的全球基準規則）──在頂部工具列切換地區即可看到不同的規則組合。`, ja: `TokenShieldには、機微な個人・業務データを検出するための正規表現ルールが組み込まれています。下の表は、現在選択中の<strong>地域</strong>で有効なルール（常時有効なグローバル基準を含む）を示しています──上部ツールバーで地域を切り替えると別のルールセットが表示されます。` },
+      guideHowToEditBtn: { en: 'How to edit these rules', zh: '如何編輯這些規則', ja: 'これらのルールを編集する方法' },
+      guideSafeAskAiTitle: { en: 'Not sure this file is actually safe? Ask an AI.', zh: '不確定這個檔案是否安全？問問 AI 吧。', ja: 'このファイルが本当に安全か不安ですか？AIに聞いてみましょう。' },
+      guideSafeAskAiBody: { en: `TokenShield is a single HTML file — no server, no background network calls. You don't need to read code yourself: paste the entire <code class="bg-white border border-line px-1 rounded">TokenShield.html</code> source into any AI (ChatGPT, Claude, etc.) and ask it directly: "Does this page send any user input anywhere?" Let the AI verify it for you, instead of just taking the developer's word for it.`, zh: `TokenShield 是單一 HTML 檔案──沒有伺服器，也沒有背景網路連線。你不需要自己看程式碼：把整份 <code class="bg-white border border-line px-1 rounded">TokenShield.html</code> 原始碼貼給任何一個 AI（ChatGPT、Claude 等），直接問它：「這個頁面會把使用者輸入送到任何地方嗎？」讓 AI 幫你驗證，而不是只憑開發者的一面之詞。`, ja: `TokenShieldは単一のHTMLファイルであり、サーバーもバックグラウンドでの通信も一切ありません。自分でコードを読む必要はありません──<code class="bg-white border border-line px-1 rounded">TokenShield.html</code> のソース全体を任意のAI（ChatGPT、Claudeなど）に貼り付け、「このページはユーザーの入力をどこかに送信していますか？」と直接尋ねてみてください。開発者の言葉を鵜呑みにするのではなく、AIに検証してもらいましょう。` },
+      guideHowToAddTitle: { en: 'How do I add my own PII rules and Hard Block keywords?', zh: '要怎麼新增自己的個資規則與硬阻斷關鍵字？', ja: '独自のPIIルールやハードブロックキーワードを追加するには？' },
+      guideHowToAddIntro: { en: `You don't need to hand-edit the HTML source — use the "Manage Custom Protection Rules" button in the toolbar instead:`, zh: `你不需要手動編輯 HTML 原始碼──改用工具列上的「管理自訂防護規則」按鈕即可：`, ja: `HTMLソースを手動で編集する必要はありません──ツールバーの「カスタム保護ルールを管理」ボタンを使ってください：` },
+      guideStep1: { en: `Click <strong>"Manage Custom Protection Rules"</strong> in the toolbar, then switch to the "Hard Block Keywords" or "Regex Rules" tab.`, zh: `點擊工具列上的<strong>「管理自訂防護規則」</strong>，然後切換到「硬阻斷關鍵字」或「正則規則」分頁。`, ja: `ツールバーの<strong>「カスタム保護ルールを管理」</strong>をクリックし、「ハードブロックキーワード」または「正規表現ルール」タブに切り替えます。` },
+      guideStep2: { en: `Download that tab's CSV template, fill in your keywords or patterns, and save it.`, zh: `下載該分頁的 CSV 範本，填入你的關鍵字或規則，然後儲存。`, ja: `そのタブのCSVテンプレートをダウンロードし、キーワードやパターンを入力して保存します。` },
+      guideStep3: { en: `Click "Import CSV", pick that file, and choose "Merge with Existing" or "Replace All".`, zh: `點擊「匯入 CSV」，選取該檔案，再選擇「與現有規則合併」或「取代全部」。`, ja: `「CSVをインポート」をクリックしてそのファイルを選び、「既存と統合」または「すべて置き換え」を選択します。` },
+      guideStep4: { en: `To have your customizations applied automatically every time you open this file, expand "Advanced Settings" (desktop only) in the same panel, click "Export as Auto-load File", and place the downloaded <code class="bg-white border border-line px-1 rounded">tokenshield.config.js</code> next to <code class="bg-white border border-line px-1 rounded">TokenShield.html</code> — this only takes effect when the page is opened as a local file.`, zh: `如果想讓你的自訂規則每次開啟檔案時都自動套用，展開同一面板中的「進階設定」（僅限桌面版），點擊「匯出為自動載入檔案」，並把下載到的 <code class="bg-white border border-line px-1 rounded">tokenshield.config.js</code> 放在 <code class="bg-white border border-line px-1 rounded">TokenShield.html</code> 旁邊──只有在以本機檔案方式開啟頁面時才會生效。`, ja: `カスタマイズをファイルを開くたびに自動で適用させたい場合は、同じパネル内の「詳細設定」（デスクトップ版のみ）を展開し、「自動読み込みファイルとしてエクスポート」をクリックして、ダウンロードした <code class="bg-white border border-line px-1 rounded">tokenshield.config.js</code> を <code class="bg-white border border-line px-1 rounded">TokenShield.html</code> と同じ場所に置いてください──これはページをローカルファイルとして開いた場合のみ有効です。` },
+      guideStep5: { en: `To discard manual edits and restore the built-in defaults, open "Manage Custom Protection Rules", expand "Advanced Settings" (desktop only), and click "Reload Config".`, zh: `如果想捨棄手動修改、回復內建預設值，開啟「管理自訂防護規則」，展開「進階設定」（僅限桌面版），點擊「重新載入設定」。`, ja: `手動での編集を破棄して組み込みの既定値に戻したい場合は、「カスタム保護ルールを管理」を開き、「詳細設定」（デスクトップ版のみ）を展開して「設定を再読み込み」をクリックします。` },
+      guideColCategory: { en: 'Data Category', zh: '資料類別', ja: 'データ分類' },
+      guideColTag: { en: 'Replacement Tag', zh: '替換標籤', ja: '置換タグ' },
+      guideColExample: { en: 'Example', zh: '範例', ja: '例' },
+      guideColRegex: { en: 'Regular Expression', zh: '正規表示式', ja: '正規表現' },
+      guideHardBlockHeading: { en: 'Extremely Sensitive Terms (Hard Block)', zh: '極度敏感用語（硬阻斷）', ja: '極めて機微な用語（ハードブロック）' },
+      guideHardBlockIntro: { en: `If the source text contains any of the following terms (from the currently selected Persona), TokenShield locks the copy function to prevent accidental exposure:`, zh: `如果原始文字包含以下任一用語（來自目前選定的身分模式），TokenShield 會鎖定複製功能以避免不慎外流：`, ja: `元のテキストに以下のいずれかの用語（現在選択中のペルソナに基づく）が含まれる場合、TokenShieldは誤った漏洩を防ぐためコピー機能をロックします：` },
+
+      // ---- Unlock confirmation modal ----
+      modalUnlockTitle: { en: 'Sensitive Information Block Warning', zh: '敏感資訊阻擋警告', ja: '機微情報ブロックの警告' },
+      unlockIntro: { en: 'TokenShield detected text that may contain extremely sensitive information. To protect the people involved, copy/export has been temporarily locked.', zh: 'TokenShield 偵測到文字中可能包含極度敏感的資訊。為保護當事人，複製／匯出功能已被暫時鎖定。', ja: 'TokenShieldは、極めて機微な情報を含む可能性のあるテキストを検出しました。関係者を保護するため、コピー／エクスポート機能を一時的にロックしています。' },
+      unlockReasonsHeading: { en: 'Block Reason(s)', zh: '阻擋原因', ja: 'ブロック理由' },
+      unlockFooterHint: { en: `If you've confirmed this information is safe to release, or believe this is a false positive, you can force-unlock it.`, zh: '如果你已確認這項資訊可以安全公開，或認為這是誤判，可以強制解鎖。', ja: 'この情報を公開しても安全だと確認できた場合、または誤検知だと思われる場合は、強制的にロックを解除できます。' },
+      unlockBtnKeepLocked: { en: 'Keep Locked (Safe)', zh: '維持鎖定（安全）', ja: 'ロックを維持する（安全）' },
+      unlockBtnConfirm: { en: 'I Confirm No Risk, Unlock', zh: '我確認沒有風險，解鎖', ja: 'リスクがないことを確認し、解除する' },
+
+      // ---- Build Dictionary Online modal ----
+      modalEditCsvTitle: { en: 'Custom Dictionary Manager (View / Edit / Build)', zh: '自訂字典管理員（檢視／編輯／建立）', ja: 'カスタム辞書マネージャー（表示／編集／作成）' },
+      editCsvIntro: { en: `Type directly into the table below, or <strong class="text-ink-hover">copy two columns from Excel and paste into any cell</strong> — the table expands automatically. Empty rows are ignored when you apply.`, zh: `直接在下方表格輸入，或<strong class="text-ink-hover">從 Excel 複製兩欄後貼到任一儲存格</strong>──表格會自動擴展。套用時會忽略空白列。`, ja: `下の表に直接入力するか、<strong class="text-ink-hover">Excelから2列をコピーして任意のセルに貼り付け</strong>てください──表は自動的に拡張されます。適用時、空の行は無視されます。` },
+      editCsvBtnAddRow: { en: '+ Add Row Manually', zh: '+ 手動新增一列', ja: '+ 行を手動で追加' },
+      editCsvFilterKwPlaceholder: { en: 'Filter by keyword...', zh: '依關鍵字篩選……', ja: 'キーワードで絞り込み…' },
+      editCsvFilterTypePlaceholder: { en: 'Filter by category...', zh: '依類別篩選……', ja: 'カテゴリで絞り込み…' },
+      editCsvColKeyword: { en: 'Keyword (required)', zh: '關鍵字（必填）', ja: 'キーワード（必須）' },
+      editCsvColCategory: { en: 'Category (optional, e.g. NAME)', zh: '類別（選填，例如 NAME）', ja: 'カテゴリ（任意、例：NAME）' },
+      commonDelete: { en: 'Delete', zh: '刪除', ja: '削除' },
+      editCsvBtnDownload: { en: 'Download as CSV', zh: '下載為 CSV', ja: 'CSVとしてダウンロード' },
+      editCsvBtnApply: { en: 'Apply to System', zh: '套用到系統', ja: 'システムに適用' },
+
+      // ---- Manage Custom Protection Rules modal ----
+      modalPmTitle: { en: 'Manage Custom Protection Rules', zh: '管理自訂防護規則', ja: 'カスタム保護ルールを管理' },
+      pmTabHardBlock: { en: 'Hard Block Keywords', zh: '硬阻斷關鍵字', ja: 'ハードブロックキーワード' },
+      pmTabRegex: { en: 'Regex Rules', zh: '正則規則', ja: '正規表現ルール' },
+      pmTabPrompts: { en: 'Local AI Prompts', zh: '本機 AI 提示詞', ja: 'ローカルAIプロンプト' },
+      pmHardBlockIntro: { en: `Single-column CSV, one keyword per row. This only manages your custom layer — the built-in Personal/Business keyword lists aren't editable here (see PII Rule Guide).`, zh: `單欄 CSV，每列一個關鍵字。這裡只管理你的自訂層──內建的個人／企業關鍵字清單無法在此編輯（請見個資規則說明）。`, ja: `単一列のCSVで、1行につき1キーワードです。ここで管理できるのはカスタム層のみです──組み込みの個人／ビジネスキーワードリストはここでは編集できません（PIIルールガイドを参照）。` },
+      pmBtnDownloadTemplate: { en: 'Download Template', zh: '下載範本', ja: 'テンプレートをダウンロード' },
+      pmBtnImportCsv: { en: 'Import CSV', zh: '匯入 CSV', ja: 'CSVをインポート' },
+      pmColKeyword: { en: 'Keyword', zh: '關鍵字', ja: 'キーワード' },
+      pmRegexIntro: { en: `4-column CSV: TypeTag,RuleName,Pattern,ExampleText. The Pattern column accepts a bare pattern or a full /pattern/flags literal. This only manages your custom layer — the built-in region-specific rules aren't editable here (see PII Rule Guide).`, zh: `4 欄 CSV：TypeTag,RuleName,Pattern,ExampleText。Pattern 欄位可以是單純的規則字串，也可以是完整的 /pattern/flags 格式。這裡只管理你的自訂層──內建的地區專屬規則無法在此編輯（請見個資規則說明）。`, ja: `4列構成のCSV：TypeTag,RuleName,Pattern,ExampleText。Pattern列には素のパターン、または完全な /pattern/flags 形式のどちらでも指定できます。ここで管理できるのはカスタム層のみです──組み込みの地域別ルールはここでは編集できません（PIIルールガイドを参照）。` },
+      pmColTag: { en: 'Tag', zh: '標籤', ja: 'タグ' },
+      pmColName: { en: 'Name', zh: '名稱', ja: '名前' },
+      pmColPattern: { en: 'Pattern', zh: '規則樣式', ja: 'パターン' },
+      pmChannel1Label: { en: 'Channel 1 — entity extraction prompt ({{TEXT}} is replaced with the actual text to scan)', zh: '通道 1──實體擷取提示詞（{{TEXT}} 會被替換為實際要掃描的文字）', ja: 'チャンネル1──エンティティ抽出プロンプト（{{TEXT}}は実際にスキャンするテキストに置き換えられます）' },
+      pmBtnResetDefault: { en: 'Reset to Default', zh: '重設為預設值', ja: '既定値にリセット' },
+      pmNoPlaceholderWarning: { en: `No {{TEXT}} placeholder found — the AI won't receive the actual document text.`, zh: `找不到 {{TEXT}} 佔位符──AI 將無法收到實際的文件內容。`, ja: `{{TEXT}} プレースホルダーが見つかりません──AIは実際の文書テキストを受け取れません。` },
+      pmChannel2PersonalLabel: { en: 'Channel 2 — risk assessment prompt (Personal persona)', zh: '通道 2──風險評估提示詞（個人身分模式）', ja: 'チャンネル2──リスク評価プロンプト（個人ペルソナ）' },
+      pmChannel2BusinessLabel: { en: 'Channel 2 — risk assessment prompt (Business persona)', zh: '通道 2──風險評估提示詞（企業身分模式）', ja: 'チャンネル2──リスク評価プロンプト（ビジネスペルソナ）' },
+      pmAdvancedSettingsHeading: { en: 'Advanced Settings: Auto-load Config File', zh: '進階設定：自動載入設定檔', ja: '詳細設定：設定ファイルの自動読み込み' },
+      pmAutoConfigNetworkNotice: { en: `This feature only takes effect when you download this page as a local HTML file and open it directly. You're currently browsing it via a URL — "Export as Auto-load File" still downloads the config file, but it will only auto-apply once you also download this page and keep the config file next to it.`, zh: `這個功能只有在你把這個頁面下載成本機 HTML 檔案並直接開啟時才會生效。你目前是透過網址瀏覽的──「匯出為自動載入檔案」仍然可以下載設定檔，但只有在你也把這個頁面下載下來、並把設定檔放在旁邊時，才會自動套用。`, ja: `この機能は、このページをローカルのHTMLファイルとしてダウンロードし、直接開いた場合にのみ有効になります。現在はURL経由で閲覧しています──「自動読み込みファイルとしてエクスポート」で設定ファイルはダウンロードできますが、このページ自体もダウンロードして設定ファイルを同じ場所に置かない限り、自動適用はされません。` },
+      pmExportBtnTitle: { en: 'Package the current in-memory custom rules and prompts into an auto-load config file', zh: '將目前記憶體中的自訂規則與提示詞打包成自動載入設定檔', ja: '現在メモリ上にあるカスタムルールとプロンプトを自動読み込み設定ファイルにまとめます' },
+      pmBtnExportAutoConfig: { en: 'Export as Auto-load File', zh: '匯出為自動載入檔案', ja: '自動読み込みファイルとしてエクスポート' },
+      pmReloadBtnTitle: { en: 'Discard manual edits and re-apply built-in defaults plus the same-folder auto-load config file', zh: '捨棄手動編輯，重新套用內建預設值與同資料夾中的自動載入設定檔', ja: '手動での編集を破棄し、組み込みの既定値と同じフォルダ内の自動読み込み設定ファイルを再適用します' },
+      pmBtnReloadConfig: { en: 'Reload Config', zh: '重新載入設定', ja: '設定を再読み込み' },
+      commonClose: { en: 'Close', zh: '關閉', ja: '閉じる' },
+
+      // ---- Import Merge/Replace modal ----
+      modalImportModeTitle: { en: 'Import Mode', zh: '匯入模式', ja: 'インポートモード' },
+      importModeBtnMerge: { en: 'Merge with Existing', zh: '與現有規則合併', ja: '既存と統合' },
+      importModeBtnReplace: { en: 'Replace All', zh: '取代全部', ja: 'すべて置き換え' },
+
+      // ---- Source badges & dynamic tables ----
+      badgeBuiltin: { en: 'Built-in', zh: '內建', ja: '組み込み' },
+      badgeAutoLoaded: { en: 'Auto-loaded', zh: '自動載入', ja: '自動読み込み' },
+      badgeManual: { en: 'Manually imported', zh: '手動匯入', ja: '手動インポート' },
+      badgeOverridden: { en: 'Overridden', zh: '已覆寫', ja: '上書き済み' },
+      badgeAiSession: { en: 'AI-extracted (session)', zh: 'AI 擷取（本次工作階段）', ja: 'AI抽出（セッション内）' },
+      pmNoCustomHardBlock: { en: 'No custom hard-block keywords yet', zh: '尚無自訂硬阻斷關鍵字', ja: 'カスタムのハードブロックキーワードはまだありません' },
+      pmNoCustomRegex: { en: 'No custom regex rules yet', zh: '尚無自訂正則規則', ja: 'カスタムの正規表現ルールはまだありません' },
+      editCsvRowKeywordPlaceholder: { en: 'Enter a keyword', zh: '輸入關鍵字', ja: 'キーワードを入力' },
+      editCsvRowCategoryPlaceholder: { en: 'e.g. NAME', zh: '例如 NAME', ja: '例：NAME' },
+      editCsvRowDeleteTitle: { en: 'Delete this row', zh: '刪除此列', ja: 'この行を削除' },
+
+      // ---- Toasts, confirms & dynamic scan/report strings ----
+      confirmDefaultTitle: { en: 'Please Confirm', zh: '請確認', ja: '確認してください' },
+      confirmDefaultOk: { en: 'OK', zh: '確定', ja: 'OK' },
+      confirmDefaultCancel: { en: 'Cancel', zh: '取消', ja: 'キャンセル' },
+      toastCopiedPromptTemplate: { en: 'Copied the {persona} local AI prompt template!', zh: '已複製「{persona}」本機 AI 提示詞範本！', ja: '「{persona}」ローカルAIプロンプトテンプレートをコピーしました！' },
+      confirmReloadConfigMessage: { en: 'Reloading will discard any manually edited custom rules and dictionary entries, then re-apply the built-in defaults plus the auto-load config file (if present). Continue?', zh: '重新載入將會捨棄所有手動編輯的自訂規則與字典項目，並重新套用內建預設值與自動載入設定檔（若有的話）。要繼續嗎？', ja: '再読み込みすると、手動で編集したカスタムルールと辞書エントリはすべて破棄され、組み込みの既定値と自動読み込み設定ファイル（存在する場合）が再適用されます。続けますか？' },
+      confirmReloadConfigOk: { en: 'Reload', zh: '重新載入', ja: '再読み込み' },
+      toastConfigReloaded: { en: 'Configuration reloaded.', zh: '設定已重新載入。', ja: '設定を再読み込みしました。' },
+      toastNoUsableRows: { en: 'The file has no usable rows.', zh: '檔案中沒有可用的資料列。', ja: 'ファイルに使用可能な行がありません。' },
+      importDimRoster: { en: 'dictionary entries', zh: '字典項目', ja: '辞書エントリ' },
+      importDimHardBlock: { en: 'hard-block keywords', zh: '硬阻斷關鍵字', ja: 'ハードブロックキーワード' },
+      importDimRegex: { en: 'regex rules', zh: '正則規則', ja: '正規表現ルール' },
+      importInvalidPatternIntro: { en: 'The following {count} row(s) have an invalid pattern and will be skipped:', zh: '以下 {count} 列的規則格式無效，將會被略過：', ja: '以下の{count}行は無効なパターンのためスキップされます：' },
+      importInvalidPatternRow: { en: 'Row {row} ({pattern}): {error}', zh: '第 {row} 列（{pattern}）：{error}', ja: '{row}行目（{pattern}）：{error}' },
+      importModeMessage: { en: 'You currently have {existingCount} {dimensionLabel}. This file has {rowCount} row(s). How should it be imported?', zh: '你目前有 {existingCount} 筆{dimensionLabel}。這個檔案有 {rowCount} 列資料。要如何匯入？', ja: '現在{existingCount}件の{dimensionLabel}があります。このファイルには{rowCount}行のデータがあります。どのようにインポートしますか？' },
+      toastImportComplete: { en: 'Import complete.', zh: '匯入完成。', ja: 'インポートが完了しました。' },
+      toastClipboardReadFailed: { en: "Couldn't read the clipboard. Please allow clipboard access in your browser, or paste manually with Ctrl+V.", zh: '無法讀取剪貼簿。請允許瀏覽器存取剪貼簿權限，或改用 Ctrl+V 手動貼上。', ja: 'クリップボードを読み取れませんでした。ブラウザでクリップボードへのアクセスを許可するか、Ctrl+Vで手動で貼り付けてください。' },
+      toastTableEmptyNoKeywords: { en: 'The table is empty — no keywords entered!', zh: '表格是空的──尚未輸入任何關鍵字！', ja: '表が空です──キーワードが入力されていません！' },
+      toastTableEmptyNoExport: { en: 'The table is empty — nothing to export!', zh: '表格是空的──沒有可匯出的內容！', ja: '表が空です──エクスポートする内容がありません！' },
+      tooltipCategory: { en: 'Category: {reason}', zh: '類別：{reason}', ja: '分類：{reason}' },
+      toastOllamaConnectFailed: { en: "Couldn't connect. Local AI (Ollama) may not be running or CORS isn't configured. Please start Ollama first.", zh: '無法連線。本機 AI（Ollama）可能尚未啟動，或 CORS 尚未設定完成。請先啟動 Ollama。', ja: '接続できませんでした。ローカルAI（Ollama）が起動していないか、CORSが設定されていない可能性があります。まずOllamaを起動してください。' },
+      scanChannel1Starting: { en: 'AI Scan (1/2 starting) - click to cancel', zh: 'AI 掃描（1/2 啟動中）── 點擊可取消', ja: 'AIスキャン（1/2 開始中）── クリックでキャンセル' },
+      confirmStillWaitingMessage: { en: 'The AI response has taken longer than 3 minutes.', zh: 'AI 回應時間已超過 3 分鐘。', ja: 'AIの応答が3分以上かかっています。' },
+      confirmStillWaitingTitle: { en: 'Still Waiting', zh: '仍在等待中', ja: 'まだ待機中' },
+      confirmStillWaitingAbort: { en: 'Abort', zh: '中止', ja: '中止' },
+      confirmStillWaitingKeepWaiting: { en: 'Keep Waiting', zh: '繼續等待', ja: '待機を続ける' },
+      scanChannel1Progress: { en: 'Scan (1/2) received {count} chars (click to cancel)', zh: '掃描（1/2）已接收 {count} 字元（點擊可取消）', ja: 'スキャン（1/2）{count}文字を受信（クリックでキャンセル）' },
+      reasonAiEntityExtraction: { en: 'AI entity extraction', zh: 'AI 實體擷取', ja: 'AIエンティティ抽出' },
+      reasonAutoLoadedConfig: { en: 'Auto-loaded config', zh: '自動載入設定', ja: '自動読み込み設定' },
+      reasonBuiltOnline: { en: 'Built online', zh: '線上建立', ja: 'オンラインで作成' },
+      scanChannel2Starting: { en: 'AI Scan (2/2 starting)', zh: 'AI 掃描（2/2 啟動中）', ja: 'AIスキャン（2/2 開始中）' },
+      scanChannel2Progress: { en: 'Scan (2/2) received {count} chars (click to cancel)', zh: '掃描（2/2）已接收 {count} 字元（點擊可取消）', ja: 'スキャン（2/2）{count}文字を受信（クリックでキャンセル）' },
+      reasonAiDeepScanFlagged: { en: 'AI deep scan flagged: {reason}', zh: 'AI 深度掃描標記：{reason}', ja: 'AI詳細スキャンでフラグ：{reason}' },
+      reasonAiDeepScanFallback: { en: 'a potential sensitive-risk finding', zh: '潛在的敏感風險項目', ja: '機微リスクの可能性がある事項' },
+      toastScanCompleteBlocked: { en: 'Scan complete!\nAdded {count} new masked entities.\nA sensitive-risk finding was detected — copy has been force-locked!', zh: '掃描完成！\n新增了 {count} 個遮蔽項目。\n偵測到敏感風險項目──複製功能已被強制鎖定！', ja: 'スキャン完了！\n{count}件のマスク項目を追加しました。\n機微リスクが検出されたため、コピー機能を強制的にロックしました！' },
+      toastScanCompleteOk: { en: 'Scan complete! Added {count} new masked entities. No additional sensitive risks found.', zh: '掃描完成！新增了 {count} 個遮蔽項目，未發現其他敏感風險。', ja: 'スキャン完了！{count}件のマスク項目を追加しました。追加の機微リスクは見つかりませんでした。' },
+      toastAiScanCancelled: { en: 'AI scan was cancelled.', zh: 'AI 掃描已取消。', ja: 'AIスキャンはキャンセルされました。' },
+      toastAiScanFailed: { en: 'AI scan failed:\n{message}', zh: 'AI 掃描失敗：\n{message}', ja: 'AIスキャンに失敗しました：\n{message}' },
+      toastPasteAiReplyFirst: { en: 'Please paste the external AI reply first.', zh: '請先貼上外部 AI 的回覆。', ja: '先に外部AIの返信を貼り付けてください。' },
+      toastNoMaskingRecordYet: { en: `No masking record yet — please run de-identification in the "De-identify" tab first.`, zh: '尚無遮蔽紀錄──請先在「去識別化」分頁執行去識別化。', ja: 'マスキング記録がまだありません──先に「匿名化」タブで匿名化を実行してください。' },
+      toastMaskedPromptCopied: { en: 'Masked prompt copied!', zh: '已複製遮蔽後的提示詞！', ja: 'マスク済みプロンプトをコピーしました！' },
+      toastRestoredTextCopied: { en: 'Restored text copied!', zh: '已複製還原後文字！', ja: '復元後のテキストをコピーしました！' },
+      ollamaTestTesting: { en: 'Testing connection...', zh: '測試連線中……', ja: '接続をテスト中…' },
+      ollamaTestSuccess: { en: '✅ Connected successfully!', zh: '✅ 連線成功！', ja: '✅ 接続に成功しました！' },
+      ollamaTestModelNotFound: { en: `⚠️ Connected, but model [{model}] wasn't found. Make sure you've run "ollama pull".`, zh: `⚠️ 已連線，但找不到模型 [{model}]。請確認你已執行過「ollama pull」。`, ja: `⚠️ 接続はできましたが、モデル [{model}] が見つかりません。「ollama pull」を実行済みか確認してください。` },
+      ollamaTestFailed: { en: 'Connection failed. Make sure Ollama is running and OLLAMA_ORIGINS is set.', zh: '連線失敗。請確認 Ollama 已啟動，且已設定 OLLAMA_ORIGINS。', ja: '接続に失敗しました。Ollamaが起動しており、OLLAMA_ORIGINSが設定されていることを確認してください。' },
+      v1LongTextWarning: { en: 'Text is over 50,000 characters — scanning may be slower.', zh: '文字超過 50,000 字元──掃描速度可能會變慢。', ja: 'テキストが50,000文字を超えています──スキャンが遅くなる場合があります。' },
+      commonTableBadge: { en: 'Table', zh: '表格', ja: 'テーブル' },
+      reasonManualTableMask: { en: 'Manual table mask', zh: '手動表格遮蔽', ja: '手動テーブルマスク' },
+      commonDoneCheckmark: { en: '✓ Done', zh: '✓ 完成', ja: '✓ 完了' },
+      v1NoMaskedItems: { en: 'No masked items', zh: '尚無遮蔽項目', ja: 'マスクされた項目はありません' },
+      v2NoMaskingRecord: { en: 'No masking record', zh: '尚無遮蔽紀錄', ja: 'マスキング記録がありません' },
+      tooltipTag: { en: 'Tag: {token}', zh: '標籤：{token}', ja: 'タグ：{token}' },
+      tooltipTagToggle: { en: 'Tag: {token} (click to toggle masking)', zh: '標籤：{token}（點擊可切換遮蔽狀態）', ja: 'タグ：{token}（クリックでマスク状態を切り替え）' },
+      v2RestoreMissingItems: { en: '⚠ {count} item(s) missing — see the record on the left', zh: '⚠ 有 {count} 個項目缺失──請查看左側紀錄', ja: '⚠ {count}件の項目が見つかりません──左側の記録をご確認ください' },
+      v2RestoreFully: { en: '✓ Fully restored', zh: '✓ 已完整還原', ja: '✓ 完全に復元されました' },
+      ctxUnmaskWithReason: { en: `- Un-mask [{reason}] "{value}"`, zh: `- 取消遮蔽 [{reason}]「{value}」`, ja: `- マスク解除 [{reason}]「{value}」` },
+      ctxMarkSensitive: { en: `+ Mark "{value}" as sensitive`, zh: `+ 將「{value}」標記為敏感資訊`, ja: `+「{value}」を機微情報としてマーク` },
+      ctxTableUnmaskCell: { en: '[Table] Un-mask this cell', zh: '[表格] 取消遮蔽此儲存格', ja: '[テーブル] このセルのマスクを解除' },
+      ctxTableUnmaskCol: { en: '[Table] Un-mask this column', zh: '[表格] 取消遮蔽此欄', ja: '[テーブル] この列のマスクを解除' },
+      ctxTableUnmaskRow: { en: '[Table] Un-mask this row', zh: '[表格] 取消遮蔽此列', ja: '[テーブル] この行のマスクを解除' },
+      ctxTableMaskCell: { en: '[Table] Mask this cell', zh: '[表格] 遮蔽此儲存格', ja: '[テーブル] このセルをマスク' },
+      ctxTableMaskCol: { en: '[Table] Mask this column ({rows} rows)', zh: '[表格] 遮蔽此欄（{rows} 列）', ja: '[テーブル] この列をマスク（{rows}行）' },
+      ctxTableMaskRow: { en: '[Table] Mask this row ({cols} columns)', zh: '[表格] 遮蔽此列（{cols} 欄）', ja: '[テーブル] この行をマスク（{cols}列）' },
+      // __I18N_END__
+    };
+
+    function t(key, vars) {
+      const entry = I18N[key];
+      if (!entry) return key;
+      let str = entry[currentLang] || entry.en || key;
+      if (vars) { for (const k in vars) str = str.split(`{${k}}`).join(vars[k]); }
+      return str;
+    }
+
+    function updateDictCountLabel() {
+      document.getElementById('dictCountLabel').innerText = t('dictCountLabel', { count: customDict.length });
+    }
+
+    function applyLanguage(lang) {
+      currentLang = lang;
+      localStorage.setItem(LANG_STORAGE_KEY, lang);
+      document.documentElement.lang = lang === 'zh' ? 'zh-Hant' : (lang === 'ja' ? 'ja' : 'en');
+      document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        if (!I18N[key]) return;
+        const varsAttr = el.getAttribute('data-i18n-vars');
+        let vars;
+        if (varsAttr) { try { vars = JSON.parse(varsAttr); } catch (e) {} }
+        el.innerHTML = t(key, vars);
+      });
+      document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+        const key = el.getAttribute('data-i18n-placeholder');
+        if (I18N[key]) el.placeholder = t(key);
+      });
+      document.querySelectorAll('[data-i18n-title]').forEach(el => {
+        const key = el.getAttribute('data-i18n-title');
+        if (I18N[key]) el.title = t(key);
+      });
+      document.querySelectorAll('[data-i18n-aria-label]').forEach(el => {
+        const key = el.getAttribute('data-i18n-aria-label');
+        if (I18N[key]) el.setAttribute('aria-label', t(key));
+      });
+      const langSelectEl = document.getElementById('langSelect');
+      if (langSelectEl) langSelectEl.value = lang;
+      refreshDynamicText();
+    }
+
+    function switchLanguage(val) {
+      applyLanguage(val);
+    }
+
+    // Re-render dynamic UI pieces that are pure functions of existing state, so an
+    // already-open panel reflects the newly selected language immediately on switch.
+    function refreshDynamicText() {
+      updateDictCountLabel();
+      if (typeof renderHardBlockMgmtTable === 'function') renderHardBlockMgmtTable();
+      if (typeof renderRegexMgmtTable === 'function') renderRegexMgmtTable();
+      if (typeof refreshGuideModalIfOpen === 'function') refreshGuideModalIfOpen();
     }
 
     let customDict = []; // Array of { type, value, reason, isAi?, source }
@@ -1264,7 +1623,7 @@
     };
     function copyLocalPrompt(which) {
       const text = LOCAL_AI_PROMPTS[which];
-      if (text) navigator.clipboard.writeText(text).then(() => showToast(`Copied the ${which === 'business' ? 'Business' : 'Personal'} local AI prompt template!`, 'success'));
+      if (text) navigator.clipboard.writeText(text).then(() => showToast(t('toastCopiedPromptTemplate', { persona: which === 'business' ? t('personaBusiness') : t('personaPersonal') }), 'success'));
     }
 
     // ==========================================
@@ -1347,12 +1706,12 @@
       customDict = []; // roster has no builtin baseline, reset just means clear
     }
 
-    const SOURCE_BADGE_LABELS = {
-      builtin: 'Built-in', 'auto-loaded': 'Auto-loaded', manual: 'Manually imported',
-      overridden: 'Overridden', 'ai-session': 'AI-extracted (session)'
+    const SOURCE_BADGE_KEYS = {
+      builtin: 'badgeBuiltin', 'auto-loaded': 'badgeAutoLoaded', manual: 'badgeManual',
+      overridden: 'badgeOverridden', 'ai-session': 'badgeAiSession'
     };
     function sourceBadgeHtml(source) {
-      const label = SOURCE_BADGE_LABELS[source] || source || '';
+      const label = SOURCE_BADGE_KEYS[source] ? t(SOURCE_BADGE_KEYS[source]) : (source || '');
       if (!label) return '';
       return ` <span class="badge-source badge-${source}" style="font-size:10px;padding:1px 6px;border-radius:9999px;background:var(--stone-200);color:var(--stone-600);margin-left:4px;white-space:nowrap;">${label}</span>`;
     }
@@ -1387,7 +1746,7 @@
         hardBlockPresets.custom = mergeByKey(hardBlockPresets.custom, incoming, e => e.value.toLowerCase(), 'auto-loaded', 'auto-loaded');
       }
       if (Array.isArray(cfg.roster)) {
-        const incoming = cfg.roster.filter(r => r && r.value).map(r => ({ type: r.type || 'CUSTOM', value: r.value, reason: r.reason || 'Auto-loaded config' }));
+        const incoming = cfg.roster.filter(r => r && r.value).map(r => ({ type: r.type || 'CUSTOM', value: r.value, reason: r.reason || t('reasonAutoLoadedConfig') }));
         customDict = mergeByKey(customDict, incoming, e => e.value, 'auto-loaded', 'auto-loaded');
       }
       if (Array.isArray(cfg.regexRules)) {
@@ -1428,16 +1787,16 @@
     }
 
     async function reloadConfig() {
-      const ok = await showConfirmModal('Reloading will discard any manually edited custom rules and dictionary entries, then re-apply the built-in defaults plus the auto-load config file (if present). Continue?', { danger: true, okLabel: 'Reload' });
+      const ok = await showConfirmModal(t('confirmReloadConfigMessage'), { danger: true, okLabel: t('confirmReloadConfigOk') });
       if (!ok) return;
       initCustomProtectionState();
       loadAutoConfig(() => {
-        document.getElementById('dictCountLabel').innerText = `Dictionary: ${customDict.length}`;
+        updateDictCountLabel();
         renderHardBlockMgmtTable();
         renderRegexMgmtTable();
         renderAiPromptTextareas();
         triggerPreview();
-        showToast('Configuration reloaded.', 'success');
+        showToast(t('toastConfigReloaded'), 'success');
       });
     }
 
@@ -1518,10 +1877,10 @@
         <tr>
           <td class="px-3 py-2">${escapeHtml(entry.value)}${sourceBadgeHtml(entry.source)}</td>
           <td class="px-3 py-2 text-center">
-            <button onclick="deleteHardBlockEntry('${escapeHtml(escapeForInlineJs(entry.value))}')" class="text-danger-500 hover:text-danger-700 text-xs">Delete</button>
+            <button onclick="deleteHardBlockEntry('${escapeHtml(escapeForInlineJs(entry.value))}')" class="text-danger-500 hover:text-danger-700 text-xs">${t('commonDelete')}</button>
           </td>
         </tr>
-      `).join('') || `<tr><td colspan="2" class="px-3 py-4 text-center text-ink-faint text-xs">No custom hard-block keywords yet</td></tr>`;
+      `).join('') || `<tr><td colspan="2" class="px-3 py-4 text-center text-ink-faint text-xs">${t('pmNoCustomHardBlock')}</td></tr>`;
     }
 
     function renderRegexMgmtTable() {
@@ -1533,10 +1892,10 @@
           <td class="px-3 py-2">${escapeHtml(rule.name)}${sourceBadgeHtml(rule.source)}</td>
           <td class="px-3 py-2 font-mono text-[10px] break-all">${escapeHtml(`/${rule.pattern}/${rule.flags}`)}</td>
           <td class="px-3 py-2 text-center">
-            <button onclick="deleteRegexEntry('${escapeHtml(escapeForInlineJs(rule.pattern))}')" class="text-danger-500 hover:text-danger-700 text-xs">Delete</button>
+            <button onclick="deleteRegexEntry('${escapeHtml(escapeForInlineJs(rule.pattern))}')" class="text-danger-500 hover:text-danger-700 text-xs">${t('commonDelete')}</button>
           </td>
         </tr>
-      `).join('') || `<tr><td colspan="4" class="px-3 py-4 text-center text-ink-faint text-xs">No custom regex rules yet</td></tr>`;
+      `).join('') || `<tr><td colspan="4" class="px-3 py-4 text-center text-ink-faint text-xs">${t('pmNoCustomRegex')}</td></tr>`;
     }
 
     function deleteHardBlockEntry(value) {
@@ -1564,10 +1923,10 @@
     let pendingImport = null; // { dimension: 'roster'|'hardBlock'|'regex', rows: [...] }
 
     function openImportDialog(dimension, rows) {
-      if (!rows.length) { showToast('The file has no usable rows.', 'warning'); return; }
+      if (!rows.length) { showToast(t('toastNoUsableRows'), 'warning'); return; }
       pendingImport = { dimension, rows };
 
-      const dimensionLabel = { roster: 'dictionary entries', hardBlock: 'hard-block keywords', regex: 'regex rules' }[dimension];
+      const dimensionLabel = { roster: t('importDimRoster'), hardBlock: t('importDimHardBlock'), regex: t('importDimRegex') }[dimension];
       const existingCount = { roster: customDict.length, hardBlock: hardBlockPresets.custom.length, regex: regexPresets.custom.length }[dimension];
 
       const errorList = document.getElementById('importModeErrorList');
@@ -1575,8 +1934,8 @@
         const errors = rows.map((row, idx) => tryCompileRegexRow(row, idx)).filter(r => !r.ok);
         if (errors.length) {
           errorList.classList.remove('hidden');
-          errorList.innerHTML = `The following ${errors.length} row(s) have an invalid pattern and will be skipped:<br>` +
-            errors.map(e => `Row ${e.idx + 1} (${escapeHtml(e.raw.pattern || '')}): ${escapeHtml(e.error)}`).join('<br>');
+          errorList.innerHTML = t('importInvalidPatternIntro', { count: errors.length }) + '<br>' +
+            errors.map(e => t('importInvalidPatternRow', { row: e.idx + 1, pattern: escapeHtml(e.raw.pattern || ''), error: escapeHtml(e.error) })).join('<br>');
         } else {
           errorList.classList.add('hidden');
           errorList.innerHTML = '';
@@ -1587,7 +1946,7 @@
       }
 
       document.getElementById('importModeMessage').innerText =
-        `You currently have ${existingCount} ${dimensionLabel}. This file has ${rows.length} row(s). How should it be imported?`;
+        t('importModeMessage', { existingCount, dimensionLabel, rowCount: rows.length });
       openModal('importModeModal');
     }
 
@@ -1608,13 +1967,13 @@
       } else if (dimension === 'roster') {
         const base = mode === 'replace' ? [] : customDict;
         customDict = mergeByKey(base, rows, e => e.value, 'manual', 'overridden');
-        document.getElementById('dictCountLabel').innerText = `Dictionary: ${customDict.length}`;
+        updateDictCountLabel();
       }
 
       pendingImport = null;
       closeModal('importModeModal');
       triggerPreview();
-      showToast('Import complete.', 'success');
+      showToast(t('toastImportComplete'), 'success');
     }
 
     function handleHardBlockCsvUpload(event) {
@@ -1694,11 +2053,12 @@
     }
 
     initCustomProtectionState(); // apply built-in defaults first
+    applyLanguage(currentLang); // apply saved/default display language to the freshly-built DOM
     // then try merging in same-folder tokenshield.config.js (silently skipped if absent);
     // must refresh the "Dictionary: N" counter afterward, otherwise it stays at the HTML's
     // hardcoded initial value of 0 until something else happens to touch it.
     loadAutoConfig(() => {
-      document.getElementById('dictCountLabel').innerText = `Dictionary: ${customDict.length}`;
+      updateDictCountLabel();
     });
     if (location.protocol !== 'file:') {
       const autoConfigNetworkNotice = document.getElementById('autoConfigNetworkNotice');
@@ -1749,7 +2109,7 @@
     // Generic confirm modal (replaces window.confirm) — returns a Promise<boolean>.
     let _genericConfirmResolve = null;
     function showConfirmModal(message, opts = {}) {
-      const { title = 'Please Confirm', okLabel = 'OK', cancelLabel = 'Cancel', danger = false } = opts;
+      const { title = t('confirmDefaultTitle'), okLabel = t('confirmDefaultOk'), cancelLabel = t('confirmDefaultCancel'), danger = false } = opts;
       document.getElementById('genericConfirmTitle').textContent = title;
       document.getElementById('genericConfirmMessage').textContent = message;
       document.getElementById('genericConfirmCancelBtn').textContent = cancelLabel;
@@ -1777,7 +2137,7 @@
       const container = document.getElementById('toastContainer');
       const el = document.createElement('div');
       el.className = `pointer-events-auto max-w-sm w-full bg-white ${TOAST_STYLES[variant] || TOAST_STYLES.info} border rounded-lg shadow-lg px-4 py-3 text-sm flex items-start gap-2 transition-all duration-300 opacity-0 translate-y-2`;
-      el.innerHTML = `<span class="flex-1 whitespace-pre-line">${escapeHtml(message)}</span><button class="text-ink-faint hover:text-ink-hover flex-shrink-0 font-medium" aria-label="Close">&times;</button>`;
+      el.innerHTML = `<span class="flex-1 whitespace-pre-line">${escapeHtml(message)}</span><button class="text-ink-faint hover:text-ink-hover flex-shrink-0 font-medium" aria-label="${escapeHtml(t('commonClose'))}">&times;</button>`;
       el.querySelector('button').onclick = () => removeToast(el);
       container.appendChild(el);
       requestAnimationFrame(() => { el.classList.remove('opacity-0', 'translate-y-2'); });
@@ -1791,7 +2151,7 @@
 
     function openSettings() { openModal('settingsModal'); }
     function closeSettings() { closeModal('settingsModal'); }
-    function openGuide() {
+    function renderGuideTable() {
       const tbody = document.getElementById("guideTableBody");
       tbody.innerHTML = getActiveRegexRules().map(rule => `
         <tr>
@@ -1802,7 +2162,14 @@
         </tr>
       `).join('');
       document.getElementById("guideHardBlockList").innerText = getHardBlockKeywords().join(", ");
+    }
+    function openGuide() {
+      renderGuideTable();
       openModal('guideModal');
+    }
+    function refreshGuideModalIfOpen() {
+      const modal = document.getElementById('guideModal');
+      if (modal && !modal.classList.contains('hidden')) renderGuideTable();
     }
     function closeGuide() { closeModal('guideModal'); }
     function toggleGuideInstructions() {
@@ -1860,7 +2227,7 @@
           document.getElementById("aiReplyInput").value = text;
         }
       } catch (err) {
-        showToast("Couldn't read the clipboard. Please allow clipboard access in your browser, or paste manually with Ctrl+V.", 'danger');
+        showToast(t('toastClipboardReadFailed'), 'danger');
       }
     }
 
@@ -1876,13 +2243,13 @@
       tr.innerHTML = `
         <td class="px-3 py-1.5 text-center text-ink-faint font-mono text-xs border-r border-line-soft">${editCsvRowCount}</td>
         <td class="px-3 py-1.5 border-r border-line-soft">
-          <input type="text" class="csv-kw-input w-full p-1.5 bg-transparent border border-transparent focus:border-brand-300 focus:bg-white rounded outline-none transition-all" value="${escapeHtml(keyword)}" placeholder="Enter a keyword">
+          <input type="text" class="csv-kw-input w-full p-1.5 bg-transparent border border-transparent focus:border-brand-300 focus:bg-white rounded outline-none transition-all" value="${escapeHtml(keyword)}" placeholder="${escapeHtml(t('editCsvRowKeywordPlaceholder'))}">
         </td>
         <td class="px-3 py-1.5 border-r border-line-soft">
-          <input type="text" class="csv-type-input w-full p-1.5 bg-transparent border border-transparent focus:border-brand-300 focus:bg-white rounded outline-none transition-all font-mono text-xs uppercase" value="${escapeHtml(type)}" placeholder="e.g. NAME">
+          <input type="text" class="csv-type-input w-full p-1.5 bg-transparent border border-transparent focus:border-brand-300 focus:bg-white rounded outline-none transition-all font-mono text-xs uppercase" value="${escapeHtml(type)}" placeholder="${escapeHtml(t('editCsvRowCategoryPlaceholder'))}">
         </td>
         <td class="px-3 py-1.5 text-center">
-          <button onclick="handleCsvDeleteRow(this)" class="csv-delete-btn text-ink-faint hover:text-danger-600 focus:text-danger-600 focus:bg-danger-50 focus:outline-none transition-colors rounded p-1" title="Delete this row">
+          <button onclick="handleCsvDeleteRow(this)" class="csv-delete-btn text-ink-faint hover:text-danger-600 focus:text-danger-600 focus:bg-danger-50 focus:outline-none transition-colors rounded p-1" title="${escapeHtml(t('editCsvRowDeleteTitle'))}">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
           </button>
         </td>
@@ -2083,17 +2450,17 @@
     function applyOnlineCsv() {
       const data = getOnlineCsvData();
       if (data.length === 0) {
-        showToast("The table is empty — no keywords entered!", 'warning');
+        showToast(t('toastTableEmptyNoKeywords'), 'warning');
         return;
       }
 
       customDict = [];
       data.forEach(item => {
-        customDict.push({ type: item.type || 'CUSTOM', value: item.kw, reason: "Built online", source: 'manual' });
+        customDict.push({ type: item.type || 'CUSTOM', value: item.kw, reason: t('reasonBuiltOnline'), source: 'manual' });
       });
 
-      document.getElementById('dictCountLabel').innerText = `Dictionary: ${customDict.length}`;
-      showToast(`Applied ${customDict.length} custom dictionary entries!`, 'success');
+      updateDictCountLabel();
+      showToast(t('toastAppliedCustomDict', { count: customDict.length }), 'success');
       closeEditCsvModal();
       triggerPreview();
     }
@@ -2101,7 +2468,7 @@
     function downloadOnlineCsv() {
       const data = getOnlineCsvData();
       if (data.length === 0) {
-        showToast("The table is empty — nothing to export!", 'warning');
+        showToast(t('toastTableEmptyNoExport'), 'warning');
         return;
       }
 
@@ -2170,7 +2537,7 @@
       const resultEl = document.getElementById('ollamaTestResult');
       resultEl.classList.remove('hidden', 'text-brand-600', 'text-danger-600', 'text-warning-600');
       resultEl.classList.add('text-brand-600');
-      resultEl.innerText = "Testing connection...";
+      resultEl.innerText = t('ollamaTestTesting');
 
       try {
         const res = await fetch(`${url}/api/tags`);
@@ -2178,17 +2545,17 @@
           const data = await res.json();
           const hasModel = data.models && data.models.some(m => m.name === model || m.name === model+':latest' || m.name.startsWith(model+':'));
           if (hasModel) {
-            resultEl.innerText = "✅ Connected successfully!";
+            resultEl.innerText = t('ollamaTestSuccess');
           } else {
             resultEl.classList.replace('text-brand-600', 'text-warning-600');
-            resultEl.innerText = `⚠️ Connected, but model [${model}] wasn't found. Make sure you've run "ollama pull".`;
+            resultEl.innerText = t('ollamaTestModelNotFound', { model });
           }
         } else {
           throw new Error("HTTP Failed");
         }
       } catch (e) {
         resultEl.classList.replace('text-brand-600', 'text-danger-600');
-        resultEl.innerText = "❌ Connection failed. Make sure Ollama is running and OLLAMA_ORIGINS is set.";
+        resultEl.innerText = t('ollamaTestFailed');
       }
     }
 
@@ -2331,26 +2698,26 @@
         if (selectedText.length > 1) {
           const existingEnt = activeExtractedEntities.find(ent => ent.value === selectedText);
           if (existingEnt) {
-             html += `<button class="px-3 py-1.5 text-left hover:bg-ink-hover transition-colors w-full" onclick="handleSelectionAction('remove', '${escapeHtml(selectedText)}')">- Un-mask [${existingEnt.reason}] "${escapeHtml(selectedText)}"</button>`;
+             html += `<button class="px-3 py-1.5 text-left hover:bg-ink-hover transition-colors w-full" onclick="handleSelectionAction('remove', '${escapeHtml(selectedText)}')">${escapeHtml(t('ctxUnmaskWithReason', { reason: existingEnt.reason, value: selectedText }))}</button>`;
           } else {
-             html += `<button class="px-3 py-1.5 text-left hover:bg-ink-hover transition-colors w-full" onclick="handleSelectionAction('add', '${escapeHtml(selectedText)}')">+ Mark "${escapeHtml(selectedText)}" as sensitive</button>`;
+             html += `<button class="px-3 py-1.5 text-left hover:bg-ink-hover transition-colors w-full" onclick="handleSelectionAction('add', '${escapeHtml(selectedText)}')">${escapeHtml(t('ctxMarkSensitive', { value: selectedText }))}</button>`;
           }
         } else if (start === end) {
           const ent = activeExtractedEntities.find(ent => start > ent.start && start < ent.end);
           if (ent) {
-             html += `<button class="px-3 py-1.5 text-left hover:bg-ink-hover transition-colors w-full" onclick="handleSelectionAction('remove', '${escapeHtml(ent.value)}')">- Un-mask [${ent.reason}] "${escapeHtml(ent.value)}"</button>`;
+             html += `<button class="px-3 py-1.5 text-left hover:bg-ink-hover transition-colors w-full" onclick="handleSelectionAction('remove', '${escapeHtml(ent.value)}')">${escapeHtml(t('ctxUnmaskWithReason', { reason: ent.reason, value: ent.value }))}</button>`;
           }
           if (isTable) {
              if (html) html += `<div class="h-px bg-ink-hover my-1 w-full"></div>`;
              const isCellMasked = tableMasks.has(`${r}_${c}`);
              if (isCellMasked) {
-                html += `<button class="px-3 py-1.5 text-left hover:bg-ink-hover transition-colors w-full text-brand-300" onclick="handleTableMask('unmask_cell', ${r}, ${c})">[Table] Un-mask this cell</button>`;
-                html += `<button class="px-3 py-1.5 text-left hover:bg-ink-hover transition-colors w-full text-brand-300" onclick="handleTableMask('unmask_col', ${blockStart}, ${blockEnd}, ${c})">[Table] Un-mask this column</button>`;
-                html += `<button class="px-3 py-1.5 text-left hover:bg-ink-hover transition-colors w-full text-brand-300" onclick="handleTableMask('unmask_row', ${r}, ${cellCount})">[Table] Un-mask this row</button>`;
+                html += `<button class="px-3 py-1.5 text-left hover:bg-ink-hover transition-colors w-full text-brand-300" onclick="handleTableMask('unmask_cell', ${r}, ${c})">${t('ctxTableUnmaskCell')}</button>`;
+                html += `<button class="px-3 py-1.5 text-left hover:bg-ink-hover transition-colors w-full text-brand-300" onclick="handleTableMask('unmask_col', ${blockStart}, ${blockEnd}, ${c})">${t('ctxTableUnmaskCol')}</button>`;
+                html += `<button class="px-3 py-1.5 text-left hover:bg-ink-hover transition-colors w-full text-brand-300" onclick="handleTableMask('unmask_row', ${r}, ${cellCount})">${t('ctxTableUnmaskRow')}</button>`;
              } else {
-                html += `<button class="px-3 py-1.5 text-left hover:bg-ink-hover transition-colors w-full text-warning-300" onclick="handleTableMask('mask_cell', ${r}, ${c})">[Table] Mask this cell</button>`;
-                html += `<button class="px-3 py-1.5 text-left hover:bg-ink-hover transition-colors w-full text-warning-300" onclick="handleTableMask('mask_col', ${blockStart}, ${blockEnd}, ${c})">[Table] Mask this column (${blockEnd - blockStart + 1} rows)</button>`;
-                html += `<button class="px-3 py-1.5 text-left hover:bg-ink-hover transition-colors w-full text-warning-300" onclick="handleTableMask('mask_row', ${r}, ${cellCount})">[Table] Mask this row (${cellCount} columns)</button>`;
+                html += `<button class="px-3 py-1.5 text-left hover:bg-ink-hover transition-colors w-full text-warning-300" onclick="handleTableMask('mask_cell', ${r}, ${c})">${t('ctxTableMaskCell')}</button>`;
+                html += `<button class="px-3 py-1.5 text-left hover:bg-ink-hover transition-colors w-full text-warning-300" onclick="handleTableMask('mask_col', ${blockStart}, ${blockEnd}, ${c})">${t('ctxTableMaskCol', { rows: blockEnd - blockStart + 1 })}</button>`;
+                html += `<button class="px-3 py-1.5 text-left hover:bg-ink-hover transition-colors w-full text-warning-300" onclick="handleTableMask('mask_row', ${r}, ${cellCount})">${t('ctxTableMaskRow', { cols: cellCount })}</button>`;
              }
           }
         }
@@ -2476,7 +2843,7 @@
     function triggerPreview() {
       const text = textarea.value;
       if(!text) {
-        document.getElementById("entityChips").innerHTML = '<span class="text-ink-faint italic text-xs py-1">No data</span>';
+        document.getElementById("entityChips").innerHTML = `<span class="text-ink-faint italic text-xs py-1" data-i18n="commonNoData">${t('commonNoData')}</span>`;
         activeExtractedEntities = [];
         renderHighlights();
         return;
@@ -2484,7 +2851,7 @@
 
       if (text.length > 50000) {
         const chips = document.getElementById("entityChips");
-        chips.innerHTML = '<span class="text-warning-500 italic text-xs py-1">Text is over 50,000 characters — scanning may be slower.</span>';
+        chips.innerHTML = `<span class="text-warning-500 italic text-xs py-1" data-i18n="v1LongTextWarning">${t('v1LongTextWarning')}</span>`;
       }
 
       activeExtractedEntities = extractStaticEntities(text);
@@ -2501,7 +2868,7 @@
       });
 
       if (uniqueVals.size === 0 && tableMasks.size === 0) {
-        container.innerHTML = '<span class="text-ink-faint italic text-xs py-1">No data</span>';
+        container.innerHTML = `<span class="text-ink-faint italic text-xs py-1" data-i18n="commonNoData">${t('commonNoData')}</span>`;
         return;
       }
 
@@ -2533,10 +2900,10 @@
         el.onmouseenter = (e) => {
           el.classList.replace(bgClass.split(' ')[0], hoverClass);
           highlightEntityChip(val, true);
-          showGlobalTooltip(e, `Category: ${data.reason}`);
+          showGlobalTooltip(e, t('tooltipCategory', { reason: data.reason }));
         };
         el.onmousemove = (e) => {
-          showGlobalTooltip(e, `Category: ${data.reason}`);
+          showGlobalTooltip(e, t('tooltipCategory', { reason: data.reason }));
         };
         el.onmouseleave = () => {
           el.classList.replace(hoverClass, bgClass.split(' ')[0]);
@@ -2557,13 +2924,13 @@
               const el = document.createElement('span');
               el.className = 'bg-accent-ai-50 text-accent-ai-700 border-accent-ai-200 px-2 py-0.5 rounded text-xs border flex items-center transition-all cursor-default flex-shrink-0';
               el.setAttribute('data-table-chip', maskKey);
-              el.innerHTML = `${cellText} <span class="ml-1 text-accent-ai-400 text-[10px]">Table</span>`;
+              el.innerHTML = `${cellText} <span class="ml-1 text-accent-ai-400 text-[10px]" data-i18n="commonTableBadge">${t('commonTableBadge')}</span>`;
               el.onmouseenter = (e) => {
                 el.classList.add('bg-accent-ai-100');
                 document.querySelectorAll(`[data-table-mask="${maskKey}"]`).forEach(m => m.classList.add('ring-2', 'ring-accent-ai-500'));
-                showGlobalTooltip(e, 'Manual table mask');
+                showGlobalTooltip(e, t('reasonManualTableMask'));
               };
-              el.onmousemove = (e) => showGlobalTooltip(e, 'Manual table mask');
+              el.onmousemove = (e) => showGlobalTooltip(e, t('reasonManualTableMask'));
               el.onmouseleave = () => {
                 el.classList.remove('bg-accent-ai-100');
                 document.querySelectorAll(`[data-table-mask="${maskKey}"]`).forEach(m => m.classList.remove('ring-2', 'ring-accent-ai-500'));
@@ -2577,7 +2944,7 @@
       });
 
       if (container.childElementCount === 0) {
-        container.innerHTML = '<span class="text-ink-faint italic text-xs py-1">No data</span>';
+        container.innerHTML = `<span class="text-ink-faint italic text-xs py-1" data-i18n="commonNoData">${t('commonNoData')}</span>`;
       }
     }
 
@@ -2641,7 +3008,7 @@
                 colCounters[c] = (colCounters[c] || 0) + 1;
                 const token = `{{TAB_C${c+1}_${colCounters[c]}}}`;
                 sessionVault[token] = cellText;
-                reportData.push({ raw: cellText, token: token, reason: "Manual table mask" });
+                reportData.push({ raw: cellText, token: token, reason: t('reasonManualTableMask') });
                 return token;
               }
               return cellText;
@@ -2667,7 +3034,7 @@
       const phase1BtnText = document.getElementById('phase1BtnText');
       if (phase1BtnText) {
         const orig = phase1BtnText.textContent;
-        phase1BtnText.textContent = '✓ Done';
+        phase1BtnText.textContent = t('commonDoneCheckmark');
         setTimeout(() => { phase1BtnText.textContent = orig; }, 1500);
       }
     }
@@ -2678,7 +3045,7 @@
 
       const reportContainer = document.getElementById("anonymizeReport");
       if (reportData.length === 0) {
-        reportContainer.innerHTML = '<div class="text-ink-faint italic">No masked items</div>';
+        reportContainer.innerHTML = `<div class="text-ink-faint italic" data-i18n="v1NoMaskedItems">${t('v1NoMaskedItems')}</div>`;
         return;
       }
       reportContainer.innerHTML = reportData.map(item => `
@@ -2716,7 +3083,7 @@
         const checkRes = await fetch(`${url}/api/tags`);
         if (!checkRes.ok) throw new Error();
       } catch (err) {
-        showToast("Couldn't connect. Local AI (Ollama) may not be running or CORS isn't configured. Please start Ollama first.", 'danger');
+        showToast(t('toastOllamaConnectFailed'), 'danger');
         phase2IsRunning = false;
         return;
       }
@@ -2728,10 +3095,10 @@
       btn.classList.remove("bg-accent-ai-600", "hover:bg-accent-ai-700");
       btn.classList.add("bg-danger-600", "hover:bg-danger-700");
       if (spinner) spinner.classList.remove('hidden');
-      if (btnText) btnText.textContent = 'AI Scan (1/2 starting) - click to cancel';
+      if (btnText) btnText.textContent = t('scanChannel1Starting');
 
       let timeoutHandle = setTimeout(async () => {
-        const shouldAbort = await showConfirmModal('The AI response has taken longer than 3 minutes.', { title: 'Still Waiting', okLabel: 'Abort', cancelLabel: 'Keep Waiting' });
+        const shouldAbort = await showConfirmModal(t('confirmStillWaitingMessage'), { title: t('confirmStillWaitingTitle'), okLabel: t('confirmStillWaitingAbort'), cancelLabel: t('confirmStillWaitingKeepWaiting') });
         if (shouldAbort) controller.abort();
       }, 3 * 60 * 1000);
 
@@ -2772,7 +3139,7 @@
                 const parsedLine = JSON.parse(line);
                 if (parsedLine.response) {
                     fullResponse1 += parsedLine.response;
-                    if (btnText) btnText.textContent = `Scan (1/2) received ${fullResponse1.length} chars (click to cancel)`;
+                    if (btnText) btnText.textContent = t('scanChannel1Progress', { count: fullResponse1.length });
                     if (fullResponse1.length > maxAllowedLength) {
                         throw new Error(`Response length is abnormal (${fullResponse1.length} chars) — safety cutoff triggered.`);
                     }
@@ -2826,9 +3193,9 @@
             typeCounters[tType] = (typeCounters[tType] || 0) + 1;
             const token = `{{${tType}_${typeCounters[tType]}}}`;
             sessionVault[token] = item.value;
-            reportData.push({ raw: item.value, token: token, reason: item.reason || "AI entity extraction", isAi: true });
+            reportData.push({ raw: item.value, token: token, reason: item.reason || t('reasonAiEntityExtraction'), isAi: true });
             newText = newText.split(item.value).join(token);
-            customDict.push({ type: tType, value: item.value, reason: item.reason || "AI entity extraction", isAi: true, source: 'ai-session' });
+            customDict.push({ type: tType, value: item.value, reason: item.reason || t('reasonAiEntityExtraction'), isAi: true, source: 'ai-session' });
             newCount++;
           }
         });
@@ -2838,7 +3205,7 @@
         triggerPreview();
 
         // Channel 2: risk assessment
-        if (btnText) btnText.textContent = 'AI Scan (2/2 starting)';
+        if (btnText) btnText.textContent = t('scanChannel2Starting');
 
         const channel2Prompt = currentPersona === 'business' ? aiPrompts.channel2Business : aiPrompts.channel2Personal;
 
@@ -2875,7 +3242,7 @@
                 const parsedLine = JSON.parse(line);
                 if (parsedLine.response) {
                     fullResponse2 += parsedLine.response;
-                    if (btnText) btnText.textContent = `Scan (2/2) received ${fullResponse2.length} chars (click to cancel)`;
+                    if (btnText) btnText.textContent = t('scanChannel2Progress', { count: fullResponse2.length });
                     if (fullResponse2.length > maxAllowedLength) {
                         throw new Error(`Response length is abnormal (${fullResponse2.length} chars) — safety cutoff triggered.`);
                     }
@@ -2900,7 +3267,7 @@
             if (Array.isArray(parsed2) && parsed2.length > 0) parsed2 = parsed2[0];
 
             if (parsed2.critical === true || parsed2.critical === "true") {
-                criticalReasons.push(`AI deep scan flagged: ${parsed2.reason || 'a potential sensitive-risk finding'}`);
+                criticalReasons.push(t('reasonAiDeepScanFlagged', { reason: parsed2.reason || t('reasonAiDeepScanFallback') }));
             }
         } catch (e) {
             console.warn("Channel 2 JSON parse failed:", fullResponse2);
@@ -2908,17 +3275,17 @@
 
         if (criticalReasons.length > 0) {
             triggerHardBlock(criticalReasons);
-            showToast(`Scan complete!\nAdded ${newCount} new masked entities.\nA sensitive-risk finding was detected — copy has been force-locked!`, 'warning');
+            showToast(t('toastScanCompleteBlocked', { count: newCount }), 'warning');
         } else {
-            showToast(`Scan complete! Added ${newCount} new masked entities. No additional sensitive risks found.`, 'success');
+            showToast(t('toastScanCompleteOk', { count: newCount }), 'success');
         }
 
       } catch (err) {
         if (err.name === 'AbortError') {
-          showToast('AI scan was cancelled.', 'info');
+          showToast(t('toastAiScanCancelled'), 'info');
         } else {
           console.error(err);
-          showToast("AI scan failed:\n" + err.message, 'danger');
+          showToast(t('toastAiScanFailed', { message: err.message }), 'danger');
         }
       } finally {
         clearTimeout(timeoutHandle);
@@ -2926,7 +3293,7 @@
         btn.classList.add("bg-accent-ai-600", "hover:bg-accent-ai-700");
         btn.classList.remove("bg-danger-600", "hover:bg-danger-700");
         if (spinner) spinner.classList.add('hidden');
-        if (btnText) btnText.textContent = 'Scan with Local AI';
+        if (btnText) btnText.textContent = t('v1BtnScanLocalAi');
       }
     }
 
@@ -2936,7 +3303,10 @@
     function renderOriginalWithCapsules(missingTokens = []) {
       const container = document.getElementById("readOnlyOriginal");
       if (!rawAnonymizedText) {
-        container.innerText = document.getElementById("rawInput").value || "Please run de-identification in the \"De-identify\" view first.";
+        const rawVal = document.getElementById("rawInput").value;
+        container.innerHTML = rawVal
+          ? escapeHtml(rawVal)
+          : `<span data-i18n="v2ReadOnlyPlaceholder">${t('v2ReadOnlyPlaceholder')}</span>`;
         return;
       }
 
@@ -2963,7 +3333,7 @@
           const rawVal = sessionVault[token];
           const isMissing = missingTokens.includes(token);
           const bgClass = isMissing ? 'bg-danger-100 text-danger-800 border-danger-400' : 'bg-line text-ink border-line-strong';
-          html += `<span class="inline-block px-1.5 py-0.5 mx-0.5 rounded text-xs font-semibold border transition-all cursor-default ${bgClass}" data-token="${escapeHtml(token)}" onmouseenter="showGlobalTooltip(event, 'Tag: ${escapeHtml(token)}'); highlightCrossReference('${escapeHtml(token)}', true)" onmouseleave="hideGlobalTooltip(); highlightCrossReference('${escapeHtml(token)}', false)" onmousemove="showGlobalTooltip(event, 'Tag: ${escapeHtml(token)}')">${escapeHtml(rawVal)}</span>`;
+          html += `<span class="inline-block px-1.5 py-0.5 mx-0.5 rounded text-xs font-semibold border transition-all cursor-default ${bgClass}" data-token="${escapeHtml(token)}" onmouseenter="showGlobalTooltip(event, '${escapeForInlineJs(t('tooltipTag', { token: escapeHtml(token) }))}'); highlightCrossReference('${escapeHtml(token)}', true)" onmouseleave="hideGlobalTooltip(); highlightCrossReference('${escapeHtml(token)}', false)" onmousemove="showGlobalTooltip(event, '${escapeForInlineJs(t('tooltipTag', { token: escapeHtml(token) }))}')">${escapeHtml(rawVal)}</span>`;
         } else {
           html += escapeHtml(seg.text);
         }
@@ -2975,7 +3345,7 @@
     function renderRestoreChips(missingTokens = []) {
       const container = document.getElementById("restoreChips");
       if (Object.keys(sessionVault).length === 0) {
-        container.innerHTML = '<span class="text-ink-faint italic text-xs">No masking record</span>';
+        container.innerHTML = `<span class="text-ink-faint italic text-xs" data-i18n="v2NoMaskingRecord">${t('v2NoMaskingRecord')}</span>`;
         return;
       }
       container.innerHTML = Object.entries(sessionVault).map(([token, raw]) => {
@@ -2984,7 +3354,7 @@
           ? 'bg-danger-100 text-danger-800 border border-danger-300'
           : 'bg-paper-hover text-ink-hover border border-line';
         return `
-          <div class="inline-block ${cls} px-2 py-1 rounded text-xs cursor-default transition-all" data-token="${token}" onmouseenter="showGlobalTooltip(event, 'Tag: ${token}'); highlightCrossReference('${token}', true)" onmouseleave="hideGlobalTooltip(); highlightCrossReference('${token}', false)" onmousemove="showGlobalTooltip(event, 'Tag: ${token}')">
+          <div class="inline-block ${cls} px-2 py-1 rounded text-xs cursor-default transition-all" data-token="${token}" onmouseenter="showGlobalTooltip(event, '${escapeForInlineJs(t('tooltipTag', { token }))}'); highlightCrossReference('${token}', true)" onmouseleave="hideGlobalTooltip(); highlightCrossReference('${token}', false)" onmousemove="showGlobalTooltip(event, '${escapeForInlineJs(t('tooltipTag', { token }))}')">
             ${escapeHtml(raw)}
           </div>`;
       }).join('');
@@ -2992,8 +3362,8 @@
 
     function processRestore() {
       let replyText = document.getElementById("aiReplyInput").value;
-      if (!replyText.trim()) return showToast("Please paste the external AI reply first.", 'warning');
-      if (Object.keys(sessionVault).length === 0) return showToast("No masking record yet — please run de-identification in the \"De-identify\" tab first.", 'warning');
+      if (!replyText.trim()) return showToast(t('toastPasteAiReplyFirst'), 'warning');
+      if (Object.keys(sessionVault).length === 0) return showToast(t('toastNoMaskingRecordYet'), 'warning');
 
       // Automatically strip the system-instruction prefix the AI may have echoed back, plus trailing blank lines.
       replyText = replyText.replace(/^\[SYSTEM INSTRUCTION: This text has been de-identified\. Preserve all \{\{TAG_X\}\} tokens exactly as they are, and keep the original table formatting \(Tab characters\)!\]\s*/, "");
@@ -3002,7 +3372,7 @@
       const missing = [];
 
       Object.entries(sessionVault).forEach(([token, rawVal]) => {
-        const span = `<span class="inline-block bg-brand-50 text-brand-900 px-1 rounded font-semibold border-b border-brand-200 transition-all cursor-pointer hover:bg-brand-100" data-token="${token}" data-mask-state="0" contenteditable="false" onclick="toggleMask(this, '${escapeHtml(rawVal)}')" onmouseenter="showGlobalTooltip(event, 'Tag: ${token} (click to toggle masking)'); highlightCrossReference('${token}', true)" onmouseleave="hideGlobalTooltip(); highlightCrossReference('${token}', false)" onmousemove="showGlobalTooltip(event, 'Tag: ${token} (click to toggle masking)')">${escapeHtml(rawVal)}</span>`;
+        const span = `<span class="inline-block bg-brand-50 text-brand-900 px-1 rounded font-semibold border-b border-brand-200 transition-all cursor-pointer hover:bg-brand-100" data-token="${token}" data-mask-state="0" contenteditable="false" onclick="toggleMask(this, '${escapeHtml(rawVal)}')" onmouseenter="showGlobalTooltip(event, '${escapeForInlineJs(t('tooltipTagToggle', { token }))}'); highlightCrossReference('${token}', true)" onmouseleave="hideGlobalTooltip(); highlightCrossReference('${token}', false)" onmousemove="showGlobalTooltip(event, '${escapeForInlineJs(t('tooltipTagToggle', { token }))}')">${escapeHtml(rawVal)}</span>`;
         if (replyText.includes(token)) {
           html = html.split(token).join(span);
         } else {
@@ -3031,8 +3401,8 @@
       document.getElementById("restoredOutputView").innerHTML = html;
 
       const stat = document.getElementById("integrityStatus");
-      if (missing.length > 0) stat.innerHTML = `<span class="text-danger-500">⚠ ${missing.length} item(s) missing — see the record on the left</span>`;
-      else stat.innerHTML = `<span class="text-brand-600">✓ Fully restored</span>`;
+      if (missing.length > 0) stat.innerHTML = `<span class="text-danger-500" data-i18n="v2RestoreMissingItems" data-i18n-vars='${escapeHtml(JSON.stringify({ count: missing.length }))}'>${t('v2RestoreMissingItems', { count: missing.length })}</span>`;
+      else stat.innerHTML = `<span class="text-brand-600" data-i18n="v2RestoreFully">${t('v2RestoreFully')}</span>`;
 
       renderOriginalWithCapsules(missing);
       renderRestoreChips(missing);
@@ -3042,7 +3412,7 @@
 
     function copyAnonymizedPrompt() {
       const text = document.getElementById("anonymizedOutput").value;
-      if(text) navigator.clipboard.writeText(text).then(() => showToast("Masked prompt copied!", 'success'));
+      if(text) navigator.clipboard.writeText(text).then(() => showToast(t('toastMaskedPromptCopied'), 'success'));
     }
     function clearRestoredResult() {
       document.getElementById("restoredOutputView").innerHTML = "";
@@ -3053,14 +3423,14 @@
 
     function copyRestoredResult() {
       const text = document.getElementById("restoredOutputView").innerText;
-      if(text) navigator.clipboard.writeText(text).then(() => showToast("Restored text copied!", 'success'));
+      if(text) navigator.clipboard.writeText(text).then(() => showToast(t('toastRestoredTextCopied'), 'success'));
     }
     function clearLeftInput() {
       textarea.value = "";
       document.getElementById("anonymizedOutput").value = "";
       rawAnonymizedText = "";
       triggerPreview();
-      document.getElementById("anonymizeReport").innerHTML = '<div class="text-ink-faint italic">Not run yet</div>';
+      document.getElementById("anonymizeReport").innerHTML = `<div class="text-ink-faint italic" data-i18n="commonNotRunYet">${t('commonNotRunYet')}</div>`;
       document.getElementById("phase2Btn").classList.add("hidden");
       document.getElementById("copyPromptBtn").disabled = true;
       resetHardBlockState();

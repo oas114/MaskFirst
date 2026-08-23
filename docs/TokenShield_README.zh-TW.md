@@ -176,6 +176,22 @@ window.TOKENSHIELD_AUTO_CONFIG = {
 > [!NOTE]
 > 此機制只處理規則/提示詞設定，完全不涉及使用者實際輸入的文件內容——`sessionVault`、輸入文字框等仍完全遵循 1.2 節提到的既有零持久化承諾，頁面關閉或重整後立即消失。
 
+### 2.9 顯示語言（i18n）
+
+頂部工具列的 `#langSelect` 下拉選單可切換介面在**英文／繁體中文／日本語**之間顯示，刻意與 `currentRegion`／`currentPersona`（見 2.1 節）脫鉤——Region／Persona 決定套用哪一組*規則資料*，這裡只決定介面文字用哪個*語言*呈現，所以「套用 EU 規則庫、介面顯示繁體中文」這種組合是完全支援的。
+
+```javascript
+const LANG_STORAGE_KEY = 'tokenshield_display_lang';
+let currentLang = localStorage.getItem(LANG_STORAGE_KEY) || 'en'; // 會被記住——跟 Region/Persona 不同
+const I18N = { someKey: { en: '...', zh: '...', ja: '...' }, /* 約 220 組 key */ };
+function t(key, vars) { /* 查找 I18N[key][currentLang]，找不到就退回 en，再退回 key 本身；支援 {placeholder} 變數插值 */ }
+function applyLanguage(lang) { /* 設定 currentLang、寫入 localStorage、掃描套用所有 data-i18n*、呼叫 refreshDynamicText() */ }
+```
+
+靜態畫面透過 `data-i18n`（設定 `innerHTML`）、`data-i18n-placeholder`、`data-i18n-title`、`data-i18n-aria-label` 這幾個屬性接入字典。動態組出來的字串（toast 訊息、`showConfirmModal()` 的訊息、`renderHardBlockMgmtTable()`／`renderRegexMgmtTable()`／`renderGuideTable()` 這類表格渲染函式）則直接呼叫 `t()`，不再把英文字面字串寫死。`refreshDynamicText()` 會重新執行這些「純渲染」函式，讓當下已經開啟的面板在切換語言的當下就立即反映新語言，不需要使用者重新開啟一次。
+
+**刻意不翻譯的部分**（視為技術／參考內容，跟「PII Rule Guide 裡的 Regular Expression 欄位從不翻譯」是同一個判斷邏輯）：`REGEX_PRESETS_DEFAULT`／`HARD_BLOCK_PRESETS_DEFAULT` 規則庫本身（規則的 `name`／`example` 欄位、硬阻斷關鍵字清單——翻譯關鍵字清單會直接改變實際偵測行為，不只是顯示文字而已），以及 `LOCAL_AI_PROMPTS`／`aiPrompts` 這些提示詞內容（這些是要送給另一個 AI 模型的指令，不是給使用者看的介面文字）。`localStorage` 持久化是刻意對 TokenShield「設計上零持久化」原則（見 1.2 節）的例外——這是顯示偏好設定，不是文件內容或掃描狀態。
+
 ---
 
 ## 三、系統操作手冊

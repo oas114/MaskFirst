@@ -176,6 +176,22 @@ Both actions live inside a collapsible "Advanced Settings: Auto-load Config File
 > [!NOTE]
 > This mechanism only ever touches rule/prompt configuration — never the actual document content typed into the app. The existing zero-persistence promise (everything destroyed on page close/reload, see §1.2) is untouched for `sessionVault` and the input textareas.
 
+### 2.9 Display Language (i18n)
+
+A `#langSelect` dropdown in the header toolbar switches the interface between **English / 繁體中文 / 日本語**, deliberately decoupled from `currentRegion`/`currentPersona` (§2.1) — Region/Persona pick which *rule data* is active, this only picks which *language* the chrome renders in, so e.g. running the EU ruleset with a Traditional Chinese interface is a supported combination.
+
+```javascript
+const LANG_STORAGE_KEY = 'tokenshield_display_lang';
+let currentLang = localStorage.getItem(LANG_STORAGE_KEY) || 'en'; // persisted — unlike Region/Persona
+const I18N = { someKey: { en: '...', zh: '...', ja: '...' }, /* ~220 keys */ };
+function t(key, vars) { /* looks up I18N[key][currentLang], falls back to en, then the raw key; supports {placeholder} interpolation */ }
+function applyLanguage(lang) { /* sets currentLang, persists it, walks data-i18n*, calls refreshDynamicText() */ }
+```
+
+Static markup opts in via `data-i18n` (sets `innerHTML`), `data-i18n-placeholder`, `data-i18n-title`, and `data-i18n-aria-label`. Dynamically-generated strings (toasts, `showConfirmModal()` messages, table renderers like `renderHardBlockMgmtTable()`/`renderRegexMgmtTable()`/`renderGuideTable()`) call `t()` directly instead of embedding literal English. `refreshDynamicText()` re-runs the pure-render functions so a panel that's already open updates immediately on a language switch, without needing the user to reopen it.
+
+**Deliberately left untranslated** (treated as technical/reference content, same reasoning as why the "Regular Expression" column in the PII Rule Guide is never translated): the `REGEX_PRESETS_DEFAULT`/`HARD_BLOCK_PRESETS_DEFAULT` catalog (rule `name`/`example` fields, Hard Block keyword lists — translating the keyword lists would change actual detection behavior, not just display), and the `LOCAL_AI_PROMPTS`/`aiPrompts` prompt text (these are instructions sent to another AI model, not UI copy). `localStorage` persistence is a deliberate exception to TokenShield's zero-persistence-by-design rule (§1.2) — it's a display preference, not document content or scan state.
+
 ---
 
 ## 3. User Manual
