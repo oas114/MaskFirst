@@ -347,18 +347,79 @@
           </div>
           <h1 class="font-bold text-lg tracking-tight">TokenShield <span class="font-normal text-ink-muted text-sm ml-1 hidden sm:inline" data-i18n="headerTagline">Privacy Shield for AI</span></h1>
         </div>
-        <!-- Tab switcher -->
-        <div class="flex flex-wrap bg-paper-hover p-1 rounded-lg gap-1 ml-auto lg:ml-0">
-          <button id="tabBtn1" onclick="switchTab(1)" class="px-3 sm:px-5 py-1.5 text-xs sm:text-sm font-semibold rounded-md bg-white shadow-sm text-brand-700 transition-all" data-i18n="tabDeidentify">
-            De-identify
-          </button>
-          <button id="tabBtn2" onclick="switchTab(2)" class="px-3 sm:px-5 py-1.5 text-xs sm:text-sm font-medium rounded-md text-ink-muted hover:text-ink-hover transition-all" data-i18n="tabRestore">
-            Restore
-          </button>
+        <!-- Tab switcher + mobile hamburger: kept in the same row as the title so the
+             header never grows past one line on narrow screens (row 2's controls are
+             collapsed into this hamburger's dropdown instead of wrapping onto a new row). -->
+        <div class="flex items-center gap-2 ml-auto lg:ml-0">
+          <div class="flex flex-wrap bg-paper-hover p-1 rounded-lg gap-1">
+            <button id="tabBtn1" onclick="switchTab(1)" class="px-3 sm:px-5 py-1.5 text-xs sm:text-sm font-semibold rounded-md bg-white shadow-sm text-brand-700 transition-all" data-i18n="tabDeidentify">
+              De-identify
+            </button>
+            <button id="tabBtn2" onclick="switchTab(2)" class="px-3 sm:px-5 py-1.5 text-xs sm:text-sm font-medium rounded-md text-ink-muted hover:text-ink-hover transition-all" data-i18n="tabRestore">
+              Restore
+            </button>
+          </div>
+
+          <!-- Mobile: collapse language/region/persona/dictionary and the guide/settings/
+               manage actions into a single "more" menu. The dropdown is positioned by JS
+               (fixed, clamped to the viewport) rather than CSS `right-0`, since this
+               button's position varies with content width/language and a pure-CSS anchor
+               can end up overflowing off-screen. -->
+          <div class="sm:hidden">
+            <button id="moreMenuBtn" onclick="toggleMoreMenu()" title="More" data-i18n-title="moreMenuLabel" aria-label="More" data-i18n-aria-label="moreMenuLabel" aria-expanded="false" aria-haspopup="true" class="bg-white hover:bg-paper-sunken border border-line-strong text-ink-hover p-1.5 rounded-lg transition-colors flex items-center justify-center">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M3.75 6.75h16.5M3.75 12h16.5M3.75 17.25h16.5"/></svg>
+            </button>
+            <div id="moreMenuDropdown" class="hidden fixed bg-white border border-line rounded-lg shadow-lg z-30 py-1 min-w-[240px]">
+              <div class="px-3 py-2 flex items-center justify-between gap-2">
+                <label for="langSelectMobile" class="text-xs text-ink-hover" data-i18n="langSelectLabel">Display language</label>
+                <select id="langSelectMobile" onchange="switchLanguage(this.value)" class="bg-white hover:bg-paper-sunken border border-line-strong text-ink-hover px-2 py-1 rounded-lg text-xs font-medium transition-colors focus:outline-none focus:ring-1 focus:ring-brand-500">
+                  <option value="en">English</option>
+                  <option value="zh">繁體中文</option>
+                  <option value="ja">日本語</option>
+                </select>
+              </div>
+              <div class="px-3 py-2 flex items-center justify-between gap-2">
+                <label for="regionSelectMobile" class="text-xs text-ink-hover" data-i18n="regionSelectLabel">Region ruleset</label>
+                <select id="regionSelectMobile" onchange="switchRegion(this.value)" class="bg-white hover:bg-paper-sunken border border-line-strong text-ink-hover px-2 py-1 rounded-lg text-xs font-medium transition-colors focus:outline-none focus:ring-1 focus:ring-brand-500">
+                  <option value="us">🇺🇸 US</option>
+                  <option value="eu">🇪🇺 EU (GDPR)</option>
+                  <option value="uk">🇬🇧 UK</option>
+                  <option value="tw">🇹🇼 TW</option>
+                  <option value="jp">🇯🇵 JP</option>
+                </select>
+              </div>
+              <div class="px-3 py-2 flex items-center justify-between gap-2">
+                <label for="personaSelectMobile" class="text-xs text-ink-hover" data-i18n="personaSelectLabel">Persona</label>
+                <select id="personaSelectMobile" onchange="switchPersona(this.value)" class="bg-white hover:bg-paper-sunken border border-line-strong text-ink-hover px-2 py-1 rounded-lg text-xs font-medium transition-colors focus:outline-none focus:ring-1 focus:ring-brand-500">
+                  <option value="personal" data-i18n="personaPersonal">Personal</option>
+                  <option value="business" data-i18n="personaBusiness">Business</option>
+                </select>
+              </div>
+              <button onclick="openEditCsvModal(); closeMoreMenu();" class="w-full flex items-center justify-between gap-2.5 px-3 py-2 text-xs text-ink-hover hover:bg-paper-sunken text-left transition-colors">
+                <span data-i18n="modalEditCsvTitle">Custom Dictionary Manager (View / Edit / Build)</span>
+                <span id="dictCountLabelMobile" class="font-mono text-ink-secondary flex-shrink-0">Dictionary: 0</span>
+              </button>
+              <div class="border-t border-line my-1"></div>
+              <button onclick="openGuide(); closeMoreMenu();" class="w-full flex items-center gap-2.5 px-3 py-2 text-xs text-ink-hover hover:bg-paper-sunken text-left transition-colors">
+                <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.967 8.967 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25"/></svg>
+                <span data-i18n="btnPiiGuide">PII Rule Guide</span>
+              </button>
+              <button onclick="openSettings(); closeMoreMenu();" class="w-full flex items-center gap-2.5 px-3 py-2 text-xs text-ink-hover hover:bg-paper-sunken text-left transition-colors">
+                <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.325.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 010 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.281c-.09.543-.56.94-1.11.94h-2.594c-.55 0-1.019-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 010-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.28z M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                <span data-i18n="btnSettings">Settings</span>
+              </button>
+              <button onclick="openProtectionManagerModal(); closeMoreMenu();" class="w-full flex items-center gap-2.5 px-3 py-2 text-xs text-ink-hover hover:bg-paper-sunken text-left transition-colors">
+                <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"/></svg>
+                <span data-i18n="btnManageRules">Manage Custom Protection Rules</span>
+              </button>
+            </div>
+          </div>
         </div>
       </div>
 
-      <div class="flex flex-wrap items-center gap-2 sm:gap-3 text-[10px] sm:text-sm">
+      <!-- Desktop only: language/region/persona, dictionary manager, guide/settings/manage.
+           Collapsed into the "more" menu above on mobile instead of wrapping onto a 2nd row. -->
+      <div class="hidden sm:flex flex-wrap items-center gap-2 sm:gap-3 text-[10px] sm:text-sm">
         <div class="flex items-center gap-1.5">
           <label class="sr-only" for="langSelect" data-i18n="langSelectLabel">Display language</label>
           <select id="langSelect" onchange="switchLanguage(this.value)" title="Display language — independent from the Region ruleset below" data-i18n-title="langSelectTitle" class="bg-white hover:bg-paper-sunken border border-line-strong text-ink-hover px-2 py-1.5 rounded-lg text-[10px] sm:text-xs font-medium transition-colors focus:outline-none focus:ring-1 focus:ring-brand-500">
@@ -385,7 +446,7 @@
         </button>
 
         <!-- Desktop: inline icon buttons -->
-        <div class="hidden sm:flex items-center gap-1.5">
+        <div class="flex items-center gap-1.5">
           <button onclick="openGuide()" title="PII Rule Guide" data-i18n-title="btnPiiGuide" aria-label="PII Rule Guide" data-i18n-aria-label="btnPiiGuide" class="bg-white hover:bg-paper-sunken border border-line-strong text-ink-hover p-1.5 rounded-lg transition-colors flex items-center justify-center">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.967 8.967 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25"/></svg>
           </button>
@@ -395,30 +456,6 @@
           <button id="manageProtectionBtn" onclick="openProtectionManagerModal()" title="Manage Custom Protection Rules" data-i18n-title="btnManageRules" aria-label="Manage Custom Protection Rules" data-i18n-aria-label="btnManageRules" class="bg-white hover:bg-paper-sunken border border-line-strong text-ink-hover p-1.5 rounded-lg transition-colors flex items-center justify-center">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"/></svg>
           </button>
-        </div>
-
-        <!-- Mobile: collapse the same three actions into a "more" menu. The dropdown is
-             positioned by JS (fixed, clamped to the viewport) rather than CSS `right-0`,
-             since this button's position within the wrapped toolbar row varies with content
-             width/language and a pure-CSS anchor can end up overflowing off-screen. -->
-        <div class="sm:hidden">
-          <button id="moreMenuBtn" onclick="toggleMoreMenu()" title="More" data-i18n-title="moreMenuLabel" aria-label="More" data-i18n-aria-label="moreMenuLabel" aria-expanded="false" aria-haspopup="true" class="bg-white hover:bg-paper-sunken border border-line-strong text-ink-hover p-1.5 rounded-lg transition-colors flex items-center justify-center">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M3.75 6.75h16.5M3.75 12h16.5M3.75 17.25h16.5"/></svg>
-          </button>
-          <div id="moreMenuDropdown" class="hidden fixed bg-white border border-line rounded-lg shadow-lg z-30 py-1 min-w-[220px]">
-            <button onclick="openGuide(); closeMoreMenu();" class="w-full flex items-center gap-2.5 px-3 py-2 text-xs text-ink-hover hover:bg-paper-sunken text-left transition-colors">
-              <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.967 8.967 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25"/></svg>
-              <span data-i18n="btnPiiGuide">PII Rule Guide</span>
-            </button>
-            <button onclick="openSettings(); closeMoreMenu();" class="w-full flex items-center gap-2.5 px-3 py-2 text-xs text-ink-hover hover:bg-paper-sunken text-left transition-colors">
-              <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.325.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 010 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.281c-.09.543-.56.94-1.11.94h-2.594c-.55 0-1.019-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 010-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.28z M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-              <span data-i18n="btnSettings">Settings</span>
-            </button>
-            <button onclick="openProtectionManagerModal(); closeMoreMenu();" class="w-full flex items-center gap-2.5 px-3 py-2 text-xs text-ink-hover hover:bg-paper-sunken text-left transition-colors">
-              <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"/></svg>
-              <span data-i18n="btnManageRules">Manage Custom Protection Rules</span>
-            </button>
-          </div>
         </div>
       </div>
     </div>
@@ -1357,7 +1394,10 @@
     }
 
     function updateDictCountLabel() {
-      document.getElementById('dictCountLabel').innerText = t('dictCountLabel', { count: customDict.length });
+      const label = t('dictCountLabel', { count: customDict.length });
+      document.getElementById('dictCountLabel').innerText = label;
+      const mobileLabel = document.getElementById('dictCountLabelMobile');
+      if (mobileLabel) mobileLabel.innerText = label;
     }
 
     function applyLanguage(lang) {
@@ -1386,6 +1426,8 @@
       });
       const langSelectEl = document.getElementById('langSelect');
       if (langSelectEl) langSelectEl.value = lang;
+      const langSelectMobileEl = document.getElementById('langSelectMobile');
+      if (langSelectMobileEl) langSelectMobileEl.value = lang;
       refreshDynamicText();
     }
 
@@ -1470,10 +1512,14 @@
 
     function switchRegion(val) {
       currentRegion = val;
+      const a = document.getElementById('regionSelect'); if (a) a.value = val;
+      const b = document.getElementById('regionSelectMobile'); if (b) b.value = val;
       triggerPreview();
     }
     function switchPersona(val) {
       currentPersona = val;
+      const a = document.getElementById('personaSelect'); if (a) a.value = val;
+      const b = document.getElementById('personaSelectMobile'); if (b) b.value = val;
       triggerPreview();
     }
 
@@ -3519,6 +3565,10 @@
       });
       document.getElementById('regionSelect').value = DEFAULT_REGION;
       document.getElementById('personaSelect').value = DEFAULT_PERSONA;
+      const regionSelectMobileEl = document.getElementById('regionSelectMobile');
+      if (regionSelectMobileEl) regionSelectMobileEl.value = DEFAULT_REGION;
+      const personaSelectMobileEl = document.getElementById('personaSelectMobile');
+      if (personaSelectMobileEl) personaSelectMobileEl.value = DEFAULT_PERSONA;
       clearLeftInput();
     });
 
