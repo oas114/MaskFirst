@@ -50,7 +50,7 @@ TokenShield is **not** a rewrite of EduShield — it's a separate sibling file t
 This is TokenShield's key structural difference from EduShield. Instead of one flat, Taiwan-specific rule set, detection rules and Hard Block keywords are organized into **presets** the user switches between at runtime via two `<select>` dropdowns in the header toolbar (`#regionSelect`, `#personaSelect`).
 
 ```javascript
-const DEFAULT_REGION = "us";      // "us" | "eu" | "uk"
+const DEFAULT_REGION = "us";      // "us" | "eu" | "uk" | "tw" | "jp"
 let currentRegion = DEFAULT_REGION;
 
 const DEFAULT_PERSONA = "personal"; // "personal" | "business"
@@ -87,11 +87,23 @@ Each rule object has the shape `{ type, regex, name, example, validate? }`. Toke
 | `uk` | National Insurance | `UK_NI_N` | official NI format | AB123456C |
 | `uk` | Postcode | `UK_POSTCODE_N` | official postcode format | SW1A 1AA |
 | `uk` | Phone | `UK_PHONE_N` | `+44`/`0` + national number | +44 7911 123456 |
+| `tw` | National ID | `TW_ID_N` | `[A-Z][12]\d{8}` + **checksum** (`twIdChecksum()`) | A123456789 |
+| `tw` | Resident Certificate / Uniform ID | `TW_ARC_N` | `[A-Z][A-D89]\d{8}` | A800000014 |
+| `tw` | Mobile Number | `TW_MOBILE_N` | `09\d{2}-?\d{3}-?\d{3}` | 0912-345-678 |
+| `tw` | Landline / Extension | `TW_TEL_N` | area code + number (optional extension) | 02-23456789#123 |
+| `tw` | Business Unified Number | `TW_UBN_N` | 8 digits + **checksum** (`twUbnChecksum()`, post-2021/12/22 mod-5 rule) | 04595257 |
+| `tw` | Household/Mailing Address | `TW_ADDRESS_N` | county/city + district + road + number | 406 台中市北屯區崇德路三段100號 |
+| `jp` | My Number (個人番号) | `JP_MYNUMBER_N` | 12 digits + **checksum** (`jpMyNumberChecksum()`) | 1234-5678-9018 |
+| `jp` | Corporate Number (法人番号) | `JP_CORP_NUMBER_N` | 13 digits + **checksum** (`jpCorpNumberChecksum()`) | 8700110005901 |
+| `jp` | Mobile Number | `JP_MOBILE_N` | `0[789]0-?\d{4}-?\d{4}` | 090-1234-5678 |
+| `jp` | Landline Number | `JP_TEL_N` | area code + number | 03-1234-5678 |
+| `jp` | Postal Code | `JP_POSTAL_N` | `\d{3}-?\d{4}` | 123-4567 |
+| `jp` | Passport (approx.) | `JP_PASSPORT_N` | 2 letters + 7 digits | TH1234567 |
 
 > [!NOTE]
-> The `eu` passport/VAT patterns are **approximations**, not exhaustive legal-grade validators (EU member states don't share one uniform format). Contributions that tighten these, or add more countries as new presets, are welcome — see §5.
+> The `eu` passport/VAT patterns and the `jp` passport pattern are **approximations**, not exhaustive legal-grade validators. Contributions that tighten these, or add more countries as new presets, are welcome — see §5.
 
-The Credit Card rule additionally runs a **Luhn checksum** (`luhnCheck()`) against every regex match before accepting it, to cut down false positives from arbitrary 13-19 digit numbers.
+The Credit Card rule additionally runs a **Luhn checksum** (`luhnCheck()`) against every regex match before accepting it, to cut down false positives from arbitrary 13-19 digit numbers. The `tw`/`jp` national ID, business unified number, My Number, and corporate number rules do the same with their own official checksum algorithms (`twIdChecksum()`/`twUbnChecksum()`/`jpMyNumberChecksum()`/`jpCorpNumberChecksum()`, defined next to `luhnCheck()`), substantially cutting false positives on these otherwise-loose numeric formats.
 
 ### 2.3 Hard Block Interlock (`HARD_BLOCK_PRESETS_DEFAULT`)
 
@@ -137,7 +149,7 @@ Click "**Manage Custom Protection Rules**" in the toolbar to customize, import, 
 Built-in defaults are frozen as `HARD_BLOCK_PRESETS_DEFAULT` / `REGEX_PRESETS_DEFAULT` / `AI_PROMPTS_DEFAULT`. Live working state:
 ```javascript
 let hardBlockPresets = { personal: [], business: [], custom: [] };
-let regexPresets = { global: [], us: [], eu: [], uk: [], custom: [] };
+let regexPresets = { global: [], us: [], eu: [], uk: [], tw: [], jp: [], custom: [] };
 let aiPrompts = { channel1: '', channel2Personal: '', channel2Business: '' };
 ```
 Each entry carries a `source` field shown as a badge: `Built-in` / `Auto-loaded` / `Manually imported` / `Overridden`. Regex rules store `pattern`/`flags` as strings (not a live `RegExp`), reconstructed through the `tryCompileRegexRow()` try/catch guard on every use — a malformed rule is skipped and reported without aborting the rest of the scan. Note: the built-in `CREDIT_CARD` rule's Luhn `validate` function is preserved for built-in entries, but is necessarily lost if a CSV/config import happens to override it (CSV/JSON can't carry a function) — the import dialog surfaces a warning when this happens.
@@ -207,10 +219,10 @@ Both actions live inside a collapsible "Advanced Settings: Auto-load Config File
 No source editing needed for a personal customization — use "Manage Custom Protection Rules" → "Hard Block Keywords" tab (§2.8) to import a CSV. To change the built-in `personal`/`business` lists themselves, open `TokenShield.html`, find `HARD_BLOCK_PRESETS_DEFAULT`, and add a string to the appropriate array.
 
 ### 4.2 Adding a detection rule
-Use "Manage Custom Protection Rules" → "Regex Rules" tab (§2.8) to import a 4-column CSV. To change a built-in region's rules directly, find `REGEX_PRESETS_DEFAULT`, and add `{ type: "TAG_NAME", regex: /your-regex/g, name: "Display Name", example: "Match Example" }` to the `global` array (always on) or a specific region array (`us`/`eu`/`uk`).
+Use "Manage Custom Protection Rules" → "Regex Rules" tab (§2.8) to import a 4-column CSV. To change a built-in region's rules directly, find `REGEX_PRESETS_DEFAULT`, and add `{ type: "TAG_NAME", regex: /your-regex/g, name: "Display Name", example: "Match Example" }` to the `global` array (always on) or a specific region array (`us`/`eu`/`uk`/`tw`/`jp`).
 
 ### 4.3 Adding a new region preset
-Add a new key to `REGEX_PRESETS_DEFAULT` (e.g. `ca` for Canada) and to the live-state initializer in `buildDefaultRegexPresetsState()`, then add a matching `<option>` to `#regionSelect` in the HTML. Rules in a new region are layered on top of `global` exactly like the existing three.
+Add a new key to `REGEX_PRESETS_DEFAULT` (e.g. `ca` for Canada) and to the live-state initializer in `buildDefaultRegexPresetsState()`, then add a matching `<option>` to `#regionSelect` in the HTML. Rules in a new region are layered on top of `global` exactly like the existing five. `tw`/`jp` were added through this exact extension point and can be used as a reference.
 
 ### 4.4 Rebuilding `style.css`
 The Tailwind build tooling lives in this repo's own `dev/` folder — no external dependency on any other project. After changing Tailwind classes in `TokenShield.html`:

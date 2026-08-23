@@ -39,7 +39,7 @@ TokenShield 是**純靜態單一 HTML 檔案**。沒有後端、沒有資料庫�
 ### 地區與身分規則庫
 
 TokenShield 不是單一綁死的規則庫，而是可即時切換：
-- **地區**（頂部工具列）：🇺🇸 美國／🇪🇺 歐盟 (GDPR)／🇬🇧 英國——皆疊加於永遠開啟的 **Global** 底層規則（email、IP 位址、信用卡號）之上。同一時間僅一組地區規則生效，避免跨國格式互相誤判。
+- **地區**（頂部工具列）：🇺🇸 美國／🇪🇺 歐盟 (GDPR)／🇬🇧 英國／🇹🇼 台灣／🇯🇵 日本——皆疊加於永遠開啟的 **Global** 底層規則（email、IP 位址、信用卡號）之上。同一時間僅一組地區規則生效，避免跨國格式互相誤判。
 - **身分**（頂部工具列）：**Personal** 或 **Business**——切換 Hard Block 敏感詞庫（個人隱私用詞 vs. 企業機密用詞）。
 
 工作階段之間不會儲存任何選擇——若要永久變更預設值，請參閱 [TokenShield_README.zh-TW.md](./docs/TokenShield_README.zh-TW.md) 說明如何修改原始碼中的兩個常數。
@@ -93,7 +93,7 @@ TokenShield 不是單一綁死的規則庫，而是可即時切換：
 
 ## 在地化與貢獻
 
-TokenShield 目前內建美國／歐盟／英國三組地區規則庫——刻意不涵蓋所有國家（原因請見 [TokenShield_README.zh-TW.md](./docs/TokenShield_README.zh-TW.md)）。歡迎提交 PR：
+TokenShield 目前內建美國／歐盟／英國／台灣／日本五組地區規則庫——刻意不涵蓋所有國家（原因請見 [TokenShield_README.zh-TW.md](./docs/TokenShield_README.zh-TW.md)）。歡迎提交 PR：
 - 新增地區規則庫（regex ＋ 幾個真實範例）
 - 收斂近似的歐盟護照／VAT 規則
 - 為 Personal 或 Business 身分模式新增 Hard Block 詞彙
@@ -114,10 +114,9 @@ TokenShield 目前內建美國／歐盟／英國三組地區規則庫——刻�
 
 TokenShield 目前持續開發中，規劃方向依優先順序包含：
 
-1. **新增地區規則庫：** 加入台灣與日本的個資規則庫，與現有美國／歐盟／英國並列。
-2. **遮蔽對應資料儲存：** 提供保存遮蔽 ↔ 原始資料對應（session vault）的方式，讓工作階段可於稍後繼續。
-3. **檔案上傳遮蔽：** 支援直接上傳 Excel、Word、PDF 檔案進行遮蔽，不限於貼上文字。
-4. **企業級功能：** 為 Business 身分模式新增稽核日誌等治理功能。
+1. **遮蔽對應資料儲存：** 提供保存遮蔽 ↔ 原始資料對應（session vault）的方式，讓工作階段可於稍後繼續。
+2. **檔案上傳遮蔽：** 支援直接上傳 Excel、Word、PDF 檔案進行遮蔽，不限於貼上文字。
+3. **企業級功能：** 為 Business 身分模式新增稽核日誌等治理功能。
 
 ---
 

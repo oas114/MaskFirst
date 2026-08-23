@@ -50,7 +50,7 @@ TokenShield **不是**重寫 EduShield——它是一個獨立的姊妹檔案，
 這是 TokenShield 與 EduShield 在結構上最大的差異。偵測規則與 Hard Block 詞庫不再是單一綁死台灣格式的陣列，而是組織成使用者可於頂部工具列兩個下拉選單（`#regionSelect`、`#personaSelect`）即時切換的「規則預設集」。
 
 ```javascript
-const DEFAULT_REGION = "us";      // "us" | "eu" | "uk"
+const DEFAULT_REGION = "us";      // "us" | "eu" | "uk" | "tw" | "jp"
 let currentRegion = DEFAULT_REGION;
 
 const DEFAULT_PERSONA = "personal"; // "personal" | "business"
@@ -87,11 +87,23 @@ let currentPersona = DEFAULT_PERSONA;
 | `uk` | 國民保險號碼 | `UK_NI_N` | 官方 NI 格式 | AB123456C |
 | `uk` | 郵遞區號 | `UK_POSTCODE_N` | 官方郵遞區號格式 | SW1A 1AA |
 | `uk` | 電話 | `UK_PHONE_N` | `+44`／`0` ＋ 國內號碼 | +44 7911 123456 |
+| `tw` | 身分證字號 | `TW_ID_N` | `[A-Z][12]\d{8}` ＋ **檢查碼驗證**（`twIdChecksum()`） | A123456789 |
+| `tw` | 居留證號/統一證號 | `TW_ARC_N` | `[A-Z][A-D89]\d{8}` | A800000014 |
+| `tw` | 行動電話 | `TW_MOBILE_N` | `09\d{2}-?\d{3}-?\d{3}` | 0912-345-678 |
+| `tw` | 市話/分機 | `TW_TEL_N` | 區碼 ＋ 號碼（可含分機） | 02-23456789#123 |
+| `tw` | 統一編號 | `TW_UBN_N` | 8 碼 ＋ **檢查碼驗證**（`twUbnChecksum()`，2021/12/22 後除 5 規則） | 04595257 |
+| `tw` | 戶籍/通訊地址 | `TW_ADDRESS_N` | 縣市＋區里＋路街＋號 | 406 台中市北屯區崇德路三段100號 |
+| `jp` | 個人番号（My Number） | `JP_MYNUMBER_N` | 12 碼 ＋ **檢查碼驗證**（`jpMyNumberChecksum()`） | 1234-5678-9018 |
+| `jp` | 法人番号 | `JP_CORP_NUMBER_N` | 13 碼 ＋ **檢查碼驗證**（`jpCorpNumberChecksum()`） | 8700110005901 |
+| `jp` | 行動電話 | `JP_MOBILE_N` | `0[789]0-?\d{4}-?\d{4}` | 090-1234-5678 |
+| `jp` | 市話 | `JP_TEL_N` | 區碼 ＋ 號碼 | 03-1234-5678 |
+| `jp` | 郵遞區號 | `JP_POSTAL_N` | `\d{3}-?\d{4}` | 123-4567 |
+| `jp` | 護照號碼（近似） | `JP_PASSPORT_N` | 2 字母 ＋ 7 數字 | TH1234567 |
 
 > [!NOTE]
-> `eu` 的護照／VAT 規則屬於**近似值**，並非完整的法規級驗證器（歐盟各會員國格式並不統一）。歡迎透過 PR 收斂這些規則，或新增其他國家作為新的預設集，詳見第五節。
+> `eu` 的護照／VAT 規則、`jp` 的護照規則屬於**近似值**，並非完整的法規級驗證器（各國格式細節、官方檢查碼皆未必完整涵蓋）。歡迎透過 PR 收斂這些規則，或新增其他國家作為新的預設集，詳見第五節。
 
-信用卡規則另外會對每個正則命中結果執行 **Luhn 校驗**（`luhnCheck()`）後才接受，以降低任意 13-19 碼數字的誤判率。
+信用卡規則另外會對每個正則命中結果執行 **Luhn 校驗**（`luhnCheck()`）後才接受，以降低任意 13-19 碼數字的誤判率。`tw`／`jp` 的身分證字號、統一編號、個人番号、法人番号也比照做法，各自接上對應官方檢查碼演算法的 `validate` 函式（`twIdChecksum()`／`twUbnChecksum()`／`jpMyNumberChecksum()`／`jpCorpNumberChecksum()`，定義在 `luhnCheck()` 旁邊），大幅降低這類寬鬆數字格式的誤判率。
 
 ### 2.3 安全阻斷防線（`HARD_BLOCK_PRESETS_DEFAULT`）
 
@@ -137,7 +149,7 @@ EduShield 沒有的新增功能：系統設定視窗新增「Local AI Prompt Lib
 內建預設值凍結為 `HARD_BLOCK_PRESETS_DEFAULT`／`REGEX_PRESETS_DEFAULT`／`AI_PROMPTS_DEFAULT`。即時運作狀態：
 ```javascript
 let hardBlockPresets = { personal: [], business: [], custom: [] };
-let regexPresets = { global: [], us: [], eu: [], uk: [], custom: [] };
+let regexPresets = { global: [], us: [], eu: [], uk: [], tw: [], jp: [], custom: [] };
 let aiPrompts = { channel1: '', channel2Personal: '', channel2Business: '' };
 ```
 每筆都帶 `source` 欄位並以徽章顯示：`Built-in`／`Auto-loaded`／`Manually imported`／`Overridden`。正則規則改存 `pattern`／`flags` 字串（不再是即時的 `RegExp` 物件），每次使用都經過 `tryCompileRegexRow()` 的 try/catch 保護，格式錯誤的規則會被略過並個別回報，不會中斷其餘掃描。**注意**：內建 `CREDIT_CARD` 規則的 Luhn `validate` 函式只會保留在真正的內建項目上——若剛好被 CSV／設定檔匯入覆蓋掉（CSV／JSON 無法承載函式），驗證會隨之消失，匯入對話框會在這種情況下另外跳出警告。
@@ -207,10 +219,10 @@ window.TOKENSHIELD_AUTO_CONFIG = {
 個人化自訂不需要改原始碼，透過「管理自訂防護規則」→「硬阻斷詞彙」分頁匯入 CSV 即可（見 2.8 節）。若要直接改內建的 `personal`／`business` 清單本身，開啟 `TokenShield.html`，搜尋 `HARD_BLOCK_PRESETS_DEFAULT`，於對應陣列中加入字串。
 
 ### 4.2 新增偵測規則
-透過「管理自訂防護規則」→「正則規則」分頁匯入 4 欄 CSV（見 2.8 節）。若要直接改內建的某地區規則本身，搜尋 `REGEX_PRESETS_DEFAULT`，於 `global`（永遠開啟）或特定地區陣列（`us`／`eu`／`uk`）中加入 `{ type: "TAG_NAME", regex: /您的正規表示式/g, name: "顯示名稱", example: "範例" }`。
+透過「管理自訂防護規則」→「正則規則」分頁匯入 4 欄 CSV（見 2.8 節）。若要直接改內建的某地區規則本身，搜尋 `REGEX_PRESETS_DEFAULT`，於 `global`（永遠開啟）或特定地區陣列（`us`／`eu`／`uk`／`tw`／`jp`）中加入 `{ type: "TAG_NAME", regex: /您的正規表示式/g, name: "顯示名稱", example: "範例" }`。
 
 ### 4.3 新增地區預設集
-於 `REGEX_PRESETS_DEFAULT` 與 `buildDefaultRegexPresetsState()` 的初始化邏輯中新增一個鍵值（例如加拿大用 `ca`），並在 HTML 中的 `#regionSelect` 加入對應 `<option>`。新地區規則與現有三組一樣，會疊加於 `global` 之上。
+於 `REGEX_PRESETS_DEFAULT` 與 `buildDefaultRegexPresetsState()` 的初始化邏輯中新增一個鍵值（例如加拿大用 `ca`），並在 HTML 中的 `#regionSelect` 加入對應 `<option>`。新地區規則與現有五組一樣，會疊加於 `global` 之上。`tw`／`jp` 兩組就是照這個擴充點加入的範例，可直接參考它們的寫法。
 
 ### 4.4 重新編譯 `style.css`
 Tailwind 建置工具就在本 repo 自己的 `dev/` 資料夾內，不依賴任何外部專案。修改 `TokenShield.html` 的 Tailwind class 後：

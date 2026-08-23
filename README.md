@@ -39,7 +39,7 @@ TokenShield is a **single static HTML file**. There is no backend, no database, 
 ### Region & Persona Presets
 
 Unlike a one-size-fits-all rule set, TokenShield lets you switch:
-- **Region** (top toolbar): 🇺🇸 US / 🇪🇺 EU (GDPR) / 🇬🇧 UK — each layered on top of an always-on **Global** baseline (email, IP addresses, credit card numbers). Only one region is active at a time, to avoid cross-country format collisions.
+- **Region** (top toolbar): 🇺🇸 US / 🇪🇺 EU (GDPR) / 🇬🇧 UK / 🇹🇼 Taiwan / 🇯🇵 Japan — each layered on top of an always-on **Global** baseline (email, IP addresses, credit card numbers). Only one region is active at a time, to avoid cross-country format collisions.
 - **Persona** (top toolbar): **Personal** or **Business** — swaps the Hard Block keyword set between personal-privacy terms and corporate-confidentiality terms.
 
 Nothing is saved between sessions — see [TokenShield_README.md](./docs/TokenShield_README.md) for how to change your permanent default by editing two constants in the source.
@@ -93,7 +93,7 @@ The active persona's `HARD_BLOCK_PRESETS` list contains extremely sensitive term
 
 ## Localization & Contributing
 
-TokenShield ships with US / EU / UK region presets — not every country, by design (see [TokenShield_README.md](./docs/TokenShield_README.md) for why). We welcome Pull Requests to:
+TokenShield ships with US / EU / UK / Taiwan / Japan region presets — not every country, by design (see [TokenShield_README.md](./docs/TokenShield_README.md) for why). We welcome Pull Requests to:
 - Add a new region preset (regex + a couple of realistic examples)
 - Tighten the approximate EU passport/VAT patterns
 - Contribute new Hard Block terms for the Personal or Business persona
@@ -114,10 +114,9 @@ TokenShield ships with US / EU / UK region presets — not every country, by des
 
 TokenShield is under active development. Planned directions include (in priority order):
 
-1. **Additional Region Presets**: Taiwan and Japan PII rule libraries, alongside the existing US / EU / UK presets.
-2. **Persistent Mask Mapping Storage**: A way to save the mask ↔ original mapping so a session can be resumed later.
-3. **File Upload Masking**: Direct masking support for uploaded Excel, Word, and PDF files, not just pasted text.
-4. **Enterprise-grade Features**: Audit logs and related governance features for the Business persona.
+1. **Persistent Mask Mapping Storage**: A way to save the mask ↔ original mapping so a session can be resumed later.
+2. **File Upload Masking**: Direct masking support for uploaded Excel, Word, and PDF files, not just pasted text.
+3. **Enterprise-grade Features**: Audit logs and related governance features for the Business persona.
 
 ---
 
