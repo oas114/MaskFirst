@@ -380,16 +380,12 @@
             <option value="business" data-i18n="personaBusiness">Business</option>
           </select>
         </div>
-        <div class="flex items-center gap-2">
-          <input type="file" id="csvFileInput" accept=".csv" class="hidden" onchange="handleCsvUpload(event)" />
-          <button onclick="document.getElementById('csvFileInput').click()" class="bg-white hover:bg-paper-sunken border border-line-strong text-ink-hover px-2 sm:px-3 py-1.5 rounded-lg text-[10px] sm:text-xs font-medium transition-colors" data-i18n="btnImportCsv">
-            Import Custom Dictionary (CSV)
-          </button>
-          <button id="dictCountLabel" onclick="openEditCsvModal()" class="bg-white hover:bg-paper-hover text-ink-secondary px-2 sm:px-3 py-1.5 rounded-lg text-[10px] sm:text-xs font-mono transition-colors border border-line-strong">
-            Dictionary: 0
-          </button>
-        </div>
-        <div class="flex items-center gap-1.5">
+        <button id="dictCountLabel" onclick="openEditCsvModal()" title="Custom Dictionary Manager (View / Edit / Build)" data-i18n-title="modalEditCsvTitle" class="bg-white hover:bg-paper-hover text-ink-secondary px-2 sm:px-3 py-1.5 rounded-lg text-[10px] sm:text-xs font-mono transition-colors border border-line-strong">
+          Dictionary: 0
+        </button>
+
+        <!-- Desktop: inline icon buttons -->
+        <div class="hidden sm:flex items-center gap-1.5">
           <button onclick="openGuide()" title="PII Rule Guide" data-i18n-title="btnPiiGuide" aria-label="PII Rule Guide" data-i18n-aria-label="btnPiiGuide" class="bg-white hover:bg-paper-sunken border border-line-strong text-ink-hover p-1.5 rounded-lg transition-colors flex items-center justify-center">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.967 8.967 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25"/></svg>
           </button>
@@ -399,6 +395,30 @@
           <button id="manageProtectionBtn" onclick="openProtectionManagerModal()" title="Manage Custom Protection Rules" data-i18n-title="btnManageRules" aria-label="Manage Custom Protection Rules" data-i18n-aria-label="btnManageRules" class="bg-white hover:bg-paper-sunken border border-line-strong text-ink-hover p-1.5 rounded-lg transition-colors flex items-center justify-center">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"/></svg>
           </button>
+        </div>
+
+        <!-- Mobile: collapse the same three actions into a "more" menu. The dropdown is
+             positioned by JS (fixed, clamped to the viewport) rather than CSS `right-0`,
+             since this button's position within the wrapped toolbar row varies with content
+             width/language and a pure-CSS anchor can end up overflowing off-screen. -->
+        <div class="sm:hidden">
+          <button id="moreMenuBtn" onclick="toggleMoreMenu()" title="More" data-i18n-title="moreMenuLabel" aria-label="More" data-i18n-aria-label="moreMenuLabel" aria-expanded="false" aria-haspopup="true" class="bg-white hover:bg-paper-sunken border border-line-strong text-ink-hover p-1.5 rounded-lg transition-colors flex items-center justify-center">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M3.75 6.75h16.5M3.75 12h16.5M3.75 17.25h16.5"/></svg>
+          </button>
+          <div id="moreMenuDropdown" class="hidden fixed bg-white border border-line rounded-lg shadow-lg z-30 py-1 min-w-[220px]">
+            <button onclick="openGuide(); closeMoreMenu();" class="w-full flex items-center gap-2.5 px-3 py-2 text-xs text-ink-hover hover:bg-paper-sunken text-left transition-colors">
+              <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.967 8.967 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25"/></svg>
+              <span data-i18n="btnPiiGuide">PII Rule Guide</span>
+            </button>
+            <button onclick="openSettings(); closeMoreMenu();" class="w-full flex items-center gap-2.5 px-3 py-2 text-xs text-ink-hover hover:bg-paper-sunken text-left transition-colors">
+              <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.325.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 010 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.281c-.09.543-.56.94-1.11.94h-2.594c-.55 0-1.019-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 010-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.28z M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+              <span data-i18n="btnSettings">Settings</span>
+            </button>
+            <button onclick="openProtectionManagerModal(); closeMoreMenu();" class="w-full flex items-center gap-2.5 px-3 py-2 text-xs text-ink-hover hover:bg-paper-sunken text-left transition-colors">
+              <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"/></svg>
+              <span data-i18n="btnManageRules">Manage Custom Protection Rules</span>
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -913,7 +933,12 @@
           </table>
         </div>
       </div>
-      <div class="px-6 py-4 border-t border-line-soft bg-paper-sunken flex justify-end gap-3 flex-shrink-0">
+      <div class="px-6 py-4 border-t border-line-soft bg-paper-sunken flex flex-wrap justify-end gap-3 flex-shrink-0">
+        <input type="file" id="csvFileInput" accept=".csv" class="hidden" onchange="handleCsvUpload(event)" />
+        <button onclick="document.getElementById('csvFileInput').click()" class="px-4 py-2 bg-white border border-line-strong text-ink-hover rounded-lg text-sm font-medium hover:bg-paper-sunken transition-colors flex items-center gap-1">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 16.5V9.75m0 0l3 3m-3-3l-3 3M6.75 19.5a4.5 4.5 0 01-1.41-8.775 5.25 5.25 0 0110.233-2.33 3 3 0 013.758 3.848A3.752 3.752 0 0118 19.5H6.75z"></path></svg>
+          <span data-i18n="pmBtnImportCsv">Import CSV</span>
+        </button>
         <button onclick="downloadOnlineCsv()" class="px-4 py-2 bg-white border border-line-strong text-ink-hover rounded-lg text-sm font-medium hover:bg-paper-sunken transition-colors flex items-center gap-1">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
           <span data-i18n="editCsvBtnDownload">Download as CSV</span>
@@ -1082,14 +1107,14 @@
       personaSelectTitle: { en: 'Hard Block keyword set — Personal privacy terms vs. Business confidentiality terms', zh: '硬阻斷關鍵字集──個人隱私用語 vs. 企業機密用語', ja: 'ハードブロックキーワードセット──個人のプライバシー用語 と 企業の機密用語' },
       personaPersonal: { en: 'Personal', zh: '個人', ja: '個人' },
       personaBusiness: { en: 'Business', zh: '企業', ja: 'ビジネス' },
-      btnImportCsv: { en: 'Import Custom Dictionary (CSV)', zh: '匯入自訂字典（CSV）', ja: 'カスタム辞書をインポート（CSV）' },
-      dictCountLabel: { en: 'Dictionary: {count}', zh: '字典：{count}', ja: '辞書：{count}' },
+      dictCountLabel: { en: 'Dictionary: {count}', zh: '詞庫：{count}', ja: '辞書：{count}' },
       btnPiiGuide: { en: 'PII Rule Guide', zh: '個資規則說明', ja: 'PIIルールガイド' },
       btnSettings: { en: 'Settings', zh: '設定', ja: '設定' },
       btnManageRules: { en: 'Manage Custom Protection Rules', zh: '管理自訂防護規則', ja: 'カスタム保護ルールを管理' },
       hardBlockBannerText: { en: 'Warning: extremely sensitive terms detected. The copy function has been locked to prevent accidental exposure.', zh: '警告：偵測到極度敏感的用語，複製功能已被鎖定以避免不慎外流。', ja: '警告：極めて機微な用語が検出されました。誤った漏洩を防ぐため、コピー機能をロックしました。' },
       hardBlockBannerBtn: { en: 'View Details & Unlock', zh: '查看詳情並解鎖', ja: '詳細を見て解除' },
-      toastAppliedCustomDict: { en: 'Applied {count} custom dictionary entries!', zh: '已套用 {count} 筆自訂字典項目！', ja: 'カスタム辞書エントリを{count}件適用しました！' },
+      moreMenuLabel: { en: 'More', zh: '更多', ja: 'その他' },
+      toastAppliedCustomDict: { en: 'Applied {count} custom dictionary entries!', zh: '已套用 {count} 筆自訂詞庫項目！', ja: 'カスタム辞書エントリを{count}件適用しました！' },
 
       // ---- Common / shared strings ----
       commonClear: { en: 'Clear', zh: '清除', ja: 'クリア' },
@@ -1133,10 +1158,10 @@
       settingsRegionPersonaHeading: { en: 'Region & Persona Presets', zh: '地區與身分模式預設', ja: '地域とペルソナのプリセット' },
       settingsRegionPersonaBody: { en: `The <strong>Region</strong> selector (top toolbar) swaps which country/region regex ruleset is layered on top of the always-on <strong>Global</strong> baseline (email, IP addresses, credit card numbers, generic dates). Only one region is active at a time to avoid cross-country format collisions (e.g. a bare 9-digit number shouldn't simultaneously be treated as a US SSN and something else). The <strong>Persona</strong> selector swaps the Hard Block keyword set between <strong>Personal</strong> privacy terms and <strong>Business</strong> confidentiality terms.`, zh: `<strong>地區</strong>選單（頂部工具列）用來切換要疊加在永遠啟用的<strong>全球</strong>基準規則（電子郵件、IP 位址、信用卡卡號、常見日期格式）之上的是哪個國家／地區的正則規則庫。同時間只會啟用一個地區，避免跨國格式互相衝突（例如一組純 9 位數字，不該同時被當成美國社會安全碼又被當成別的東西）。<strong>身分模式</strong>選單則用來切換硬阻斷關鍵字集，在<strong>個人</strong>隱私用語與<strong>企業</strong>機密用語之間切換。`, ja: `<strong>地域</strong>セレクター（上部ツールバー）は、常時有効な<strong>グローバル</strong>基準ルール（メールアドレス、IPアドレス、クレジットカード番号、一般的な日付形式）の上に、どの国・地域の正規表現ルールセットを重ねるかを切り替えます。国ごとの形式が衝突しないよう、一度に有効になる地域は1つだけです（例：9桁の数字だけでは、米国のSSNと他の何かを同時に表すことはできません）。<strong>ペルソナ</strong>セレクターは、ハードブロックのキーワードセットを<strong>個人</strong>のプライバシー用語と<strong>ビジネス</strong>の機密用語との間で切り替えます。` },
       settingsRegionPersonaWarning: { en: `<strong>Nothing here is saved.</strong> TokenShield destroys all state on reload by design, so your Region/Persona choice resets every time you open the file. If you always work in one region or persona, open <code class="bg-white border border-warning-200 px-1 rounded">TokenShield.html</code> in a text editor, search for <code class="bg-white border border-warning-200 px-1 rounded">DEFAULT_REGION</code> and <code class="bg-white border border-warning-200 px-1 rounded">DEFAULT_PERSONA</code> near the top of the <code class="bg-white border border-warning-200 px-1 rounded">&lt;script&gt;</code> block, and change the value — that becomes your new startup default.`, zh: `<strong>這裡的設定不會被儲存。</strong>TokenShield 的設計就是每次重新整理都會清空所有狀態，所以每次開啟檔案時 Region／Persona 都會重設。如果你固定只用某個地區或身分模式，可以用文字編輯器打開 <code class="bg-white border border-warning-200 px-1 rounded">TokenShield.html</code>，在 <code class="bg-white border border-warning-200 px-1 rounded">&lt;script&gt;</code> 區塊開頭附近搜尋 <code class="bg-white border border-warning-200 px-1 rounded">DEFAULT_REGION</code> 與 <code class="bg-white border border-warning-200 px-1 rounded">DEFAULT_PERSONA</code>，把值改掉──那就會成為你新的預設啟動值。`, ja: `<strong>ここでの設定は保存されません。</strong>TokenShieldは仕様上、再読み込みのたびにすべての状態を破棄するため、Region／Personaの選択も開くたびにリセットされます。いつも同じ地域やペルソナで作業する場合は、テキストエディタで <code class="bg-white border border-warning-200 px-1 rounded">TokenShield.html</code> を開き、<code class="bg-white border border-warning-200 px-1 rounded">&lt;script&gt;</code> ブロックの冒頭付近にある <code class="bg-white border border-warning-200 px-1 rounded">DEFAULT_REGION</code> と <code class="bg-white border border-warning-200 px-1 rounded">DEFAULT_PERSONA</code> を検索して値を変更してください──それが新しい起動時の既定値になります。` },
-      settingsCustomDictHeading: { en: 'Custom Dictionary (CSV)', zh: '自訂字典（CSV）', ja: 'カスタム辞書（CSV）' },
-      settingsCustomDictBody: { en: `Batch-import your own keywords, names, or project codenames. Download the template and fill it out using the "Keyword,Category" format. <strong>Category is optional</strong> — it defaults to CUSTOM if left blank. The system generates matching tags automatically (e.g. NAME_1, CUSTOM_1).<br><span class="text-warning-700 font-medium">Note: keyword values cannot contain commas — this will break CSV parsing. If a term itself contains a comma, use "Build Dictionary Online" instead.</span>`, zh: `批次匯入你自己的關鍵字、姓名或專案代號。下載範本後依「Keyword,Category」格式填寫，<strong>Category 欄位可留空</strong>──留空時預設歸類為 CUSTOM，系統會自動產生對應標籤（例如 NAME_1、CUSTOM_1）。<br><span class="text-warning-700 font-medium">注意：關鍵字內容不能包含逗號，否則會破壞 CSV 解析。如果詞彙本身就含有逗號，請改用「線上建立字典」功能。</span>`, ja: `キーワード、氏名、プロジェクトのコードネームなどを一括インポートできます。テンプレートをダウンロードし、「Keyword,Category」形式で入力してください。<strong>Category列は省略可</strong>──空欄の場合はCUSTOMとして扱われ、システムが自動でタグ（NAME_1、CUSTOM_1など）を生成します。<br><span class="text-warning-700 font-medium">注意：キーワードにカンマを含めることはできません（CSVの解析が壊れます）。カンマを含む語句を登録したい場合は、「オンラインで辞書を作成」を使用してください。</span>` },
+      settingsCustomDictHeading: { en: 'Custom Dictionary (CSV)', zh: '自訂詞庫（CSV）', ja: 'カスタム辞書（CSV）' },
+      settingsCustomDictBody: { en: `Batch-import your own keywords, names, or project codenames. Download the template and fill it out using the "Keyword,Category" format. <strong>Category is optional</strong> — it defaults to CUSTOM if left blank. The system generates matching tags automatically (e.g. NAME_1, CUSTOM_1).<br><span class="text-warning-700 font-medium">Note: keyword values cannot contain commas — this will break CSV parsing. If a term itself contains a comma, use "Build Dictionary Online" instead.</span>`, zh: `批次匯入你自己的關鍵字、姓名或專案代號。下載範本後依「Keyword,Category」格式填寫，<strong>Category 欄位可留空</strong>──留空時預設歸類為 CUSTOM，系統會自動產生對應標籤（例如 NAME_1、CUSTOM_1）。<br><span class="text-warning-700 font-medium">注意：關鍵字內容不能包含逗號，否則會破壞 CSV 解析。如果詞彙本身就含有逗號，請改用「線上建立詞庫」功能。</span>`, ja: `キーワード、氏名、プロジェクトのコードネームなどを一括インポートできます。テンプレートをダウンロードし、「Keyword,Category」形式で入力してください。<strong>Category列は省略可</strong>──空欄の場合はCUSTOMとして扱われ、システムが自動でタグ（NAME_1、CUSTOM_1など）を生成します。<br><span class="text-warning-700 font-medium">注意：キーワードにカンマを含めることはできません（CSVの解析が壊れます）。カンマを含む語句を登録したい場合は、「オンラインで辞書を作成」を使用してください。</span>` },
       commonDownloadCsvTemplate: { en: 'Download CSV Template', zh: '下載 CSV 範本', ja: 'CSVテンプレートをダウンロード' },
-      settingsBtnBuildDictOnline: { en: 'Build / Edit Dictionary Online', zh: '線上建立／編輯字典', ja: 'オンラインで辞書を作成／編集' },
+      settingsBtnBuildDictOnline: { en: 'Build / Edit Dictionary Online', zh: '線上建立／編輯詞庫', ja: 'オンラインで辞書を作成／編集' },
       settingsPromptLibHeading: { en: 'Local AI Prompt Library', zh: '本機 AI 提示詞庫', ja: 'ローカルAIプロンプトライブラリ' },
       settingsPromptLibBody: { en: `Ready-to-copy system prompts for local models (Ollama, LM Studio, etc.). Paste one of these ahead of your masked text so the model's own instructions also stay privacy-aware — reinforcing that nothing, including your prompt phrasing, needs to leave this machine.`, zh: `提供可直接複製的系統提示詞，適用於本機模型（Ollama、LM Studio 等）。在遮蔽後的文字前貼上其中一段，讓模型本身的指令也具備隱私意識──強調包含提示詞措辭在內的一切內容，都不需要離開這台機器。`, ja: `ローカルモデル（Ollama、LM Studioなど）向けに、そのままコピーして使えるシステムプロンプトです。マスク済みテキストの前にこれらのいずれかを貼り付けることで、モデル自身の指示もプライバシーを意識したものになります──プロンプトの文言も含め、何も外部に出す必要がないことを強調します。` },
       commonCopy: { en: 'Copy', zh: '複製', ja: 'コピー' },
@@ -1200,7 +1225,7 @@
       unlockBtnConfirm: { en: 'I Confirm No Risk, Unlock', zh: '我確認沒有風險，解鎖', ja: 'リスクがないことを確認し、解除する' },
 
       // ---- Build Dictionary Online modal ----
-      modalEditCsvTitle: { en: 'Custom Dictionary Manager (View / Edit / Build)', zh: '自訂字典管理員（檢視／編輯／建立）', ja: 'カスタム辞書マネージャー（表示／編集／作成）' },
+      modalEditCsvTitle: { en: 'Custom Dictionary Manager (View / Edit / Build)', zh: '自訂詞庫管理員（檢視／編輯／建立）', ja: 'カスタム辞書マネージャー（表示／編集／作成）' },
       editCsvIntro: { en: `Type directly into the table below, or <strong class="text-ink-hover">copy two columns from Excel and paste into any cell</strong> — the table expands automatically. Empty rows are ignored when you apply.`, zh: `直接在下方表格輸入，或<strong class="text-ink-hover">從 Excel 複製兩欄後貼到任一儲存格</strong>──表格會自動擴展。套用時會忽略空白列。`, ja: `下の表に直接入力するか、<strong class="text-ink-hover">Excelから2列をコピーして任意のセルに貼り付け</strong>てください──表は自動的に拡張されます。適用時、空の行は無視されます。` },
       editCsvBtnAddRow: { en: '+ Add Row Manually', zh: '+ 手動新增一列', ja: '+ 行を手動で追加' },
       editCsvFilterKwPlaceholder: { en: 'Filter by keyword...', zh: '依關鍵字篩選……', ja: 'キーワードで絞り込み…' },
@@ -1259,11 +1284,11 @@
       confirmDefaultOk: { en: 'OK', zh: '確定', ja: 'OK' },
       confirmDefaultCancel: { en: 'Cancel', zh: '取消', ja: 'キャンセル' },
       toastCopiedPromptTemplate: { en: 'Copied the {persona} local AI prompt template!', zh: '已複製「{persona}」本機 AI 提示詞範本！', ja: '「{persona}」ローカルAIプロンプトテンプレートをコピーしました！' },
-      confirmReloadConfigMessage: { en: 'Reloading will discard any manually edited custom rules and dictionary entries, then re-apply the built-in defaults plus the auto-load config file (if present). Continue?', zh: '重新載入將會捨棄所有手動編輯的自訂規則與字典項目，並重新套用內建預設值與自動載入設定檔（若有的話）。要繼續嗎？', ja: '再読み込みすると、手動で編集したカスタムルールと辞書エントリはすべて破棄され、組み込みの既定値と自動読み込み設定ファイル（存在する場合）が再適用されます。続けますか？' },
+      confirmReloadConfigMessage: { en: 'Reloading will discard any manually edited custom rules and dictionary entries, then re-apply the built-in defaults plus the auto-load config file (if present). Continue?', zh: '重新載入將會捨棄所有手動編輯的自訂規則與詞庫項目，並重新套用內建預設值與自動載入設定檔（若有的話）。要繼續嗎？', ja: '再読み込みすると、手動で編集したカスタムルールと辞書エントリはすべて破棄され、組み込みの既定値と自動読み込み設定ファイル（存在する場合）が再適用されます。続けますか？' },
       confirmReloadConfigOk: { en: 'Reload', zh: '重新載入', ja: '再読み込み' },
       toastConfigReloaded: { en: 'Configuration reloaded.', zh: '設定已重新載入。', ja: '設定を再読み込みしました。' },
       toastNoUsableRows: { en: 'The file has no usable rows.', zh: '檔案中沒有可用的資料列。', ja: 'ファイルに使用可能な行がありません。' },
-      importDimRoster: { en: 'dictionary entries', zh: '字典項目', ja: '辞書エントリ' },
+      importDimRoster: { en: 'dictionary entries', zh: '詞庫項目', ja: '辞書エントリ' },
       importDimHardBlock: { en: 'hard-block keywords', zh: '硬阻斷關鍵字', ja: 'ハードブロックキーワード' },
       importDimRegex: { en: 'regex rules', zh: '正則規則', ja: '正規表現ルール' },
       importInvalidPatternIntro: { en: 'The following {count} row(s) have an invalid pattern and will be skipped:', zh: '以下 {count} 列的規則格式無效，將會被略過：', ja: '以下の{count}行は無効なパターンのためスキップされます：' },
@@ -1303,6 +1328,8 @@
       v1LongTextWarning: { en: 'Text is over 50,000 characters — scanning may be slower.', zh: '文字超過 50,000 字元──掃描速度可能會變慢。', ja: 'テキストが50,000文字を超えています──スキャンが遅くなる場合があります。' },
       commonTableBadge: { en: 'Table', zh: '表格', ja: 'テーブル' },
       reasonManualTableMask: { en: 'Manual table mask', zh: '手動表格遮蔽', ja: '手動テーブルマスク' },
+      reasonImportedFromCsv: { en: 'Imported from CSV', zh: '從 CSV 匯入', ja: 'CSVからインポート' },
+      reasonManuallySelected: { en: 'Manually selected', zh: '手動選取', ja: '手動で選択' },
       commonDoneCheckmark: { en: '✓ Done', zh: '✓ 完成', ja: '✓ 完了' },
       v1NoMaskedItems: { en: 'No masked items', zh: '尚無遮蔽項目', ja: 'マスクされた項目はありません' },
       v2NoMaskingRecord: { en: 'No masking record', zh: '尚無遮蔽紀錄', ja: 'マスキング記録がありません' },
@@ -2108,6 +2135,36 @@
       setTimeout(() => m.classList.add('hidden'), 300);
     }
 
+    // Mobile header "more" menu — collapses the PII Rule Guide / Settings / Manage
+    // Custom Protection Rules buttons into a dropdown at narrow viewport widths.
+    function toggleMoreMenu() {
+      const dropdown = document.getElementById('moreMenuDropdown');
+      const btn = document.getElementById('moreMenuBtn');
+      const willOpen = dropdown.classList.contains('hidden');
+      if (willOpen) {
+        dropdown.classList.remove('hidden');
+        const r = btn.getBoundingClientRect();
+        const margin = 8;
+        let left = r.right - dropdown.offsetWidth;
+        left = Math.max(margin, Math.min(left, window.innerWidth - dropdown.offsetWidth - margin));
+        dropdown.style.left = left + 'px';
+        dropdown.style.top = (r.bottom + 6) + 'px';
+        btn.setAttribute('aria-expanded', 'true');
+      } else {
+        closeMoreMenu();
+      }
+    }
+    function closeMoreMenu() {
+      document.getElementById('moreMenuDropdown').classList.add('hidden');
+      document.getElementById('moreMenuBtn').setAttribute('aria-expanded', 'false');
+    }
+    document.addEventListener('mousedown', (e) => {
+      const dropdown = document.getElementById('moreMenuDropdown');
+      const btn = document.getElementById('moreMenuBtn');
+      if (!dropdown || dropdown.classList.contains('hidden')) return;
+      if (!dropdown.contains(e.target) && e.target !== btn && !btn.contains(e.target)) closeMoreMenu();
+    });
+
     // Generic confirm modal (replaces window.confirm) — returns a Promise<boolean>.
     let _genericConfirmResolve = null;
     function showConfirmModal(message, opts = {}) {
@@ -2509,7 +2566,7 @@
             const val = parts[0] || '';
             if (val) {
                 const type = parts[1] ? parts[1].toUpperCase() : 'CUSTOM';
-                rows.push({ type, value: val, reason: "Custom dictionary" });
+                rows.push({ type, value: val, reason: t('reasonImportedFromCsv') });
             }
         }
 
@@ -2748,7 +2805,7 @@
       if (val) {
         if (action === "add") {
           whitelist.delete(val);
-          customDict.push({ type: 'CUSTOM', value: val, reason: "Manually selected", source: 'manual' });
+          customDict.push({ type: 'CUSTOM', value: val, reason: t('reasonManuallySelected'), source: 'manual' });
         } else if (action === "remove") {
           addToWhitelist(val);
         }

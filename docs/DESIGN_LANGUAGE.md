@@ -79,7 +79,34 @@ AI scan button).
   (Note: regex rules can currently only be added via CSV import, not a single-row text input, so
   there's no separate single-field regex validation UI to keep in sync with this.)
 
-## 4. Keeping this in sync with EduShield
+## 4. Header toolbar: icon buttons and the mobile "more" menu
+
+The header toolbar accumulates buttons over time (region/persona/language selects, dictionary
+counter, rule guide, settings, custom-rule manager, …), so it follows a density convention rather
+than growing indefinitely:
+
+- **Low-frequency, long-label actions become icon-only buttons**, not text buttons — currently PII
+  Rule Guide / Settings / Manage Custom Protection Rules. Use `title` (tooltip) and `aria-label`
+  (screen readers) set to the action's full name, since there's no visible text to fall back on.
+  Reuse the existing outline-SVG icon style already used elsewhere in the file (24×24 viewbox,
+  `stroke-width="1.75"` for these three, `stroke-linecap="round" stroke-linejoin="round"`) rather
+  than inventing a new icon style. High-frequency or stateful controls (Region, Persona, Language,
+  the dictionary counter) stay as `<select>`s or labeled buttons — their visible value/count *is*
+  the state, so icon-ifying them would hide information, not just save space.
+- **Below the `sm` breakpoint, those same icon buttons collapse into a single "more" menu**
+  (hamburger icon) instead of wrapping the toolbar onto an extra line. Keep two markup blocks —
+  `hidden sm:flex` for the inline icons, `sm:hidden` for the hamburger + dropdown — driven by the
+  same `onclick` handlers, rather than one dynamically-repositioned set of buttons; duplicating a
+  handful of `<button>` tags is simpler than JS that moves elements between two layout contexts.
+- **Position the dropdown with JS, not a CSS `right-0`/`left-0` anchor.** The hamburger button's
+  actual position within the wrapped toolbar row shifts with content width (language, translated
+  label lengths, viewport size), so a pure-CSS anchor reliably overflows off-screen in some
+  combination of those. `toggleMoreMenu()` computes the button's `getBoundingClientRect()` and
+  clamps the dropdown's `left` to an 8px margin on both edges of the viewport instead. Close on an
+  outside `mousedown` (see the listener next to `toggleMoreMenu()`/`closeMoreMenu()`), matching the
+  same pattern already used for the text-selection context menu.
+
+## 5. Keeping this in sync with EduShield
 
 EduShield's `docs/DESIGN_LANGUAGE.md` (Traditional Chinese) documents the same system with one
 intentional difference: its `brand` ramp is blue instead of emerald. Everything else — token
