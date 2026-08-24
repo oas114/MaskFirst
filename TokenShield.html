@@ -321,11 +321,12 @@
     }
 
     /* Table cell outline: inline-block + tighter line-height so the outline hugs the text
-       instead of being stretched by the container's line-height, and adjacent rows get a gap. */
+       instead of being stretched by the container's line-height, and adjacent rows get a gap.
+       Small left/right margin too, so same-row cells' dashed outlines don't slightly overlap. */
     .pii-table-cell {
       display: inline-block;
       line-height: 1.3;
-      margin-bottom: 4px;
+      margin: 0 2px 4px 2px;
     }
 
     /* Scrollbar styling */
@@ -346,7 +347,7 @@
   <!-- Top navigation and tabs -->
   <header class="bg-white border-b border-line sticky top-0 z-20 shadow-sm flex-shrink-0">
     <div class="max-w-[90rem] mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-4">
-      <div class="flex items-center justify-between w-full lg:w-auto lg:justify-start gap-4 sm:gap-6 flex-wrap">
+      <div class="flex items-center justify-between w-full xl:w-auto xl:justify-start gap-4 sm:gap-6 flex-wrap">
         <div class="flex items-center gap-2.5">
           <div style="width:30px;height:30px;background:linear-gradient(135deg,var(--brand-700),var(--brand-500));border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
             <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
@@ -376,7 +377,7 @@
                (fixed, clamped to the viewport) rather than CSS `right-0`, since this
                button's position varies with content width/language and a pure-CSS anchor
                can end up overflowing off-screen. -->
-          <div class="sm:hidden">
+          <div class="xl:hidden">
             <button id="moreMenuBtn" onclick="toggleMoreMenu()" title="More" data-i18n-title="moreMenuLabel" aria-label="More" data-i18n-aria-label="moreMenuLabel" aria-expanded="false" aria-haspopup="true" class="bg-white hover:bg-paper-sunken border border-line-strong text-ink-hover p-1.5 rounded-lg transition-colors flex items-center justify-center">
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M3.75 6.75h16.5M3.75 12h16.5M3.75 17.25h16.5"/></svg>
             </button>
@@ -430,7 +431,7 @@
 
       <!-- Desktop only: language/region/persona, dictionary manager, guide/settings/manage.
            Collapsed into the "more" menu above on mobile instead of wrapping onto a 2nd row. -->
-      <div class="hidden sm:flex flex-wrap items-center gap-2 sm:gap-3 text-[10px] sm:text-sm">
+      <div class="hidden xl:flex flex-wrap items-center gap-2 sm:gap-3 text-[10px] sm:text-sm">
         <div class="flex items-center gap-1.5">
           <label class="sr-only" for="langSelect" data-i18n="langSelectLabel">Display language</label>
           <select id="langSelect" onchange="switchLanguage(this.value)" title="Display language — independent from the Region ruleset below" data-i18n-title="langSelectTitle" class="h-10 bg-white hover:bg-paper-sunken border border-line-strong text-ink-hover px-2 rounded-lg text-[10px] sm:text-xs font-medium transition-colors focus:outline-none focus:ring-1 focus:ring-brand-500">
@@ -613,12 +614,23 @@
             </div>
             <div id="integrityStatus" class="text-xs font-medium"></div>
           </div>
-          <div id="restoredOutputView" contenteditable="true" class="flex-1 p-4 text-sm bg-white overflow-y-auto font-sans leading-[2.25] whitespace-pre-wrap min-h-0 focus:outline-none focus:ring-2 focus:ring-brand-100 transition-shadow" style="tab-size: 4;"></div>
+          <div id="restoredOutputView" contenteditable="true" class="relative flex-1 p-4 text-sm bg-white overflow-y-auto font-sans leading-[2.25] whitespace-pre-wrap min-h-0 focus:outline-none focus:ring-2 focus:ring-brand-100 transition-shadow" style="tab-size: 4;"></div>
+          <div id="restoreBatchBar" class="hidden p-3 border-t border-line-soft bg-paper-sunken flex-shrink-0 flex flex-wrap items-center gap-2 text-xs">
+            <span class="text-ink-muted"><span data-i18n="v2SelectedPrefix">Selected</span> <span id="restoreSelectedCount">0</span></span>
+            <button onclick="applyRestoreBatchMaskState('2')" class="bg-brand-700 hover:bg-brand-800 text-white font-medium px-3 py-1.5 rounded-md transition-colors" data-i18n="v2MaskPartial">Partial-mask selected</button>
+            <button onclick="applyRestoreBatchMaskState('1')" class="bg-ink hover:bg-ink-hover text-white font-medium px-3 py-1.5 rounded-md transition-colors" data-i18n="v2MaskFull">Full-mask selected</button>
+            <button onclick="applyRestoreBatchMaskState('0')" class="bg-white border border-line-strong text-ink-hover px-3 py-1.5 rounded-md hover:bg-paper-hover transition-colors" data-i18n="v2MaskUnmask">Un-mask selected</button>
+            <button onclick="clearRestoreSelection()" class="bg-white border border-line-strong text-ink-hover px-3 py-1.5 rounded-md hover:bg-paper-hover transition-colors" data-i18n="v2ClearSelection">Clear selection</button>
+          </div>
+          <p class="px-3 pt-2 text-xs text-ink-faint flex-shrink-0" data-i18n="altDragHint">Tip: hold Alt while dragging to select multiple items for batch masking; a plain drag still selects/edits text normally.</p>
           <div class="p-3 border-t border-line-soft bg-paper-sunken flex-shrink-0 flex gap-2">
             <button onclick="clearRestoredResult()" class="flex-[1] bg-white border border-line-strong hover:bg-paper-sunken text-ink-hover font-medium py-2 px-3 rounded-lg shadow-sm transition-colors text-sm whitespace-nowrap" data-i18n="v2BtnClearResult">
               Clear Result
             </button>
-            <button onclick="copyRestoredResult()" class="flex-[3] bg-ink hover:bg-ink-hover text-white font-semibold py-2 px-4 rounded-lg shadow-sm transition-colors text-sm" data-i18n="v2BtnCopyRestored">
+            <button onclick="restoreSelectAll()" class="flex-[1] bg-white border border-line-strong hover:bg-paper-sunken text-ink-hover font-medium py-2 px-3 rounded-lg shadow-sm transition-colors text-sm whitespace-nowrap" data-i18n="v2SelectAll">
+              Select All
+            </button>
+            <button onclick="copyRestoredResult()" class="flex-[2] bg-ink hover:bg-ink-hover text-white font-semibold py-2 px-4 rounded-lg shadow-sm transition-colors text-sm" data-i18n="v2BtnCopyRestored">
               Copy Restored Text
             </button>
           </div>
@@ -654,15 +666,17 @@
         <div class="p-3 border-b border-line-soft bg-paper-sunken/50 flex-shrink-0">
           <label class="font-semibold text-sm text-ink" data-i18n="v3ResultLabel">Detection Result (drag to select multiple, click one to cycle its state)</label>
         </div>
-        <div id="quickMaskOutput" class="relative flex-1 p-4 text-sm bg-white overflow-y-auto font-sans leading-[2.25] whitespace-pre-wrap min-h-0" style="tab-size: 4;">
+        <div id="quickMaskOutput" contenteditable="true" class="relative flex-1 p-4 text-sm bg-white overflow-y-auto font-sans leading-[2.25] whitespace-pre-wrap min-h-0 focus:outline-none focus:ring-2 focus:ring-brand-100 transition-shadow" style="tab-size: 4;">
           <span class="text-ink-faint italic text-xs" data-i18n="v3NotRunYet">Not run yet</span>
         </div>
         <div id="quickMaskBatchBar" class="hidden p-3 border-t border-line-soft bg-paper-sunken flex-shrink-0 flex flex-wrap items-center gap-2 text-xs">
           <span class="text-ink-muted"><span data-i18n="v3SelectedPrefix">Selected</span> <span id="quickMaskSelectedCount">0</span></span>
           <button onclick="applyBatchMaskState('2')" class="bg-brand-700 hover:bg-brand-800 text-white font-medium px-3 py-1.5 rounded-md transition-colors" data-i18n="v3MaskPartial">Partial-mask selected</button>
           <button onclick="applyBatchMaskState('1')" class="bg-ink hover:bg-ink-hover text-white font-medium px-3 py-1.5 rounded-md transition-colors" data-i18n="v3MaskFull">Full-mask selected</button>
+          <button onclick="applyBatchMaskState('0')" class="bg-white border border-line-strong text-ink-hover px-3 py-1.5 rounded-md hover:bg-paper-hover transition-colors" data-i18n="v3MaskUnmask">Un-mask selected</button>
           <button onclick="clearQuickMaskSelection()" class="bg-white border border-line-strong text-ink-hover px-3 py-1.5 rounded-md hover:bg-paper-hover transition-colors" data-i18n="v3ClearSelection">Clear selection</button>
         </div>
+        <p class="px-3 pt-2 text-xs text-ink-faint flex-shrink-0" data-i18n="altDragHint">Tip: hold Alt while dragging to select multiple items for batch masking; a plain drag still selects/edits text normally.</p>
         <div class="p-3 border-t border-line-soft bg-paper-sunken flex-shrink-0 flex gap-2">
           <button onclick="quickMaskSelectAll()" class="flex-[1] bg-white border border-line-strong hover:bg-paper-sunken text-ink-hover font-medium py-2 px-3 rounded-lg shadow-sm transition-colors text-xs sm:text-sm whitespace-nowrap" data-i18n="v3SelectAll">
             Select All
@@ -1568,6 +1582,14 @@
       v3BtnCopy: { en: 'Copy Masked Text', zh: '複製遮蔽後文字', ja: 'マスク後のテキストをコピー' },
       toastQuickMaskEmptyWarning: { en: 'Please paste some text first', zh: '請先貼上文字', ja: 'まず文章を貼り付けてください' },
       toastQuickMaskCopied: { en: 'Masked text copied!', zh: '已複製遮蔽後文字！', ja: 'マスク後のテキストをコピーしました！' },
+      v3MaskUnmask: { en: 'Un-mask selected', zh: '取消遮蔽已選取', ja: '選択項目のマスクを解除' },
+      altDragHint: { en: 'Tip: hold Alt while dragging to select multiple items for batch masking; a plain drag still selects/edits text normally.', zh: '提示：按住 Alt 拖曳可框選多筆項目批次遮蔽；一般拖曳仍可正常選取文字/編輯內容。', ja: 'ヒント：Alt を押しながらドラッグすると複数項目を選択して一括マスクできます。通常のドラッグはテキスト選択・編集のままご利用いただけます。' },
+      v2SelectedPrefix: { en: 'Selected', zh: '已選取', ja: '選択中' },
+      v2MaskPartial: { en: 'Partial-mask selected', zh: '半遮蔽已選取', ja: '選択項目を部分マスク' },
+      v2MaskFull: { en: 'Full-mask selected', zh: '全遮蔽已選取', ja: '選択項目を全マスク' },
+      v2MaskUnmask: { en: 'Un-mask selected', zh: '取消遮蔽已選取', ja: '選択項目のマスクを解除' },
+      v2ClearSelection: { en: 'Clear selection', zh: '取消選取', ja: '選択解除' },
+      v2SelectAll: { en: 'Select All', zh: '全選', ja: '全選択' },
 
       // __I18N_END__
     };
@@ -3881,7 +3903,7 @@
       const missing = [];
 
       Object.entries(sessionVault).forEach(([token, rawVal]) => {
-        const span = `<span class="inline-block bg-brand-50 text-brand-900 px-1 rounded font-semibold border-b border-brand-200 transition-all cursor-pointer hover:bg-brand-100" data-token="${token}" data-mask-state="0" contenteditable="false" onclick="toggleMask(this, '${escapeHtml(rawVal)}')" onmouseenter="showGlobalTooltip(event, '${escapeForInlineJs(t('tooltipTagToggle', { token }))}'); highlightCrossReference('${token}', true)" onmouseleave="hideGlobalTooltip(); highlightCrossReference('${token}', false)" onmousemove="showGlobalTooltip(event, '${escapeForInlineJs(t('tooltipTagToggle', { token }))}')">${escapeHtml(rawVal)}</span>`;
+        const span = `<span class="inline-block bg-brand-50 text-brand-900 px-1 rounded font-semibold border-b border-brand-200 transition-all cursor-pointer hover:bg-brand-100" data-token="${token}" data-raw="${escapeHtml(rawVal)}" data-mask-state="0" contenteditable="false" onclick="toggleMask(this, '${escapeHtml(rawVal)}')" onmouseenter="showGlobalTooltip(event, '${escapeForInlineJs(t('tooltipTagToggle', { token }))}'); highlightCrossReference('${token}', true)" onmouseleave="hideGlobalTooltip(); highlightCrossReference('${token}', false)" onmousemove="showGlobalTooltip(event, '${escapeForInlineJs(t('tooltipTagToggle', { token }))}')">${escapeHtml(rawVal)}</span>`;
         if (replyText.includes(token)) {
           html = html.split(token).join(span);
         } else {
@@ -3915,6 +3937,7 @@
 
       renderOriginalWithCapsules(missing);
       renderRestoreChips(missing);
+      clearRestoreSelection();
 
       document.getElementById("aiReplyInput").style.height = "60px";
     }
@@ -3928,6 +3951,7 @@
       document.getElementById("integrityStatus").innerHTML = "";
       document.getElementById("aiReplyInput").style.height = "160px";
       renderOriginalWithCapsules([]);
+      clearRestoreSelection();
     }
 
     function copyRestoredResult() {
@@ -4274,8 +4298,10 @@
       if (text) navigator.clipboard.writeText(text).then(() => showToast(t('toastQuickMaskCopied'), 'success'));
     }
 
-    // Drag-select: dragging a rectangle over blank space in the result area selects every
-    // detected span it intersects, so batch actions don't require clicking items one by one.
+    // Drag-select: dragging a rectangle over the result area selects every detected span it
+    // intersects, so batch actions don't require clicking items one by one. The output is now
+    // contenteditable too, so the drag must be gated behind Alt to leave plain drags free for
+    // normal text selection/editing.
     let quickMaskDragStart = null;
     let quickMaskSelectionBox = null;
     const quickMaskSelected = new Set();
@@ -4283,6 +4309,7 @@
     function initQuickMaskDragSelect() {
       const container = document.getElementById("quickMaskOutput");
       container.addEventListener('mousedown', (e) => {
+        if (!e.altKey) return; // no Alt = normal text selection/editing, don't start a drag-select
         if (e.target.closest('[data-mask-state]')) return; // clicking an item itself still cycles it, not a drag
         quickMaskDragStart = { x: e.clientX, y: e.clientY };
         quickMaskSelectionBox = document.createElement('div');
@@ -4343,6 +4370,77 @@
       clearQuickMaskSelection();
     }
 
+    // Restore tab's own drag-select batch masking: same mechanism as Quick Mask's output,
+    // kept as an independent copy since restoredOutputView is a different container with its
+    // own set of spans. Alt-gated for the same contenteditable reason.
+    let restoreDragStart = null;
+    let restoreSelectionBox = null;
+    const restoreSelected = new Set();
+
+    function initRestoreDragSelect() {
+      const container = document.getElementById("restoredOutputView");
+      container.addEventListener('mousedown', (e) => {
+        if (!e.altKey) return;
+        if (e.target.closest('[data-mask-state]')) return;
+        restoreDragStart = { x: e.clientX, y: e.clientY };
+        restoreSelectionBox = document.createElement('div');
+        restoreSelectionBox.className = 'fixed border-2 border-dashed border-brand-500 bg-brand-100/30 pointer-events-none z-50';
+        document.body.appendChild(restoreSelectionBox);
+        e.preventDefault();
+      });
+      document.addEventListener('mousemove', (e) => {
+        if (!restoreDragStart) return;
+        const x = Math.min(restoreDragStart.x, e.clientX), y = Math.min(restoreDragStart.y, e.clientY);
+        const w = Math.abs(e.clientX - restoreDragStart.x), h = Math.abs(e.clientY - restoreDragStart.y);
+        Object.assign(restoreSelectionBox.style, { left: `${x}px`, top: `${y}px`, width: `${w}px`, height: `${h}px` });
+      });
+      document.addEventListener('mouseup', () => {
+        if (!restoreDragStart) return;
+        const box = restoreSelectionBox.getBoundingClientRect();
+        document.querySelectorAll('#restoredOutputView [data-mask-state]').forEach(el => {
+          const r = el.getBoundingClientRect();
+          const hit = !(r.right < box.left || r.left > box.right || r.bottom < box.top || r.top > box.bottom);
+          if (hit) restoreToggleSelect(el, true);
+        });
+        restoreSelectionBox.remove();
+        restoreSelectionBox = null;
+        restoreDragStart = null;
+      });
+    }
+
+    function restoreToggleSelect(el, forceOn) {
+      const isSelected = restoreSelected.has(el);
+      if (forceOn || !isSelected) {
+        restoreSelected.add(el);
+        el.classList.add('ring-2', 'ring-brand-500');
+      } else {
+        restoreSelected.delete(el);
+        el.classList.remove('ring-2', 'ring-brand-500');
+      }
+      updateRestoreBatchBar();
+    }
+
+    function clearRestoreSelection() {
+      restoreSelected.forEach(el => el.classList.remove('ring-2', 'ring-brand-500'));
+      restoreSelected.clear();
+      updateRestoreBatchBar();
+    }
+
+    function updateRestoreBatchBar() {
+      const bar = document.getElementById("restoreBatchBar");
+      bar.classList.toggle('hidden', restoreSelected.size === 0);
+      document.getElementById("restoreSelectedCount").innerText = restoreSelected.size;
+    }
+
+    function restoreSelectAll() {
+      document.querySelectorAll('#restoredOutputView [data-mask-state]').forEach(el => restoreToggleSelect(el, true));
+    }
+
+    function applyRestoreBatchMaskState(targetState) {
+      restoreSelected.forEach(el => setMaskState(el, el.dataset.raw, targetState));
+      clearRestoreSelection();
+    }
+
     // Clear all inputs on load/reload so nothing carries over between sessions
     window.addEventListener('load', () => {
       document.querySelectorAll('textarea, input[type="text"]').forEach(el => {
@@ -4356,6 +4454,7 @@
       if (personaSelectMobileEl) personaSelectMobileEl.value = DEFAULT_PERSONA;
       clearLeftInput();
       initQuickMaskDragSelect();
+      initRestoreDragSelect();
     });
 
   </script>
