@@ -127,6 +127,8 @@ Two channels, same wire protocol as EduShield (`{ollamaUrl}/api/generate`, strea
 | 1 — Entity extraction | Finds names, vendors/organizations, addresses, project names, bank/payment accounts that static regex missed | No — entity types are universal |
 | 2 — Risk assessment | Flags "extremely sensitive" narrative content | **Yes** — the risk category list sent to the model differs by `currentPersona` (self-harm/abuse/mental-health/immigration for `personal`; insider-info/M&A/layoffs/breach/litigation for `business`) |
 
+> **Known accuracy limitation**: real-world testing shows Channel 1's name extraction is not reliable — small models like `qwen2.5:3b` frequently miss names, since they're a free-form, highly context-dependent entity type. The UI's passive hint (`layer1HintBanner`) points users at the Custom Dictionary for names instead of the deep scan for this reason; treat Channel 1's name output as best-effort, not authoritative.
+
 Same safeguards as EduShield: pre-flight connection check, manual cancel, runaway-output length guard (`maxAllowedLength`), 3-minute timeout confirmation, and `finally`-block UI recovery.
 
 ### 2.6 Local AI Prompt Library

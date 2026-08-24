@@ -60,6 +60,8 @@ A separate **language selector** (top toolbar) switches the interface between **
 
 **Layer 2 — Local LLM Semantic Scan** *(Optional)*: integrates with [Ollama](https://ollama.com/) running on your own machine. No data ever leaves your device. Entity extraction and risk-assessment prompts are persona-aware.
 
+> **Practical limits of name detection**: small local models are not yet consistently reliable at recognizing person names — a free-form, highly context-dependent entity type — so name masking should not rely on this layer alone. If your documents contain fixed, recurring names, add them directly to the **Custom Dictionary** (manageable from the toolbar) to guarantee they're masked every time.
+
 ### Session Vault & Restore Mechanism
 
 Every masked item is stored in an in-memory `sessionVault` as a unique token (`{{TYPE_N}}`). After the external AI processes the masked text, TokenShield restores original data using a **triple-tolerance matching algorithm** (exact, whitespace-tolerant, bracket-tolerant).
