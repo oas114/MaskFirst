@@ -396,7 +396,7 @@
                 </select>
               </div>
               <button onclick="openEditCsvModal(); closeMoreMenu();" class="w-full flex items-center justify-between gap-2.5 px-3 py-2 text-xs text-ink-hover hover:bg-paper-sunken text-left transition-colors">
-                <span data-i18n="modalEditCsvTitle">Custom Dictionary Manager (View / Edit / Build)</span>
+                <span data-i18n="dictManagerBtnLabel">Custom Dictionary Manager</span>
                 <span id="dictCountLabelMobile" class="font-mono text-ink-secondary flex-shrink-0">Dictionary: 0</span>
               </button>
               <div class="border-t border-line my-1"></div>
@@ -441,7 +441,7 @@
             <option value="business" data-i18n="personaBusiness">Business</option>
           </select>
         </div>
-        <button id="dictCountLabel" onclick="openEditCsvModal()" title="Custom Dictionary Manager (View / Edit / Build)" data-i18n-title="modalEditCsvTitle" class="h-10 inline-flex items-center bg-white hover:bg-paper-hover text-ink-secondary px-2 sm:px-3 rounded-lg text-[10px] sm:text-xs font-mono transition-colors border border-line-strong">
+        <button id="dictCountLabel" onclick="openEditCsvModal()" title="Custom Dictionary Manager" data-i18n-title="dictManagerBtnLabel" class="h-10 inline-flex items-center bg-white hover:bg-paper-hover text-ink-secondary px-2 sm:px-3 rounded-lg text-[10px] sm:text-xs font-mono transition-colors border border-line-strong">
           Dictionary: 0
         </button>
 
@@ -1174,7 +1174,7 @@
       v1OutputPlaceholder: { en: 'Output will appear here after running de-identification...', zh: '執行去識別化後，結果會顯示在這裡……', ja: '匿名化を実行すると、結果がここに表示されます…' },
       v1BtnScanLocalAi: { en: 'Scan with Local AI', zh: '使用本機 AI 掃描', ja: 'ローカルAIでスキャン' },
       v1BtnCopyMasked: { en: 'Copy Masked Data', zh: '複製遮蔽後資料', ja: 'マスク済みデータをコピー' },
-      v1Layer1HintBanner: { en: 'Only basic pattern matching has run — names and irregular PII may still be exposed. Run "Scan with Local AI" before copying.', zh: '僅完成基礎掃描（正則比對），姓名等不規則個資可能仍未遮蔽，建議先執行「使用本機 AI 掃描」再複製。', ja: '基本パターン照合のみ実行済みです。氏名などの不規則な個人情報が検出されていない可能性があります。コピーする前に「ローカルAIでスキャン」を実行してください。' },
+      v1Layer1HintBanner: { en: 'Only basic pattern matching has run — names and irregular PII may still be exposed. Add recurring names to the Custom Dictionary for reliable masking; local AI deep scan is not reliable enough for names and should only be used as a supplementary check.', zh: '僅完成基礎掃描（正則比對），姓名等不規則個資可能仍未遮蔽。姓名建議加入「自訂詞庫」以確保穩定遮蔽，地端 AI 深度掃描對姓名的判讀仍不夠穩定，僅能作為輔助。', ja: '基本パターン照合のみ実行済みです。氏名などの不規則な個人情報が検出されていない可能性があります。氏名は「カスタム辞書」に追加すると確実にマスキングできます。ローカルAIによる詳細スキャンは氏名の判定精度がまだ十分ではなく、補助的な用途にとどめてください。' },
 
       // ---- View 2: Restore & Compare ----
       v2OriginalRecordLabel: { en: 'Original Data & Masking Record', zh: '原始資料與遮蔽紀錄', ja: '元データとマスキング記録' },
@@ -1267,6 +1267,7 @@
 
       // ---- Build Dictionary Online modal ----
       modalEditCsvTitle: { en: 'Custom Dictionary Manager (View / Edit / Build)', zh: '自訂詞庫管理員（檢視／編輯／建立）', ja: 'カスタム辞書マネージャー（表示／編集／作成）' },
+      dictManagerBtnLabel: { en: 'Custom Dictionary Manager', zh: '自訂詞庫管理', ja: 'カスタム辞書マネージャー' },
       editCsvIntro: { en: `Type directly into the table below, or <strong class="text-ink-hover">copy two columns from Excel and paste into any cell</strong> — the table expands automatically. Empty rows are ignored when you apply.`, zh: `直接在下方表格輸入，或<strong class="text-ink-hover">從 Excel 複製兩欄後貼到任一儲存格</strong>──表格會自動擴展。套用時會忽略空白列。`, ja: `下の表に直接入力するか、<strong class="text-ink-hover">Excelから2列をコピーして任意のセルに貼り付け</strong>てください──表は自動的に拡張されます。適用時、空の行は無視されます。` },
       editCsvBtnAddRow: { en: '+ Add Row Manually', zh: '+ 手動新增一列', ja: '+ 行を手動で追加' },
       editCsvFilterKwPlaceholder: { en: 'Filter by keyword...', zh: '依關鍵字篩選……', ja: 'キーワードで絞り込み…' },
