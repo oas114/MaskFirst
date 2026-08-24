@@ -320,6 +320,14 @@
       background-color: rgba(var(--danger-500-rgb), 0.45);
     }
 
+    /* Table cell outline: inline-block + tighter line-height so the outline hugs the text
+       instead of being stretched by the container's line-height, and adjacent rows get a gap. */
+    .pii-table-cell {
+      display: inline-block;
+      line-height: 1.3;
+      margin-bottom: 4px;
+    }
+
     /* Scrollbar styling */
     ::-webkit-scrollbar { width: 6px; height: 6px; }
     ::-webkit-scrollbar-track { background: transparent; }
@@ -625,10 +633,15 @@
       <!-- Left: paste raw text -->
       <section class="flex-1 bg-white rounded-xl border border-line shadow-sm flex flex-col min-h-[40vh] lg:min-h-0">
         <div class="p-3 border-b border-line-soft flex justify-between items-center bg-paper-sunken/50 flex-shrink-0">
-          <label class="font-semibold text-sm text-ink" data-i18n="v3OriginalInputLabel">Original Text</label>
-          <button onclick="document.getElementById('quickMaskInput').value = ''" class="text-xs text-ink-muted hover:text-ink transition-colors" data-i18n="commonClear">Clear</button>
+          <label class="font-semibold text-sm text-ink" data-i18n="v3OriginalInputLabel">Original Text (select text or a table cell to mark it sensitive)</label>
+          <button onclick="clearQuickMaskInput()" class="text-xs text-ink-muted hover:text-ink transition-colors" data-i18n="commonClear">Clear</button>
         </div>
-        <textarea id="quickMaskInput" class="flex-1 w-full p-4 text-sm bg-white resize-none font-mono focus:outline-none min-h-[30vh]" style="tab-size: 4;" placeholder="Paste text you want to publish or share, e.g. an announcement list or contact directory...&#10;This mode never contacts an external AI and builds no reference table — nothing survives a refresh." data-i18n-placeholder="v3InputPlaceholder"></textarea>
+        <div class="flex-1 relative bg-white min-h-[30vh] lg:min-h-0">
+          <div class="editor-container absolute inset-0 w-full h-full">
+            <div id="quickMaskBackdrop" class="editor-backdrop"></div>
+            <textarea id="quickMaskInput" class="editor-textarea" spellcheck="false" placeholder="Paste text you want to publish or share, e.g. an announcement list or contact directory...&#10;This mode never contacts an external AI and builds no reference table — nothing survives a refresh." data-i18n-placeholder="v3InputPlaceholder"></textarea>
+          </div>
+        </div>
         <div class="p-4 border-t border-line-soft bg-paper-sunken flex-shrink-0">
           <button onclick="processQuickMask()" class="w-full bg-brand-700 hover:bg-brand-800 text-white font-semibold py-2.5 px-4 rounded-lg shadow-sm transition-colors text-sm" data-i18n="v3BtnDetect">
             Detect
@@ -1541,7 +1554,7 @@
       errorVaultWrongPassword: { en: 'Wrong password, or the file is corrupted.', zh: '密碼錯誤或檔案已損毀，請重新輸入或確認檔案內容。', ja: 'パスワードが正しくないか、ファイルが破損しています。' },
 
       tabQuickMask: { en: 'Quick Mask', zh: '快速遮蔽', ja: 'クイックマスク' },
-      v3OriginalInputLabel: { en: 'Original Text', zh: '原始文字', ja: '原文' },
+      v3OriginalInputLabel: { en: 'Original Text (select text or a table cell to mark it sensitive)', zh: '原始文字（選取文字或表格儲存格可手動設為機密）', ja: '原文（テキストやテーブルセルを選択して機微情報としてマーク可能）' },
       v3InputPlaceholder: { en: `Paste text you want to publish or share, e.g. an announcement list or contact directory...\nThis mode never contacts an external AI and builds no reference table — nothing survives a refresh.`, zh: '貼上要公告/分享的文字，例如錄取名單、聯絡資訊清單...\n此模式不送外部 AI、不建立任何對照表，離開或重新整理就不留痕跡。', ja: '公開・共有したい文章を貼り付けてください（合格者名簿や連絡先一覧など）。\nこのモードは外部 AI に送信せず、対照表も作成しません。更新すると内容は残りません。' },
       v3BtnDetect: { en: 'Detect', zh: '偵測', ja: '検出' },
       v3ResultLabel: { en: 'Detection Result (drag to select multiple, click one to cycle its state)', zh: '偵測結果（拖曳滑鼠可框選多筆，單點可循環切換單筆）', ja: '検出結果（ドラッグで複数選択、クリックで単体の状態を切り替え）' },
@@ -1628,6 +1641,8 @@
     let activeExtractedEntities = [];
     let tableMasks = new Set(); // Stores "lineIndex_colIndex"
     let rawAnonymizedText = ""; // Stores the tokenized text used by Phase 2
+    let quickMaskActiveEntities = []; // Quick Mask input's own live detection, independent of activeExtractedEntities
+    let quickMaskTableMasks = new Set(); // Quick Mask input's own table-cell masks, independent of tableMasks
 
     // ==========================================
     // Tooltip & cross-reference helpers
@@ -3118,7 +3133,7 @@
             } else {
               cellHtml = renderRange(text, lineCursor, lineCursor + cellText.length);
             }
-            cellHtmls.push(`<span class="outline outline-1 outline-dashed outline-line-strong pointer-events-none hover:bg-paper-sunken/50 transition-colors" data-cell="${r}_${c}">${cellHtml}</span>`);
+            cellHtmls.push(`<span class="pii-table-cell outline outline-1 outline-dashed outline-line-strong pointer-events-none hover:bg-paper-sunken/50 transition-colors" data-cell="${r}_${c}">${cellHtml}</span>`);
             lineCursor += cellText.length + 1;
           });
           html += cellHtmls.join('\t') + '\n';
@@ -3887,7 +3902,7 @@
       let restoredLines = html.split('\n');
       html = restoredLines.map(line => {
         if (line.includes('\t')) {
-          return line.split('\t').map(cell => `<span class="outline outline-1 outline-dashed outline-line-strong rounded-sm hover:bg-paper-sunken transition-colors">${cell}</span>`).join('\t');
+          return line.split('\t').map(cell => `<span class="pii-table-cell outline outline-1 outline-dashed outline-line-strong rounded-sm hover:bg-paper-sunken transition-colors">${cell}</span>`).join('\t');
         }
         return line;
       }).join('\n');
@@ -3981,26 +3996,275 @@
     };
 
     // ==========================================
+    // Quick Mask input: select-to-mark-sensitive + table-cell masking
+    // (Mirrors the De-identify tab's rawInput renderHighlights/selection-menu/
+    //  handleSelectionAction/handleTableMask mechanism as an independent copy, so the
+    //  well-established main flow's shared functions don't need refactoring for a 2nd caller.)
+    // ==========================================
+    const quickMaskTextarea = document.getElementById('quickMaskInput');
+    const quickMaskBackdrop = document.getElementById('quickMaskBackdrop');
+    let quickMaskDebounceTimer;
+
+    function renderQuickMaskRange(text, start, end) {
+      const rangeEntities = quickMaskActiveEntities.filter(e => e.start < end && e.end > start);
+      if (rangeEntities.length === 0) return escapeHtml(text.substring(start, end));
+
+      let rangeHtml = '';
+      let cursor = start;
+      rangeEntities.forEach(ent => {
+        if (cursor < ent.start) {
+          rangeHtml += escapeHtml(text.substring(cursor, ent.start));
+          cursor = ent.start;
+        }
+        const overlapStart = Math.max(cursor, ent.start);
+        const overlapEnd = Math.min(end, ent.end);
+        if (overlapStart < overlapEnd) {
+          let markClass = '';
+          if (ent.isCritical) markClass = 'highlight-critical';
+          else if (ent.isAi) markClass = 'highlight-ai';
+          rangeHtml += `<mark class="${markClass}" data-entity-val="${escapeHtml(ent.value)}">${escapeHtml(text.substring(overlapStart, overlapEnd))}</mark>`;
+          cursor = overlapEnd;
+        }
+      });
+      if (cursor < end) rangeHtml += escapeHtml(text.substring(cursor, end));
+      return rangeHtml;
+    }
+
+    function renderQuickMaskHighlights() {
+      const text = quickMaskTextarea.value;
+      if (!text) { quickMaskBackdrop.innerHTML = ''; return; }
+
+      let html = '';
+      let globalCursor = 0;
+      const lines = text.split('\n');
+
+      lines.forEach((line, r) => {
+        if (line.includes('\t')) {
+          const cells = line.split('\t');
+          let cellHtmls = [];
+          let lineCursor = globalCursor;
+          cells.forEach((cellText, c) => {
+            const isMasked = quickMaskTableMasks.has(`${r}_${c}`);
+            let cellHtml = '';
+            if (isMasked) {
+              cellHtml = `<mark class="bg-brand-100/80 text-brand-800 rounded-sm py-0.5 pointer-events-auto" data-table-mask="${r}_${c}" data-entity-val="${escapeHtml(cellText)}">${escapeHtml(cellText)}</mark>`;
+            } else {
+              cellHtml = renderQuickMaskRange(text, lineCursor, lineCursor + cellText.length);
+            }
+            cellHtmls.push(`<span class="pii-table-cell outline outline-1 outline-dashed outline-line-strong pointer-events-none hover:bg-paper-sunken/50 transition-colors" data-cell="${r}_${c}">${cellHtml}</span>`);
+            lineCursor += cellText.length + 1;
+          });
+          html += cellHtmls.join('\t') + '\n';
+          globalCursor += line.length + 1;
+        } else {
+          html += renderQuickMaskRange(text, globalCursor, globalCursor + line.length) + '\n';
+          globalCursor += line.length + 1;
+        }
+      });
+      quickMaskBackdrop.innerHTML = html;
+    }
+
+    function triggerQuickMaskPreview() {
+      quickMaskActiveEntities = quickMaskTextarea.value ? extractStaticEntities(quickMaskTextarea.value) : [];
+      renderQuickMaskHighlights();
+    }
+
+    quickMaskTextarea.addEventListener('input', () => {
+      clearTimeout(quickMaskDebounceTimer);
+      quickMaskDebounceTimer = setTimeout(() => { triggerQuickMaskPreview(); }, 200);
+    });
+    quickMaskTextarea.addEventListener('scroll', () => {
+      quickMaskBackdrop.scrollTop = quickMaskTextarea.scrollTop;
+      quickMaskBackdrop.scrollLeft = quickMaskTextarea.scrollLeft;
+    });
+
+    function clearQuickMaskInput() {
+      quickMaskTextarea.value = '';
+      triggerQuickMaskPreview();
+    }
+
+    // Separate floating menu instance (does not share rawInput's selectionBtn, so the
+    // "only tracks one textarea" outside-click logic doesn't need to know about a 2nd one).
+    const quickMaskSelectionBtn = document.createElement('div');
+    quickMaskSelectionBtn.className = 'fixed z-50 bg-ink text-white text-xs rounded-md shadow-lg hidden pointer-events-auto overflow-hidden flex flex-col py-1';
+    document.body.appendChild(quickMaskSelectionBtn);
+
+    quickMaskTextarea.addEventListener('mouseup', (e) => {
+      setTimeout(() => {
+        const start = quickMaskTextarea.selectionStart;
+        const end = quickMaskTextarea.selectionEnd;
+        const text = quickMaskTextarea.value;
+        const selectedText = text.substring(start, end).trim();
+
+        let html = '';
+
+        let r = 0, c = 0, isTable = false, blockStart = 0, blockEnd = 0, cellCount = 0;
+        if (start === end) {
+          const lines = text.split('\n');
+          let currentLen = 0;
+          for (let i = 0; i < lines.length; i++) {
+            if (start <= currentLen + lines[i].length) {
+              r = i;
+              if (lines[i].includes('\t')) {
+                isTable = true;
+                const cells = lines[i].split('\t');
+                cellCount = cells.length;
+                let cellLen = currentLen;
+                for (let j = 0; j < cells.length; j++) {
+                  if (start <= cellLen + cells[j].length) { c = j; break; }
+                  cellLen += cells[j].length + 1;
+                }
+              }
+              break;
+            }
+            currentLen += lines[i].length + 1;
+          }
+          if (isTable) {
+            blockStart = r;
+            while (blockStart > 0 && lines[blockStart - 1].includes('\t')) blockStart--;
+            blockEnd = r;
+            while (blockEnd < lines.length - 1 && lines[blockEnd + 1].includes('\t')) blockEnd++;
+          }
+        }
+
+        if (selectedText.length > 1) {
+          const existingEnt = quickMaskActiveEntities.find(ent => ent.value === selectedText);
+          if (existingEnt) {
+             html += `<button class="px-3 py-1.5 text-left hover:bg-ink-hover transition-colors w-full" onclick="handleQuickMaskSelectionAction('remove', '${escapeHtml(selectedText)}')">${escapeHtml(t('ctxUnmaskWithReason', { reason: existingEnt.reason, value: selectedText }))}</button>`;
+          } else {
+             html += `<button class="px-3 py-1.5 text-left hover:bg-ink-hover transition-colors w-full" onclick="handleQuickMaskSelectionAction('add', '${escapeHtml(selectedText)}')">${escapeHtml(t('ctxMarkSensitive', { value: selectedText }))}</button>`;
+          }
+        } else if (start === end) {
+          const ent = quickMaskActiveEntities.find(ent => start > ent.start && start < ent.end);
+          if (ent) {
+             html += `<button class="px-3 py-1.5 text-left hover:bg-ink-hover transition-colors w-full" onclick="handleQuickMaskSelectionAction('remove', '${escapeHtml(ent.value)}')">${escapeHtml(t('ctxUnmaskWithReason', { reason: ent.reason, value: ent.value }))}</button>`;
+          }
+          if (isTable) {
+             if (html) html += `<div class="h-px bg-ink-hover my-1 w-full"></div>`;
+             const isCellMasked = quickMaskTableMasks.has(`${r}_${c}`);
+             if (isCellMasked) {
+                html += `<button class="px-3 py-1.5 text-left hover:bg-ink-hover transition-colors w-full text-brand-300" onclick="handleQuickMaskTableMask('unmask_cell', ${r}, ${c})">${t('ctxTableUnmaskCell')}</button>`;
+                html += `<button class="px-3 py-1.5 text-left hover:bg-ink-hover transition-colors w-full text-brand-300" onclick="handleQuickMaskTableMask('unmask_col', ${blockStart}, ${blockEnd}, ${c})">${t('ctxTableUnmaskCol')}</button>`;
+                html += `<button class="px-3 py-1.5 text-left hover:bg-ink-hover transition-colors w-full text-brand-300" onclick="handleQuickMaskTableMask('unmask_row', ${r}, ${cellCount})">${t('ctxTableUnmaskRow')}</button>`;
+             } else {
+                html += `<button class="px-3 py-1.5 text-left hover:bg-ink-hover transition-colors w-full text-warning-300" onclick="handleQuickMaskTableMask('mask_cell', ${r}, ${c})">${t('ctxTableMaskCell')}</button>`;
+                html += `<button class="px-3 py-1.5 text-left hover:bg-ink-hover transition-colors w-full text-warning-300" onclick="handleQuickMaskTableMask('mask_col', ${blockStart}, ${blockEnd}, ${c})">${t('ctxTableMaskCol', { rows: blockEnd - blockStart + 1 })}</button>`;
+                html += `<button class="px-3 py-1.5 text-left hover:bg-ink-hover transition-colors w-full text-warning-300" onclick="handleQuickMaskTableMask('mask_row', ${r}, ${cellCount})">${t('ctxTableMaskRow', { cols: cellCount })}</button>`;
+             }
+          }
+        }
+
+        if (html) {
+          quickMaskSelectionBtn.innerHTML = html;
+          quickMaskSelectionBtn.classList.remove('hidden');
+          const menuW = quickMaskSelectionBtn.offsetWidth || 180;
+          const menuH = quickMaskSelectionBtn.offsetHeight || 120;
+          const safeX = Math.min(e.clientX, window.innerWidth - menuW - 10);
+          const safeY = Math.min(e.clientY + 15, window.innerHeight - menuH - 10);
+          quickMaskSelectionBtn.style.left = safeX + 'px';
+          quickMaskSelectionBtn.style.top = safeY + 'px';
+        } else {
+          quickMaskSelectionBtn.classList.add('hidden');
+        }
+      }, 10);
+    });
+
+    quickMaskTextarea.addEventListener('scroll', () => quickMaskSelectionBtn.classList.add('hidden'));
+    document.addEventListener('mousedown', (e) => {
+      if (!quickMaskSelectionBtn.contains(e.target) && e.target !== quickMaskTextarea) quickMaskSelectionBtn.classList.add('hidden');
+    });
+
+    function handleQuickMaskSelectionAction(action, val) {
+      if (val) {
+        if (action === "add") {
+          whitelist.delete(val);
+          customDict.push({ type: 'CUSTOM', value: val, reason: t('reasonManuallySelected'), source: 'manual' });
+        } else if (action === "remove") {
+          whitelist.add(val);
+        }
+        triggerQuickMaskPreview();
+      }
+      quickMaskSelectionBtn.classList.add('hidden');
+      quickMaskTextarea.setSelectionRange(0, 0);
+    }
+
+    function handleQuickMaskTableMask(action, p1, p2, p3) {
+      if (action === 'mask_cell') {
+        quickMaskTableMasks.add(`${p1}_${p2}`);
+      } else if (action === 'unmask_cell') {
+        quickMaskTableMasks.delete(`${p1}_${p2}`);
+      } else if (action === 'mask_col') {
+        for(let i=p1; i<=p2; i++) quickMaskTableMasks.add(`${i}_${p3}`);
+      } else if (action === 'unmask_col') {
+        for(let i=p1; i<=p2; i++) quickMaskTableMasks.delete(`${i}_${p3}`);
+      } else if (action === 'mask_row') {
+        for(let j=0; j<p2; j++) quickMaskTableMasks.add(`${p1}_${j}`);
+      } else if (action === 'unmask_row') {
+        for(let j=0; j<p2; j++) quickMaskTableMasks.delete(`${p1}_${j}`);
+      }
+      triggerQuickMaskPreview();
+      quickMaskSelectionBtn.classList.add('hidden');
+      quickMaskTextarea.setSelectionRange(0, 0);
+    }
+
+    // ==========================================
     // Quick Mask (standalone mode: no AI round-trip, no reference table)
     // ==========================================
     function processQuickMask() {
-      const text = document.getElementById("quickMaskInput").value;
+      const text = quickMaskTextarea.value;
       const output = document.getElementById("quickMaskOutput");
       if (!text.trim()) {
         showToast(t('toastQuickMaskEmptyWarning'), 'warning');
         return;
       }
       const entities = extractStaticEntities(text);
+
+      function wrapQuickMaskEntityRange(rangeText, start, end) {
+        const rangeEntities = entities.filter(e => e.start < end && e.end > start);
+        if (rangeEntities.length === 0) return escapeHtml(rangeText.slice(start, end));
+        let rangeHtml = '';
+        let cursor = start;
+        rangeEntities.forEach(ent => {
+          if (cursor < ent.start) { rangeHtml += escapeHtml(rangeText.slice(cursor, ent.start)); cursor = ent.start; }
+          const overlapStart = Math.max(cursor, ent.start);
+          const overlapEnd = Math.min(end, ent.end);
+          if (overlapStart < overlapEnd) {
+            const raw = rangeText.slice(overlapStart, overlapEnd);
+            const escapedRaw = escapeHtml(raw);
+            rangeHtml += `<span class="inline-block bg-brand-50 text-brand-900 px-1 rounded font-semibold border-b border-brand-200 transition-all cursor-pointer hover:bg-brand-100" data-mask-state="0" data-category="${ent.type}" data-raw="${escapedRaw}" contenteditable="false" onclick="toggleMask(this, '${escapedRaw}')">${escapedRaw}</span>`;
+            cursor = overlapEnd;
+          }
+        });
+        if (cursor < end) rangeHtml += escapeHtml(rangeText.slice(cursor, end));
+        return rangeHtml;
+      }
+
       let html = "";
-      let cursor = 0;
-      entities.forEach(ent => {
-        html += escapeHtml(text.slice(cursor, ent.start));
-        const raw = text.slice(ent.start, ent.end);
-        const escapedRaw = escapeHtml(raw);
-        html += `<span class="inline-block bg-brand-50 text-brand-900 px-1 rounded font-semibold border-b border-brand-200 transition-all cursor-pointer hover:bg-brand-100" data-mask-state="0" data-category="${ent.type}" data-raw="${escapedRaw}" contenteditable="false" onclick="toggleMask(this, '${escapedRaw}')">${escapedRaw}</span>`;
-        cursor = ent.end;
+      let globalCursor = 0;
+      const lines = text.split('\n');
+      lines.forEach((line, r) => {
+        if (line.includes('\t')) {
+          const cells = line.split('\t');
+          let lineCursor = globalCursor;
+          const cellHtmls = cells.map((cellText, c) => {
+            const key = `${r}_${c}`;
+            let cellHtml;
+            if (quickMaskTableMasks.has(key)) {
+              const escapedCell = escapeHtml(cellText);
+              cellHtml = `<span class="inline-block bg-brand-50 text-brand-900 px-1 rounded font-semibold border-b border-brand-200 transition-all cursor-pointer hover:bg-brand-100" data-mask-state="0" data-category="CUSTOM" data-raw="${escapedCell}" contenteditable="false" onclick="toggleMask(this, '${escapedCell}')">${escapedCell}</span>`;
+            } else {
+              cellHtml = wrapQuickMaskEntityRange(text, lineCursor, lineCursor + cellText.length);
+            }
+            lineCursor += cellText.length + 1;
+            return `<span class="pii-table-cell outline outline-1 outline-dashed outline-line-strong hover:bg-paper-sunken/50 transition-colors" data-cell="${key}">${cellHtml}</span>`;
+          });
+          html += cellHtmls.join('\t') + '\n';
+          globalCursor += line.length + 1;
+        } else {
+          html += wrapQuickMaskEntityRange(text, globalCursor, globalCursor + line.length) + '\n';
+          globalCursor += line.length + 1;
+        }
       });
-      html += escapeHtml(text.slice(cursor));
       output.innerHTML = html || `<span class="text-ink-faint italic text-xs">${escapeHtml(t('v3NoEntitiesFound'))}</span>`;
       clearQuickMaskSelection();
     }
