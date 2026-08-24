@@ -142,6 +142,8 @@ A small addition not present in EduShield: the Settings modal includes a **Local
 
 Unchanged from EduShield. `sessionVault` maps `{{TAG_N}}` tokens to their original values; `processRestore()` strips a leading system-instruction prefix (now the ASCII marker `[SYSTEM INSTRUCTION: ...]` instead of the Chinese `【系統指令：...】` marker EduShield uses), then applies a triple-tolerance match: exact, whitespace-tolerant, and bracket-tolerant (`[TAG_N]`, `(TAG_N)`, `【TAG_N】`). Missing tokens are reported and highlighted in red across both the left-hand original view and the chip list.
 
+**Persistent Mapping Vault**: `sessionVault` is rebuilt from scratch on every run, so token numbering isn't stable across batches. The "Mapping Vault" button on the Restore tab exports the accumulated original-value ↔ token mapping (`persistentVault`) to a file — **unencrypted CSV** (three columns, Excel-readable, with a risk notice shown before export since the file is plain text) or **encrypted JSON** (Web Crypto PBKDF2 + AES-GCM, password-protected, unrecoverable if the password is lost). Importing it later (merge or full replace) lets already-known values reuse their previous token across sessions. This is manual/one-off only — nothing is auto-persisted to browser storage, and coordinate-based table masking tokens (`{{TAB_C...}}`) are excluded since they're positional, not identity-based.
+
 ### 2.8 Custom Protection Manager (Four Dimensions)
 
 Click "**Manage Custom Protection Rules**" in the toolbar to customize, import, and export across four dimensions without hand-editing the HTML source: Roster/Dictionary (§2.4), Hard Block Keywords, Regex Rules, and Local AI Prompts (the real scan prompts, not the copy-to-clipboard library in §2.6).

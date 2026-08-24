@@ -557,7 +557,10 @@
         </div>
 
         <div class="p-3 border-t border-line-soft bg-white flex-shrink-0">
-          <div class="text-xs font-medium text-ink-muted mb-2" data-i18n="v2MaskedItemsLabel">Masked Items (hover to see the tag)</div>
+          <div class="flex justify-between items-center mb-2">
+            <div class="text-xs font-medium text-ink-muted" data-i18n="v2MaskedItemsLabel">Masked Items (hover to see the tag)</div>
+            <button onclick="openPersistentVaultModal()" class="text-xs bg-white border border-line-strong text-ink-hover px-2.5 py-1 rounded hover:bg-paper-sunken transition-colors" data-i18n="vaultBtnLabel">Mapping Vault</button>
+          </div>
           <div id="restoreChips" class="flex flex-wrap gap-2 max-h-24 overflow-y-auto p-1 -m-1">
             <!-- Interactive tooltip chips -->
           </div>
@@ -1111,6 +1114,79 @@
     </div>
   </div>
 
+  <!-- ==================== Persistent Mapping Vault Modal ==================== -->
+  <div id="persistentVaultModal" class="hidden fixed inset-0 bg-scrim/40 backdrop-blur-sm z-50 flex items-center justify-center p-4 opacity-0 transition-opacity duration-300">
+    <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg overflow-hidden transform scale-95 transition-transform duration-300 flex flex-col max-h-full border border-line">
+      <div class="px-6 py-4 border-b border-line-soft flex justify-between items-center bg-brand-50/50 flex-shrink-0">
+        <h2 class="text-sm font-bold text-brand-900" data-i18n="vaultModalTitle">Persistent Mapping Vault</h2>
+        <button onclick="closeModal('persistentVaultModal')" class="text-ink-faint hover:text-ink-secondary font-medium text-lg">&times;</button>
+      </div>
+      <div class="p-6 overflow-y-auto flex-1 bg-white space-y-5">
+        <p class="text-xs text-ink-muted leading-relaxed" data-i18n="vaultModalDesc">Export the accumulated original-value &lt;-&gt; token mapping...</p>
+        <p class="text-sm text-ink-hover"><span id="vaultEntryCountLabel">Currently holding 0 mapping(s)</span></p>
+
+        <div class="space-y-2">
+          <div class="text-xs font-medium text-ink-secondary" data-i18n="vaultExportSectionLabel">Export</div>
+          <div class="flex flex-wrap gap-2">
+            <button onclick="exportPersistentVaultEncryptedPrompt()" class="px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white rounded-lg text-sm font-semibold shadow-sm transition-colors" data-i18n="vaultExportEncryptedBtn">Export (Encrypted, JSON)</button>
+            <button onclick="exportPersistentVaultUnencrypted()" class="px-4 py-2 bg-white border border-line-strong text-ink-hover rounded-lg text-sm font-medium hover:bg-paper-sunken transition-colors" data-i18n="vaultExportUnencryptedBtn">Export (Unencrypted, CSV)</button>
+          </div>
+        </div>
+
+        <div class="border-t border-line-soft pt-4 space-y-2">
+          <div class="text-xs font-medium text-ink-secondary" data-i18n="vaultImportSectionLabel">Import</div>
+          <input type="file" id="vaultFileInput" accept=".csv,.json" class="hidden" onchange="handlePersistentVaultFileUpload(event)" />
+          <button onclick="document.getElementById('vaultFileInput').click()" class="px-4 py-2 bg-white border border-line-strong text-ink-hover rounded-lg text-sm font-medium hover:bg-paper-sunken transition-colors" data-i18n="vaultImportFilePickerBtn">Choose a mapping file (.csv / .json)</button>
+        </div>
+      </div>
+      <div class="px-6 py-4 border-t border-line-soft bg-paper-sunken flex justify-end flex-shrink-0">
+        <button onclick="closeModal('persistentVaultModal')" class="px-4 py-2 bg-white border border-line-strong text-ink-hover rounded-lg text-sm font-medium hover:bg-paper-sunken transition-colors" data-i18n="commonClose">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== Mapping Vault Password Modal ==================== -->
+  <div id="vaultPasswordModal" class="hidden fixed inset-0 bg-scrim/40 backdrop-blur-sm z-[70] flex items-center justify-center p-4 opacity-0 transition-opacity duration-300">
+    <div class="bg-white rounded-xl shadow-2xl w-full max-w-sm overflow-hidden transform scale-95 transition-transform duration-300 border border-line">
+      <div class="px-6 py-4 border-b border-line-soft bg-brand-50/50">
+        <h2 id="vaultPasswordModalTitle" class="text-sm font-bold text-brand-900" data-i18n="vaultPasswordModalTitleExport">Set an Export Password</h2>
+      </div>
+      <div class="p-6 space-y-3">
+        <div>
+          <label class="text-xs font-medium text-ink-secondary" data-i18n="vaultPasswordLabel">Password</label>
+          <input type="password" id="vaultPasswordInput1" class="mt-1 w-full text-sm p-2 border border-line-strong rounded focus:outline-none focus:border-brand-500" autocomplete="new-password">
+        </div>
+        <div id="vaultPasswordConfirmWrap">
+          <label class="text-xs font-medium text-ink-secondary" data-i18n="vaultPasswordConfirmLabel">Confirm Password</label>
+          <input type="password" id="vaultPasswordInput2" class="mt-1 w-full text-sm p-2 border border-line-strong rounded focus:outline-none focus:border-brand-500" autocomplete="new-password">
+        </div>
+        <p id="vaultPasswordError" class="hidden text-xs text-danger-600"></p>
+        <p class="text-xs text-ink-faint" data-i18n="vaultPasswordForgetWarning">If you forget the password, the file cannot be recovered.</p>
+      </div>
+      <div class="px-6 py-4 border-t border-line-soft bg-paper-sunken flex justify-end gap-2">
+        <button onclick="closeModal('vaultPasswordModal')" class="px-4 py-2 bg-white border border-line-strong text-ink-hover rounded-lg text-sm font-medium hover:bg-paper-sunken transition-colors" data-i18n="commonCancel">Cancel</button>
+        <button onclick="confirmVaultPasswordModal()" class="px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white rounded-lg text-sm font-semibold transition-colors" data-i18n="vaultPasswordConfirmBtn">Confirm</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== Mapping Vault Import Merge/Replace Modal ==================== -->
+  <div id="vaultImportModeModal" class="hidden fixed inset-0 bg-scrim/40 backdrop-blur-sm z-[70] flex items-center justify-center p-4 opacity-0 transition-opacity duration-300">
+    <div class="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden transform scale-95 transition-transform duration-300 border border-line">
+      <div class="px-6 py-4 border-b border-line-soft bg-brand-50/50">
+        <h2 class="text-sm font-bold text-brand-900" data-i18n="modalImportModeTitle">Import Mode</h2>
+      </div>
+      <div class="p-6">
+        <p id="vaultImportModeMessage" class="text-sm text-ink-hover"></p>
+      </div>
+      <div class="px-6 py-4 border-t border-line-soft bg-paper-sunken flex flex-col gap-2">
+        <button onclick="confirmVaultImportMode('merge')" class="px-4 py-2 bg-brand-700 hover:bg-brand-800 text-white rounded-lg text-sm font-semibold transition-colors" data-i18n="importModeBtnMerge">Merge with Existing</button>
+        <button onclick="confirmVaultImportMode('replace')" class="px-4 py-2 bg-danger-600 hover:bg-danger-700 text-white rounded-lg text-sm font-semibold transition-colors" data-i18n="importModeBtnReplace">Replace All</button>
+        <button onclick="closeModal('vaultImportModeModal')" class="px-4 py-2 bg-white border border-line-strong text-ink-hover rounded-lg text-sm font-medium hover:bg-paper-sunken transition-colors" data-i18n="commonCancel">Cancel</button>
+      </div>
+    </div>
+  </div>
+
   <!-- ==================== Global Tooltip ==================== -->
   <div id="globalTooltip" class="fixed z-[100] px-2 py-1 bg-ink text-white text-[10px] rounded whitespace-nowrap shadow-lg pointer-events-none transition-opacity duration-150 opacity-0 hidden"></div>
 
@@ -1388,6 +1464,37 @@
       ctxTableMaskCell: { en: '[Table] Mask this cell', zh: '[表格] 遮蔽此儲存格', ja: '[テーブル] このセルをマスク' },
       ctxTableMaskCol: { en: '[Table] Mask this column ({rows} rows)', zh: '[表格] 遮蔽此欄（{rows} 列）', ja: '[テーブル] この列をマスク（{rows}行）' },
       ctxTableMaskRow: { en: '[Table] Mask this row ({cols} columns)', zh: '[表格] 遮蔽此列（{cols} 欄）', ja: '[テーブル] この行をマスク（{cols}列）' },
+      // ---- Persistent Mapping Vault modal ----
+      vaultBtnLabel: { en: 'Mapping Vault', zh: '持久化對應表', ja: '永続マッピング表' },
+      vaultModalTitle: { en: 'Persistent Mapping Vault', zh: '持久化遮蔽對應儲存', ja: 'マスキング対応表の永続保存' },
+      vaultModalDesc: { en: 'Export the accumulated original-value ↔ token mapping, then import it later so the same values get the same masking token across different batches — useful for cross-batch restore checks. Table-grid masking tokens (starting with TAB_C) are positional and are not included in this vault.', zh: '匯出目前累積的「原始值 ↔ 遮蔽標籤」對應表，下次匯入後即可讓同一批原始值在不同批次處理時拿到一致的遮蔽標籤，方便跨批次核對還原結果。表格模式的欄位遮蔽（TAB_C 開頭）位置性較強，不包含在對應表內。', ja: '現在蓄積されている「元の値 ↔ マスキングトークン」の対応表をエクスポートし、後でインポートすると、異なるバッチで処理しても同じ値に同じマスキングトークンを割り当てられるようになります。バッチをまたいだ復元結果の照合に便利です。テーブル形式のマスキングトークン（TAB_C で始まるもの）は位置依存性が強いため、この対応表には含まれません。' },
+      vaultEntryCountLabel: { en: 'Currently holding {count} mapping(s)', zh: '目前累積 {count} 筆對應', ja: '現在 {count} 件の対応を保持中' },
+      vaultExportSectionLabel: { en: 'Export', zh: '匯出', ja: 'エクスポート' },
+      vaultExportEncryptedBtn: { en: 'Export (Encrypted, JSON)', zh: '匯出（加密，JSON）', ja: 'エクスポート（暗号化、JSON）' },
+      vaultExportUnencryptedBtn: { en: 'Export (Unencrypted, CSV)', zh: '匯出（未加密，CSV）', ja: 'エクスポート（非暗号化、CSV）' },
+      vaultImportSectionLabel: { en: 'Import', zh: '匯入', ja: 'インポート' },
+      vaultImportFilePickerBtn: { en: 'Choose a mapping file (.csv / .json)', zh: '選擇對應表檔案（.csv / .json）', ja: '対応表ファイルを選択（.csv / .json）' },
+      vaultPasswordModalTitleExport: { en: 'Set an Export Password', zh: '設定匯出密碼', ja: 'エクスポート用パスワードを設定' },
+      vaultPasswordModalTitleImport: { en: 'Enter the Import Password', zh: '輸入匯入密碼', ja: 'インポート用パスワードを入力' },
+      vaultPasswordLabel: { en: 'Password', zh: '密碼', ja: 'パスワード' },
+      vaultPasswordConfirmLabel: { en: 'Confirm Password', zh: '確認密碼', ja: 'パスワード（確認）' },
+      vaultPasswordForgetWarning: { en: 'If you forget the password, the file cannot be recovered — there is no backdoor. Please keep it safe.', zh: '忘記密碼將無法復原，沒有備用解密方式，請自行妥善保管。', ja: 'パスワードを忘れるとファイルは復元できません。バックドアはありませんので、大切に保管してください。' },
+      vaultPasswordConfirmBtn: { en: 'Confirm', zh: '確定', ja: '確定' },
+      vaultImportModeMessage: { en: 'Currently holding {existing} mapping(s); this import contains {incoming} mapping(s). Choose how to proceed:', zh: '偵測到目前已有 {existing} 筆持久對應，本次匯入 {incoming} 筆。請選擇如何處理：', ja: '現在 {existing} 件の永続対応があります。今回のインポートは {incoming} 件です。処理方法を選択してください：' },
+      vaultRiskTitle: { en: 'Unencrypted Export — Risk Notice', zh: '未加密匯出風險提醒', ja: '非暗号化エクスポートに関するリスクの注意' },
+      vaultRiskMessage: { en: `This file stores all original personal data and their token mappings in plain text, with no encryption. If it later gets synced to a cloud drive (OneDrive, Google Drive, iCloud, etc.) or sent via email/chat, that is equivalent to leaking the personal data inside it in the clear. Please make sure you understand this risk and keep the file somewhere safe (e.g. a local folder that isn't auto-synced) before continuing.`, zh: '這個檔案會以明文儲存所有原始個資與對應的遮蔽標籤，不會加密。若這個檔案之後被同步到 OneDrive、Google Drive、iCloud 等雲端硬碟，或透過 Email／即時通訊軟體傳送，等同於把裡面的個資明文外流。請確認您了解這個風險，並妥善保管此檔案（例如只存放在不會自動同步的本機資料夾），再繼續匯出。', ja: 'このファイルは、すべての元の個人情報とそれに対応するトークンを平文（暗号化なし）で保存します。このファイルが後で OneDrive、Google Drive、iCloud などのクラウドドライブに同期されたり、メールやチャットで送信されたりすると、中の個人情報がそのまま漏えいすることになります。このリスクを理解した上で、自動同期されないローカルフォルダに保管するなど、ファイルの取り扱いに十分ご注意ください。' },
+      vaultRiskOkBtn: { en: 'Export Unencrypted Anyway', zh: '仍要匯出明文檔案', ja: '未暗号化のままエクスポートする' },
+      toastVaultNothingToExport: { en: 'There is no accumulated mapping data to export yet.', zh: '目前沒有累積的對應資料可以匯出。', ja: 'エクスポートできる対応データがまだありません。' },
+      toastVaultExportedUnencrypted: { en: 'Unencrypted mapping vault exported (CSV).', zh: '已匯出未加密對應表（CSV）。', ja: '非暗号化の対応表（CSV）をエクスポートしました。' },
+      toastVaultExportedEncrypted: { en: 'Encrypted mapping vault exported (JSON).', zh: '已匯出加密對應表（JSON）。', ja: '暗号化された対応表（JSON）をエクスポートしました。' },
+      toastVaultImportSuccess: { en: 'Import complete.', zh: '匯入完成。', ja: 'インポートが完了しました。' },
+      toastVaultInvalidFile: { en: `Couldn't parse this file — please confirm it's a valid mapping vault file.`, zh: '無法解析這個檔案，請確認是有效的對應表檔案。', ja: 'このファイルを解析できません。有効な対応表ファイルかご確認ください。' },
+      toastVaultNoRows: { en: 'No usable mapping rows found in this file.', zh: '檔案中沒有可用的對應資料列。', ja: 'ファイル内に利用可能な対応データ行が見つかりませんでした。' },
+      toastVaultBadFileShape: { en: 'Invalid file format — no importable mapping data found.', zh: '檔案格式不正確，找不到可匯入的對應資料。', ja: 'ファイル形式が正しくないため、インポート可能な対応データが見つかりません。' },
+      errorVaultPasswordRequired: { en: 'Please enter a password.', zh: '請輸入密碼。', ja: 'パスワードを入力してください。' },
+      errorVaultPasswordMismatch: { en: `The two passwords don't match.`, zh: '兩次輸入的密碼不一致。', ja: '入力されたパスワードが一致しません。' },
+      errorVaultWrongPassword: { en: 'Wrong password, or the file is corrupted.', zh: '密碼錯誤或檔案已損毀，請重新輸入或確認檔案內容。', ja: 'パスワードが正しくないか、ファイルが破損しています。' },
+
       // __I18N_END__
     };
 
@@ -1454,6 +1561,7 @@
     let aiPrompts = { channel1: '', channel2Personal: '', channel2Business: '' }; // live working copy of AI_PROMPTS_DEFAULT
     let whitelist = new Set();
     let sessionVault = {};
+    let persistentVault = { entries: {}, typeCounters: {} }; // { entries: { [原始值/rawValue]: {token, typeKey} }, typeCounters: { [typeKey]: highest number used } } — stays empty until the user manually imports/replaces; never reset by processAnonymizePhase1()
     let reportData = [];
     let debounceTimer;
     let activeExtractedEntities = [];
@@ -1929,6 +2037,55 @@
     }
 
     // ==========================================
+    // Persistent Mapping Vault: encrypt/decrypt helpers
+    // ==========================================
+    function arrayBufferToBase64(buf) {
+      let binary = '';
+      const bytes = new Uint8Array(buf);
+      for (let i = 0; i < bytes.byteLength; i++) binary += String.fromCharCode(bytes[i]);
+      return btoa(binary);
+    }
+    function base64ToArrayBuffer(b64) {
+      const binary = atob(b64);
+      const bytes = new Uint8Array(binary.length);
+      for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+      return bytes.buffer;
+    }
+    const VAULT_PBKDF2_ITERATIONS = 210000;
+    async function encryptVaultPayload(plainObj, password) {
+      const enc = new TextEncoder();
+      const salt = crypto.getRandomValues(new Uint8Array(16));
+      const iv = crypto.getRandomValues(new Uint8Array(12));
+      const baseKey = await crypto.subtle.importKey('raw', enc.encode(password), 'PBKDF2', false, ['deriveKey']);
+      const aesKey = await crypto.subtle.deriveKey(
+        { name: 'PBKDF2', salt, iterations: VAULT_PBKDF2_ITERATIONS, hash: 'SHA-256' },
+        baseKey, { name: 'AES-GCM', length: 256 }, false, ['encrypt']
+      );
+      const ciphertextBuf = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, aesKey, enc.encode(JSON.stringify(plainObj)));
+      return {
+        kdf: 'PBKDF2', hash: 'SHA-256', iterations: VAULT_PBKDF2_ITERATIONS,
+        salt: arrayBufferToBase64(salt), iv: arrayBufferToBase64(iv), ciphertext: arrayBufferToBase64(ciphertextBuf)
+      };
+    }
+    async function decryptVaultPayload(fileObj, password) {
+      const enc = new TextEncoder();
+      const salt = base64ToArrayBuffer(fileObj.salt);
+      const iv = base64ToArrayBuffer(fileObj.iv);
+      const ciphertext = base64ToArrayBuffer(fileObj.ciphertext);
+      const baseKey = await crypto.subtle.importKey('raw', enc.encode(password), 'PBKDF2', false, ['deriveKey']);
+      const aesKey = await crypto.subtle.deriveKey(
+        { name: 'PBKDF2', salt, iterations: fileObj.iterations || VAULT_PBKDF2_ITERATIONS, hash: fileObj.hash || 'SHA-256' },
+        baseKey, { name: 'AES-GCM', length: 256 }, false, ['decrypt']
+      );
+      try {
+        const plainBuf = await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, aesKey, ciphertext);
+        return JSON.parse(new TextDecoder().decode(plainBuf));
+      } catch (e) {
+        throw new Error('DECRYPT_FAILED');
+      }
+    }
+
+    // ==========================================
     // Manage Custom Protection Rules panel
     // ==========================================
     function openProtectionManagerModal() {
@@ -2258,6 +2415,157 @@
       clearTimeout(el._timer);
       el.classList.add('opacity-0');
       setTimeout(() => el.remove(), 300);
+    }
+
+    // ==========================================
+    // Persistent Mapping Vault: modal interaction logic
+    // ==========================================
+    let vaultPasswordModalMode = 'export'; // 'export' | 'import'
+    let pendingVaultImportFile = null; // encrypted import: raw parsed file object awaiting a password
+    let pendingVaultImport = null; // parsed/decrypted { entries, typeCounters } awaiting merge/replace choice
+
+    function updateVaultEntryCountLabel() {
+      document.getElementById('vaultEntryCountLabel').textContent = t('vaultEntryCountLabel', { count: Object.keys(persistentVault.entries).length });
+    }
+
+    function openPersistentVaultModal() {
+      updateVaultEntryCountLabel();
+      openModal('persistentVaultModal');
+    }
+
+    function vaultCsvEscape(v) {
+      return `"${String(v).replace(/"/g, '""')}"`;
+    }
+
+    async function exportPersistentVaultUnencrypted() {
+      const entries = persistentVault.entries;
+      const keys = Object.keys(entries);
+      if (keys.length === 0) { showToast(t('toastVaultNothingToExport'), 'warning'); return; }
+
+      const confirmed = await showConfirmModal(t('vaultRiskMessage'), { title: t('vaultRiskTitle'), okLabel: t('vaultRiskOkBtn'), cancelLabel: t('commonCancel'), danger: true });
+      if (!confirmed) return;
+
+      let csvContent = '﻿Original Value,Token,Type\n';
+      keys.forEach(rawValue => {
+        const { token, typeKey } = entries[rawValue];
+        csvContent += `${vaultCsvEscape(rawValue)},${vaultCsvEscape(token)},${vaultCsvEscape(typeKey)}\n`;
+      });
+      downloadTextAsFile(csvContent, 'tokenshield-mapping-vault.csv', 'text/csv;charset=utf-8;');
+      showToast(t('toastVaultExportedUnencrypted'), 'success');
+    }
+
+    function exportPersistentVaultEncryptedPrompt() {
+      if (Object.keys(persistentVault.entries).length === 0) { showToast(t('toastVaultNothingToExport'), 'warning'); return; }
+      vaultPasswordModalMode = 'export';
+      document.getElementById('vaultPasswordModalTitle').textContent = t('vaultPasswordModalTitleExport');
+      document.getElementById('vaultPasswordConfirmWrap').classList.remove('hidden');
+      document.getElementById('vaultPasswordInput1').value = '';
+      document.getElementById('vaultPasswordInput2').value = '';
+      document.getElementById('vaultPasswordError').classList.add('hidden');
+      openModal('vaultPasswordModal');
+    }
+
+    async function confirmVaultPasswordModal() {
+      const pw1 = document.getElementById('vaultPasswordInput1').value;
+      const errorEl = document.getElementById('vaultPasswordError');
+      errorEl.classList.add('hidden');
+
+      if (vaultPasswordModalMode === 'export') {
+        const pw2 = document.getElementById('vaultPasswordInput2').value;
+        if (!pw1) { errorEl.textContent = t('errorVaultPasswordRequired'); errorEl.classList.remove('hidden'); return; }
+        if (pw1 !== pw2) { errorEl.textContent = t('errorVaultPasswordMismatch'); errorEl.classList.remove('hidden'); return; }
+        const payload = await encryptVaultPayload({ entries: persistentVault.entries, typeCounters: persistentVault.typeCounters }, pw1);
+        const fileContent = JSON.stringify({
+          version: 1, product: 'TokenShield', exportedAt: new Date().toISOString(), encrypted: true, ...payload
+        }, null, 2);
+        downloadTextAsFile(fileContent, 'tokenshield-mapping-vault.json', 'application/json;charset=utf-8;');
+        closeModal('vaultPasswordModal');
+        showToast(t('toastVaultExportedEncrypted'), 'success');
+      } else {
+        if (!pw1) { errorEl.textContent = t('errorVaultPasswordRequired'); errorEl.classList.remove('hidden'); return; }
+        try {
+          const decrypted = await decryptVaultPayload(pendingVaultImportFile, pw1);
+          pendingVaultImportFile = null;
+          closeModal('vaultPasswordModal');
+          openVaultImportModeDialog(decrypted);
+        } catch (e) {
+          errorEl.textContent = t('errorVaultWrongPassword');
+          errorEl.classList.remove('hidden');
+        }
+      }
+    }
+
+    function handlePersistentVaultFileUpload(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const isCsv = /\.csv$/i.test(file.name);
+
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        event.target.value = '';
+        if (isCsv) {
+          const lines = e.target.result.split(/\r\n|\n/).filter(l => l.trim() !== '');
+          let startIdx = 0;
+          if (lines[0] && /original value/i.test(lines[0])) startIdx = 1;
+          const entries = {};
+          const typeCounters = {};
+          for (let i = startIdx; i < lines.length; i++) {
+            const parts = parseCsvLine(lines[i]);
+            const rawValue = parts[0] || '';
+            const token = parts[1] || '';
+            const typeKey = (parts[2] || '').toUpperCase();
+            if (!rawValue || !token) continue;
+            entries[rawValue] = { token, typeKey };
+            const m = token.match(/_(\d+)\}\}$/);
+            if (m && typeKey) typeCounters[typeKey] = Math.max(typeCounters[typeKey] || 0, parseInt(m[1], 10));
+          }
+          if (Object.keys(entries).length === 0) { showToast(t('toastVaultNoRows'), 'warning'); return; }
+          openVaultImportModeDialog({ entries, typeCounters });
+        } else {
+          let fileObj;
+          try { fileObj = JSON.parse(e.target.result); }
+          catch (err) { showToast(t('toastVaultInvalidFile'), 'danger'); return; }
+
+          if (fileObj.encrypted) {
+            pendingVaultImportFile = fileObj;
+            vaultPasswordModalMode = 'import';
+            document.getElementById('vaultPasswordModalTitle').textContent = t('vaultPasswordModalTitleImport');
+            document.getElementById('vaultPasswordConfirmWrap').classList.add('hidden');
+            document.getElementById('vaultPasswordInput1').value = '';
+            document.getElementById('vaultPasswordError').classList.add('hidden');
+            openModal('vaultPasswordModal');
+          } else if (fileObj.vault) {
+            openVaultImportModeDialog(fileObj.vault);
+          } else {
+            showToast(t('toastVaultBadFileShape'), 'danger');
+          }
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    function openVaultImportModeDialog(incomingVault) {
+      pendingVaultImport = incomingVault;
+      const existingCount = Object.keys(persistentVault.entries).length;
+      const incomingCount = Object.keys(incomingVault.entries).length;
+      document.getElementById('vaultImportModeMessage').innerText = t('vaultImportModeMessage', { existing: existingCount, incoming: incomingCount });
+      openModal('vaultImportModeModal');
+    }
+
+    function confirmVaultImportMode(mode) {
+      if (!pendingVaultImport) { closeModal('vaultImportModeModal'); return; }
+      if (mode === 'replace') {
+        persistentVault = { entries: { ...pendingVaultImport.entries }, typeCounters: { ...pendingVaultImport.typeCounters } };
+      } else {
+        Object.assign(persistentVault.entries, pendingVaultImport.entries);
+        Object.keys(pendingVaultImport.typeCounters || {}).forEach(typeKey => {
+          persistentVault.typeCounters[typeKey] = Math.max(persistentVault.typeCounters[typeKey] || 0, pendingVaultImport.typeCounters[typeKey] || 0);
+        });
+      }
+      pendingVaultImport = null;
+      closeModal('vaultImportModeModal');
+      updateVaultEntryCountLabel();
+      showToast(t('toastVaultImportSuccess'), 'success');
     }
 
     function openSettings() { openModal('settingsModal'); }
@@ -3088,7 +3396,7 @@
         resetHardBlockState();
       }
 
-      const typeCounters = {};
+      const typeCounters = { ...persistentVault.typeCounters };
       const valToToken = {};
       const tokenReplacements = [];
 
@@ -3096,8 +3404,16 @@
       sortedUnique.forEach(ent => {
         if (!valToToken[ent.value]) {
           const typeKey = ent.type.toUpperCase();
-          typeCounters[typeKey] = (typeCounters[typeKey] || 0) + 1;
-          const token = `{{${typeKey}_${typeCounters[typeKey]}}}`;
+          const existing = persistentVault.entries[ent.value];
+          let token;
+          if (existing && existing.typeKey === typeKey) {
+            token = existing.token; // reuse the token from the persistent vault to keep it stable across batches/sessions
+          } else {
+            typeCounters[typeKey] = (typeCounters[typeKey] || 0) + 1;
+            token = `{{${typeKey}_${typeCounters[typeKey]}}}`;
+            persistentVault.entries[ent.value] = { token, typeKey };
+            persistentVault.typeCounters[typeKey] = typeCounters[typeKey];
+          }
           valToToken[ent.value] = token;
           tokenReplacements.push({ val: ent.value, token: token });
           sessionVault[token] = ent.value;

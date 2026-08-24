@@ -142,6 +142,8 @@ EduShield 沒有的新增功能：系統設定視窗新增「Local AI Prompt Lib
 
 與 EduShield 相同。`sessionVault` 將 `{{TAG_N}}` Token 對應回原始值；`processRestore()` 會先移除開頭的系統指令前綴（改為 ASCII 標記 `[SYSTEM INSTRUCTION: ...]`，取代 EduShield 使用的中文書名號標記 `【系統指令：...】`），接著套用三段容錯比對：精確匹配、空白容錯、括號容錯（`[TAG_N]`、`(TAG_N)`、`【TAG_N】`）。遺漏的 Token 會在左側原始資料區與膠囊列表中同步以紅色標示。
 
+**持久化遮蔽對應儲存**：`sessionVault` 每次執行都會重建，Token 編號無法跨批次保持穩定。還原分頁的「Mapping Vault」按鈕可以把目前累積的「原始值 ↔ Token」對應表（`persistentVault`）匯出成檔案——**未加密 CSV**（三欄，可用 Excel 開啟，匯出前會先跳風險提醒，因為檔案內容是明文）或**加密 JSON**（Web Crypto PBKDF2＋AES-GCM，需設密碼，忘記密碼將無法復原）。之後匯入（可選合併或完全取代）即可讓已知原始值跨 session 沿用舊 Token。此功能僅限手動、單次匯出／匯入，不會自動寫入瀏覽器儲存；表格模式的座標式遮蔽 Token（`{{TAB_C...}}`）因位置性較強而不納入此對應表。
+
 ### 2.8 自訂防護管理系統（四大維度）
 
 點擊工具列的「**管理自訂防護規則**」，可對以下四個維度進行自訂、匯入與匯出，不需要手動編輯 HTML 原始碼：名冊/詞庫（見 2.4 節）、硬阻斷詞彙、正則規則，以及地端 AI 提示詞（是實際送去掃描用的提示詞，不是 2.6 節那個複製貼上用的 Prompt Library）。
