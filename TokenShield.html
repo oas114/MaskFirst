@@ -559,7 +559,7 @@
         <div class="p-3 border-t border-line-soft bg-white flex-shrink-0">
           <div class="flex justify-between items-center mb-2">
             <div class="text-xs font-medium text-ink-muted" data-i18n="v2MaskedItemsLabel">Masked Items (hover to see the tag)</div>
-            <button onclick="openPersistentVaultModal()" class="text-xs bg-white border border-line-strong text-ink-hover px-2.5 py-1 rounded hover:bg-paper-sunken transition-colors" data-i18n="vaultBtnLabel">Mapping Vault</button>
+            <button onclick="openPersistentVaultModal()" class="text-xs bg-white border border-line-strong text-ink-hover px-2.5 py-1 rounded hover:bg-paper-sunken transition-colors" data-i18n="vaultBtnLabel">Tag Reference</button>
           </div>
           <div id="restoreChips" class="flex flex-wrap gap-2 max-h-24 overflow-y-auto p-1 -m-1">
             <!-- Interactive tooltip chips -->
@@ -1118,12 +1118,12 @@
   <div id="persistentVaultModal" class="hidden fixed inset-0 bg-scrim/40 backdrop-blur-sm z-50 flex items-center justify-center p-4 opacity-0 transition-opacity duration-300">
     <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg overflow-hidden transform scale-95 transition-transform duration-300 flex flex-col max-h-full border border-line">
       <div class="px-6 py-4 border-b border-line-soft flex justify-between items-center bg-brand-50/50 flex-shrink-0">
-        <h2 class="text-sm font-bold text-brand-900" data-i18n="vaultModalTitle">Persistent Mapping Vault</h2>
+        <h2 class="text-sm font-bold text-brand-900" data-i18n="vaultModalTitle">Tag Reference</h2>
         <button onclick="closeModal('persistentVaultModal')" class="text-ink-faint hover:text-ink-secondary font-medium text-lg">&times;</button>
       </div>
       <div class="p-6 overflow-y-auto flex-1 bg-white space-y-5">
-        <p class="text-xs text-ink-muted leading-relaxed" data-i18n="vaultModalDesc">Export the accumulated original-value &lt;-&gt; token mapping...</p>
-        <p class="text-sm text-ink-hover"><span id="vaultEntryCountLabel">Currently holding 0 mapping(s)</span></p>
+        <p class="text-xs text-ink-muted leading-relaxed" data-i18n="vaultModalDesc">Save which tag was used for each original value, then import it later so the same value gets the same tag next time.</p>
+        <p class="text-sm text-ink-hover"><span id="vaultEntryCountLabel">Currently has 0 record(s)</span></p>
 
         <div class="space-y-2">
           <div class="text-xs font-medium text-ink-secondary" data-i18n="vaultExportSectionLabel">Export</div>
@@ -1465,32 +1465,32 @@
       ctxTableMaskCol: { en: '[Table] Mask this column ({rows} rows)', zh: '[表格] 遮蔽此欄（{rows} 列）', ja: '[テーブル] この列をマスク（{rows}行）' },
       ctxTableMaskRow: { en: '[Table] Mask this row ({cols} columns)', zh: '[表格] 遮蔽此列（{cols} 欄）', ja: '[テーブル] この行をマスク（{cols}列）' },
       // ---- Persistent Mapping Vault modal ----
-      vaultBtnLabel: { en: 'Mapping Vault', zh: '持久化對應表', ja: '永続マッピング表' },
-      vaultModalTitle: { en: 'Persistent Mapping Vault', zh: '持久化遮蔽對應儲存', ja: 'マスキング対応表の永続保存' },
-      vaultModalDesc: { en: 'Export the accumulated original-value ↔ token mapping, then import it later so the same values get the same masking token across different batches — useful for cross-batch restore checks. Table-grid masking tokens (starting with TAB_C) are positional and are not included in this vault.', zh: '匯出目前累積的「原始值 ↔ 遮蔽標籤」對應表，下次匯入後即可讓同一批原始值在不同批次處理時拿到一致的遮蔽標籤，方便跨批次核對還原結果。表格模式的欄位遮蔽（TAB_C 開頭）位置性較強，不包含在對應表內。', ja: '現在蓄積されている「元の値 ↔ マスキングトークン」の対応表をエクスポートし、後でインポートすると、異なるバッチで処理しても同じ値に同じマスキングトークンを割り当てられるようになります。バッチをまたいだ復元結果の照合に便利です。テーブル形式のマスキングトークン（TAB_C で始まるもの）は位置依存性が強いため、この対応表には含まれません。' },
-      vaultEntryCountLabel: { en: 'Currently holding {count} mapping(s)', zh: '目前累積 {count} 筆對應', ja: '現在 {count} 件の対応を保持中' },
+      vaultBtnLabel: { en: 'Tag Reference', zh: '標籤對照表', ja: 'タグ対照表' },
+      vaultModalTitle: { en: 'Tag Reference', zh: '標籤對照表', ja: 'タグ対照表' },
+      vaultModalDesc: { en: 'Save which tag was used for each original value, then import it later so the same value gets the same tag across different batches — useful for cross-batch restore checks. Table-grid masking tags (starting with TAB_C) are not included in this reference.', zh: '把「原始資料」對應到「哪個標籤」的紀錄存成檔案，下次處理同一批資料時匯入回來，就能讓同一筆資料維持同樣的標籤，方便跨次核對還原結果。表格模式的欄位遮蔽（TAB_C 開頭）不會被記錄在這份對照表裡。', ja: 'どの元データにどのタグを使ったかを記録として保存し、後で読み込むことで、同じデータには次回も同じタグが使われるようにできます。バッチをまたいだ復元結果の照合に便利です。テーブル形式のマスキングタグ（TAB_C で始まるもの）はこの対照表には記録されません。' },
+      vaultEntryCountLabel: { en: 'Currently has {count} record(s)', zh: '目前已收錄 {count} 筆對照記錄', ja: '現在 {count} 件を記録中' },
       vaultExportSectionLabel: { en: 'Export', zh: '匯出', ja: 'エクスポート' },
       vaultExportEncryptedBtn: { en: 'Export (Encrypted, JSON)', zh: '匯出（加密，JSON）', ja: 'エクスポート（暗号化、JSON）' },
       vaultExportUnencryptedBtn: { en: 'Export (Unencrypted, CSV)', zh: '匯出（未加密，CSV）', ja: 'エクスポート（非暗号化、CSV）' },
       vaultImportSectionLabel: { en: 'Import', zh: '匯入', ja: 'インポート' },
-      vaultImportFilePickerBtn: { en: 'Choose a mapping file (.csv / .json)', zh: '選擇對應表檔案（.csv / .json）', ja: '対応表ファイルを選択（.csv / .json）' },
+      vaultImportFilePickerBtn: { en: 'Choose a reference file (.csv / .json)', zh: '選擇對照表檔案（.csv / .json）', ja: '対照表ファイルを選択（.csv / .json）' },
       vaultPasswordModalTitleExport: { en: 'Set an Export Password', zh: '設定匯出密碼', ja: 'エクスポート用パスワードを設定' },
       vaultPasswordModalTitleImport: { en: 'Enter the Import Password', zh: '輸入匯入密碼', ja: 'インポート用パスワードを入力' },
       vaultPasswordLabel: { en: 'Password', zh: '密碼', ja: 'パスワード' },
       vaultPasswordConfirmLabel: { en: 'Confirm Password', zh: '確認密碼', ja: 'パスワード（確認）' },
       vaultPasswordForgetWarning: { en: 'If you forget the password, the file cannot be recovered — there is no backdoor. Please keep it safe.', zh: '忘記密碼將無法復原，沒有備用解密方式，請自行妥善保管。', ja: 'パスワードを忘れるとファイルは復元できません。バックドアはありませんので、大切に保管してください。' },
       vaultPasswordConfirmBtn: { en: 'Confirm', zh: '確定', ja: '確定' },
-      vaultImportModeMessage: { en: 'Currently holding {existing} mapping(s); this import contains {incoming} mapping(s). Choose how to proceed:', zh: '偵測到目前已有 {existing} 筆持久對應，本次匯入 {incoming} 筆。請選擇如何處理：', ja: '現在 {existing} 件の永続対応があります。今回のインポートは {incoming} 件です。処理方法を選択してください：' },
+      vaultImportModeMessage: { en: 'Currently has {existing} record(s); this import contains {incoming}. Choose how to proceed:', zh: '偵測到目前已有 {existing} 筆對照記錄，本次匯入 {incoming} 筆。請選擇如何處理：', ja: '現在 {existing} 件の記録があります。今回のインポートは {incoming} 件です。処理方法を選択してください：' },
       vaultRiskTitle: { en: 'Unencrypted Export — Risk Notice', zh: '未加密匯出風險提醒', ja: '非暗号化エクスポートに関するリスクの注意' },
-      vaultRiskMessage: { en: `This file stores all original personal data and their token mappings in plain text, with no encryption. If it later gets synced to a cloud drive (OneDrive, Google Drive, iCloud, etc.) or sent via email/chat, that is equivalent to leaking the personal data inside it in the clear. Please make sure you understand this risk and keep the file somewhere safe (e.g. a local folder that isn't auto-synced) before continuing.`, zh: '這個檔案會以明文儲存所有原始個資與對應的遮蔽標籤，不會加密。若這個檔案之後被同步到 OneDrive、Google Drive、iCloud 等雲端硬碟，或透過 Email／即時通訊軟體傳送，等同於把裡面的個資明文外流。請確認您了解這個風險，並妥善保管此檔案（例如只存放在不會自動同步的本機資料夾），再繼續匯出。', ja: 'このファイルは、すべての元の個人情報とそれに対応するトークンを平文（暗号化なし）で保存します。このファイルが後で OneDrive、Google Drive、iCloud などのクラウドドライブに同期されたり、メールやチャットで送信されたりすると、中の個人情報がそのまま漏えいすることになります。このリスクを理解した上で、自動同期されないローカルフォルダに保管するなど、ファイルの取り扱いに十分ご注意ください。' },
+      vaultRiskMessage: { en: `This file stores all original personal data and their tags in plain text, with no encryption. If it later gets synced to a cloud drive (OneDrive, Google Drive, iCloud, etc.) or sent via email/chat, that is equivalent to leaking the personal data inside it in the clear. Please make sure you understand this risk and keep the file somewhere safe (e.g. a local folder that isn't auto-synced) before continuing.`, zh: '這個檔案會以明文儲存所有原始個資與對應的遮蔽標籤，不會加密。若這個檔案之後被同步到 OneDrive、Google Drive、iCloud 等雲端硬碟，或透過 Email／即時通訊軟體傳送，等同於把裡面的個資明文外流。請確認您了解這個風險，並妥善保管此檔案（例如只存放在不會自動同步的本機資料夾），再繼續匯出。', ja: 'このファイルは、すべての元の個人情報とそれに対応するタグを平文（暗号化なし）で保存します。このファイルが後で OneDrive、Google Drive、iCloud などのクラウドドライブに同期されたり、メールやチャットで送信されたりすると、中の個人情報がそのまま漏えいすることになります。このリスクを理解した上で、自動同期されないローカルフォルダに保管するなど、ファイルの取り扱いに十分ご注意ください。' },
       vaultRiskOkBtn: { en: 'Export Unencrypted Anyway', zh: '仍要匯出明文檔案', ja: '未暗号化のままエクスポートする' },
-      toastVaultNothingToExport: { en: 'There is no accumulated mapping data to export yet.', zh: '目前沒有累積的對應資料可以匯出。', ja: 'エクスポートできる対応データがまだありません。' },
-      toastVaultExportedUnencrypted: { en: 'Unencrypted mapping vault exported (CSV).', zh: '已匯出未加密對應表（CSV）。', ja: '非暗号化の対応表（CSV）をエクスポートしました。' },
-      toastVaultExportedEncrypted: { en: 'Encrypted mapping vault exported (JSON).', zh: '已匯出加密對應表（JSON）。', ja: '暗号化された対応表（JSON）をエクスポートしました。' },
+      toastVaultNothingToExport: { en: 'There is no reference data to export yet.', zh: '目前沒有累積的對照資料可以匯出。', ja: 'エクスポートできる対照データがまだありません。' },
+      toastVaultExportedUnencrypted: { en: 'Unencrypted tag reference exported (CSV).', zh: '已匯出未加密的標籤對照表（CSV）。', ja: '非暗号化のタグ対照表（CSV）をエクスポートしました。' },
+      toastVaultExportedEncrypted: { en: 'Encrypted tag reference exported (JSON).', zh: '已匯出加密的標籤對照表（JSON）。', ja: '暗号化されたタグ対照表（JSON）をエクスポートしました。' },
       toastVaultImportSuccess: { en: 'Import complete.', zh: '匯入完成。', ja: 'インポートが完了しました。' },
-      toastVaultInvalidFile: { en: `Couldn't parse this file — please confirm it's a valid mapping vault file.`, zh: '無法解析這個檔案，請確認是有效的對應表檔案。', ja: 'このファイルを解析できません。有効な対応表ファイルかご確認ください。' },
-      toastVaultNoRows: { en: 'No usable mapping rows found in this file.', zh: '檔案中沒有可用的對應資料列。', ja: 'ファイル内に利用可能な対応データ行が見つかりませんでした。' },
-      toastVaultBadFileShape: { en: 'Invalid file format — no importable mapping data found.', zh: '檔案格式不正確，找不到可匯入的對應資料。', ja: 'ファイル形式が正しくないため、インポート可能な対応データが見つかりません。' },
+      toastVaultInvalidFile: { en: `Couldn't parse this file — please confirm it's a valid tag reference file.`, zh: '無法解析這個檔案，請確認是有效的對照表檔案。', ja: 'このファイルを解析できません。有効な対照表ファイルかご確認ください。' },
+      toastVaultNoRows: { en: 'No usable reference rows found in this file.', zh: '檔案中沒有可用的對照資料列。', ja: 'ファイル内に利用可能な対照データ行が見つかりませんでした。' },
+      toastVaultBadFileShape: { en: 'Invalid file format — no importable reference data found.', zh: '檔案格式不正確，找不到可匯入的對照資料。', ja: 'ファイル形式が正しくないため、インポート可能な対照データが見つかりません。' },
       errorVaultPasswordRequired: { en: 'Please enter a password.', zh: '請輸入密碼。', ja: 'パスワードを入力してください。' },
       errorVaultPasswordMismatch: { en: `The two passwords don't match.`, zh: '兩次輸入的密碼不一致。', ja: '入力されたパスワードが一致しません。' },
       errorVaultWrongPassword: { en: 'Wrong password, or the file is corrupted.', zh: '密碼錯誤或檔案已損毀，請重新輸入或確認檔案內容。', ja: 'パスワードが正しくないか、ファイルが破損しています。' },
@@ -2445,7 +2445,7 @@
       const confirmed = await showConfirmModal(t('vaultRiskMessage'), { title: t('vaultRiskTitle'), okLabel: t('vaultRiskOkBtn'), cancelLabel: t('commonCancel'), danger: true });
       if (!confirmed) return;
 
-      let csvContent = '﻿Original Value,Token,Type\n';
+      let csvContent = '﻿Original Value,Tag,Type\n';
       keys.forEach(rawValue => {
         const { token, typeKey } = entries[rawValue];
         csvContent += `${vaultCsvEscape(rawValue)},${vaultCsvEscape(token)},${vaultCsvEscape(typeKey)}\n`;
