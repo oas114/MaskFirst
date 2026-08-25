@@ -1495,6 +1495,7 @@
       importDimRegex: { en: 'regex rules', zh: '正則規則', ja: '正規表現ルール' },
       importInvalidPatternIntro: { en: 'The following {count} row(s) have an invalid pattern and will be skipped:', zh: '以下 {count} 列的規則格式無效，將會被略過：', ja: '以下の{count}行は無効なパターンのためスキップされます：' },
       importInvalidPatternRow: { en: 'Row {row} ({pattern}): {error}', zh: '第 {row} 列（{pattern}）：{error}', ja: '{row}行目（{pattern}）：{error}' },
+      errorRegexNestedQuantifierRisk: { en: 'Rejected: this pattern has nested unbounded quantifiers (e.g. (a+)+), which can freeze the browser during scanning. Avoid using an unbounded quantifier (*, +, {n,}) both inside and outside the same group.', zh: '已拒絕匯入：偵測到可能造成瀏覽器卡死的巢狀量詞寫法（如 (a+)+）。請避免群組內外同時使用不設上限的量詞（*／+／{n,}）。', ja: '拒否されました：ブラウザがフリーズする可能性がある入れ子の無制限量指定子（例：(a+)+）が検出されました。同じグループの内側と外側の両方で無制限の量指定子（*、+、{n,}）を使用しないでください。' },
       importModeMessage: { en: 'You currently have {existingCount} {dimensionLabel}. This file has {rowCount} row(s). How should it be imported?', zh: '你目前有 {existingCount} 筆{dimensionLabel}。這個檔案有 {rowCount} 列資料。要如何匯入？', ja: '現在{existingCount}件の{dimensionLabel}があります。このファイルには{rowCount}行のデータがあります。どのようにインポートしますか？' },
       toastImportComplete: { en: 'Import complete.', zh: '匯入完成。', ja: 'インポートが完了しました。' },
       toastClipboardReadFailed: { en: "Couldn't read the clipboard. Please allow clipboard access in your browser, or paste manually with Ctrl+V.", zh: '無法讀取剪貼簿。請允許瀏覽器存取剪貼簿權限，或改用 Ctrl+V 手動貼上。', ja: 'クリップボードを読み取れませんでした。ブラウザでクリップボードへのアクセスを許可するか、Ctrl+Vで手動で貼り付けてください。' },
@@ -1974,6 +1975,51 @@
       return { pattern: (raw || '').trim(), flags: 'g' };
     }
 
+    // 偵測「群組內含不設上限量詞，且該群組本身又被不設上限量詞包住」的巢狀結構，
+    // 如 (a+)+、(a*)*、(\d+){2,}，這是最典型的災難性回溯（ReDoS）成因。
+    // {3}、{2,5} 這類有上限的量詞狀態空間有限，不會造成指數級回溯，刻意不視為風險。
+    // 這是簡化過的靜態結構偵測（非完整正則 AST 分析），無法涵蓋所有 ReDoS 變形
+    // （例如重疊字元類別交替 (a|aa)+），只針對這個最常見、最容易讓分頁卡死的形狀把關。
+    function hasCatastrophicQuantifierNesting(pattern) {
+      const src = String(pattern);
+      const stack = [];
+      let inClass = false;
+      let risky = false;
+
+      function readUnboundedQuantifier(i) {
+        const ch = src[i];
+        if (ch === '*' || ch === '+') return { unbounded: true };
+        if (ch === '{') {
+          const close = src.indexOf('}', i);
+          if (close !== -1) {
+            const inside = src.slice(i + 1, close);
+            if (/^\d*,$/.test(inside)) return { unbounded: true }; // {n,} 無上限
+          }
+        }
+        return { unbounded: false };
+      }
+
+      for (let i = 0; i < src.length; i++) {
+        const ch = src[i];
+        if (ch === '\\') { i++; continue; }
+        if (inClass) { if (ch === ']') inClass = false; continue; }
+        if (ch === '[') { inClass = true; continue; }
+        if (ch === '(') { stack.push(false); continue; }
+        if (ch === ')') {
+          const innerUnbounded = stack.pop();
+          const q = readUnboundedQuantifier(i + 1);
+          if (innerUnbounded && q.unbounded) risky = true;
+          if (stack.length > 0 && (innerUnbounded || q.unbounded)) stack[stack.length - 1] = true;
+          continue;
+        }
+        if (ch === '*' || ch === '+' || ch === '{') {
+          const q = readUnboundedQuantifier(i);
+          if (q.unbounded && stack.length > 0) stack[stack.length - 1] = true;
+        }
+      }
+      return risky;
+    }
+
     function tryCompileRegexRow(row, idx) {
       try {
         let pattern, flags;
@@ -1985,6 +2031,9 @@
         }
         const finalFlags = flags.includes('g') ? flags : flags + 'g';
         new RegExp(pattern, finalFlags);
+        if (hasCatastrophicQuantifierNesting(pattern)) {
+          throw new Error(t('errorRegexNestedQuantifierRisk'));
+        }
         return {
           ok: true,
           entry: {
