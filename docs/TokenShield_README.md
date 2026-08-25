@@ -233,7 +233,7 @@ Static markup opts in via `data-i18n` (sets `innerHTML`), `data-i18n-placeholder
 |---------|--------------|-----|
 | A term you expected wasn't masked | It's on the whitelist, or doesn't match any active rule/dictionary entry | Select it and choose "Mark as sensitive" |
 | Switching Region doesn't seem to change anything | You need to re-run the scan (edit the input or click Execute again) — switching only changes which rules apply going forward | Re-run de-identification after switching |
-| "Restore Result" shows missing items | The AI edited or dropped a token | Check the red-highlighted chips on the left and fix manually |
+| "Restore Result" shows missing items | The AI edited or dropped a token | Click the red-highlighted chip on the left and paste the actual text from the AI reply to apply a fix |
 | Copy button greyed out | A Hard Block term was detected | Click the red banner, review, and force-unlock if it's a false positive |
 
 ---

@@ -1538,8 +1538,16 @@
       v2NoMaskingRecord: { en: 'No masking record', zh: '尚無遮蔽紀錄', ja: 'マスキング記録がありません' },
       tooltipTag: { en: 'Tag: {token}', zh: '標籤：{token}', ja: 'タグ：{token}' },
       tooltipTagToggle: { en: 'Tag: {token} (click to toggle masking)', zh: '標籤：{token}（點擊可切換遮蔽狀態）', ja: 'タグ：{token}（クリックでマスク状態を切り替え）' },
+      tooltipTagFix: { en: 'Tag: {token} (click to fix manually)', zh: '標籤：{token}（點擊手動修復）', ja: 'タグ：{token}（クリックで手動修復）' },
       v2RestoreMissingItems: { en: '⚠ {count} item(s) missing — see the record on the left', zh: '⚠ 有 {count} 個項目缺失──請查看左側紀錄', ja: '⚠ {count}件の項目が見つかりません──左側の記録をご確認ください' },
       v2RestoreFully: { en: '✓ Fully restored', zh: '✓ 已完整還原', ja: '✓ 完全に復元されました' },
+      fixMissingTokenTitle: { en: 'Fix Missing Tag', zh: '修復缺漏標籤', ja: '欠落タグの修復' },
+      fixMissingTokenDesc: { en: 'The tag "{token}" wasn\'t found in the AI reply. Paste the actual text that appears in its place and we\'ll use it to complete the restore.', zh: '系統在 AI 回覆中找不到「{token}」這個標籤。請貼上 AI 回覆裡實際出現在該位置的文字，系統會用它完成還原。', ja: 'AIの返信の中にタグ「{token}」が見つかりませんでした。その位置に実際に表示されているテキストを貼り付けてください。復元に使用します。' },
+      fixMissingTokenPlaceholder: { en: 'Paste the actual text from the AI reply…', zh: '貼上 AI 回覆裡的實際文字…', ja: 'AIの返信内の実際のテキストを貼り付け…' },
+      toastFixMissingTokenEmpty: { en: 'Please paste some text first', zh: '請先貼上文字', ja: 'まずテキストを貼り付けてください' },
+      toastFixMissingTokenNotFound: { en: "Couldn't find that text in the restored result — please check it matches the AI reply exactly", zh: '在還原結果中找不到這段文字，請確認貼上的內容跟 AI 回覆裡出現的完全一致', ja: '復元結果内にそのテキストが見つかりませんでした。AIの返信内容と完全に一致しているか確認してください' },
+      toastFixMissingTokenApplied: { en: 'Fix applied', zh: '已套用修復', ja: '修復を適用しました' },
+      fixMissingTokenApplyBtn: { en: 'Apply', zh: '套用', ja: '適用' },
       ctxUnmaskWithReason: { en: `- Un-mask [{reason}] "{value}"`, zh: `- 取消遮蔽 [{reason}]「{value}」`, ja: `- マスク解除 [{reason}]「{value}」` },
       ctxMarkSensitive: { en: `+ Mark "{value}" as sensitive`, zh: `+ 將「{value}」標記為敏感資訊`, ja: `+「{value}」を機微情報としてマーク` },
       ctxTableUnmaskCell: { en: '[Table] Un-mask this cell', zh: '[表格] 取消遮蔽此儲存格', ja: '[テーブル] このセルのマスクを解除' },
@@ -1677,6 +1685,8 @@
     let rawAnonymizedText = ""; // Stores the tokenized text used by Phase 2
     let quickMaskActiveEntities = []; // Quick Mask input's own live detection, independent of activeExtractedEntities
     let quickMaskTableMasks = new Set(); // Quick Mask input's own table-cell masks, independent of tableMasks
+    let restoreMissingTokens = []; // Tokens currently missing from the restore result; read/updated by the "fix missing token" feature
+    let missingTokenFixTarget = null; // Token currently targeted by the open "fix missing token" dialog
 
     // ==========================================
     // Tooltip & cross-reference helpers
@@ -4051,13 +4061,62 @@
       container.innerHTML = Object.entries(sessionVault).map(([token, raw]) => {
         const isMissing = missingTokens.includes(token);
         const cls = isMissing
-          ? 'bg-danger-100 text-danger-800 border border-danger-300'
-          : 'bg-paper-hover text-ink-hover border border-line';
+          ? 'bg-danger-100 text-danger-800 border border-danger-300 cursor-pointer hover:bg-danger-200'
+          : 'bg-paper-hover text-ink-hover border border-line cursor-default';
+        const jsEscapedToken = escapeHtml(escapeForInlineJs(token));
+        const fixClick = isMissing ? ` onclick="openMissingTokenFixModal('${jsEscapedToken}')"` : '';
+        const tooltipKey = isMissing ? 'tooltipTagFix' : 'tooltipTag';
         return `
-          <div class="inline-block ${cls} px-2 py-1 rounded text-xs cursor-default transition-all" data-token="${token}" onmouseenter="showGlobalTooltip(event, '${escapeForInlineJs(t('tooltipTag', { token }))}'); highlightCrossReference('${token}', true)" onmouseleave="hideGlobalTooltip(); highlightCrossReference('${token}', false)" onmousemove="showGlobalTooltip(event, '${escapeForInlineJs(t('tooltipTag', { token }))}')">
+          <div class="inline-block ${cls} px-2 py-1 rounded text-xs transition-all" data-token="${token}"${fixClick} onmouseenter="showGlobalTooltip(event, '${escapeForInlineJs(t(tooltipKey, { token }))}'); highlightCrossReference('${token}', true)" onmouseleave="hideGlobalTooltip(); highlightCrossReference('${token}', false)" onmousemove="showGlobalTooltip(event, '${escapeForInlineJs(t(tooltipKey, { token }))}')">
             ${escapeHtml(raw)}
           </div>`;
       }).join('');
+    }
+
+    function updateIntegrityStatus() {
+      const stat = document.getElementById("integrityStatus");
+      if (restoreMissingTokens.length > 0) stat.innerHTML = `<span class="text-danger-500" data-i18n="v2RestoreMissingItems" data-i18n-vars='${escapeHtml(JSON.stringify({ count: restoreMissingTokens.length }))}'>${t('v2RestoreMissingItems', { count: restoreMissingTokens.length })}</span>`;
+      else stat.innerHTML = `<span class="text-brand-600" data-i18n="v2RestoreFully">${t('v2RestoreFully')}</span>`;
+    }
+
+    // Manual fix for a missing token: the user already found the actual text in the AI reply themselves,
+    // pastes it in, and we do one precise string replacement on the restored output. Not a redesign of
+    // the matching algorithm -- just closing the gap of "found it, but nowhere to apply it."
+    function openMissingTokenFixModal(token) {
+      missingTokenFixTarget = token;
+      document.getElementById('missingTokenFixDesc').textContent = t('fixMissingTokenDesc', { token });
+      const input = document.getElementById('missingTokenFixInput');
+      input.value = '';
+      openModal('missingTokenFixModal');
+      setTimeout(() => input.focus(), 50);
+    }
+    function closeMissingTokenFixModal() {
+      closeModal('missingTokenFixModal');
+      missingTokenFixTarget = null;
+    }
+    function applyMissingTokenFix() {
+      const token = missingTokenFixTarget;
+      const input = document.getElementById('missingTokenFixInput').value;
+      if (!token || !input.trim()) { showToast(t('toastFixMissingTokenEmpty'), 'warning'); return; }
+
+      const rawVal = sessionVault[token];
+      const jsEscapedRawVal = escapeHtml(escapeForInlineJs(rawVal));
+      const span = `<span class="inline-block bg-brand-50 text-brand-900 px-1 rounded font-semibold border-b border-brand-200 transition-all cursor-pointer hover:bg-brand-100" data-token="${token}" data-raw="${escapeHtml(rawVal)}" data-mask-state="0" contenteditable="false" onclick="toggleMask(this, '${jsEscapedRawVal}')" onmouseenter="showGlobalTooltip(event, '${escapeForInlineJs(t('tooltipTagToggle', { token }))}'); highlightCrossReference('${token}', true)" onmouseleave="hideGlobalTooltip(); highlightCrossReference('${token}', false)" onmousemove="showGlobalTooltip(event, '${escapeForInlineJs(t('tooltipTagToggle', { token }))}')">${escapeHtml(rawVal)}</span>`;
+
+      const outputEl = document.getElementById('restoredOutputView');
+      const escapedInput = escapeHtml(input);
+      if (!outputEl.innerHTML.includes(escapedInput)) {
+        showToast(t('toastFixMissingTokenNotFound'), 'warning');
+        return;
+      }
+      outputEl.innerHTML = outputEl.innerHTML.replace(escapedInput, span);
+
+      restoreMissingTokens = restoreMissingTokens.filter(t2 => t2 !== token);
+      renderOriginalWithCapsules(restoreMissingTokens);
+      renderRestoreChips(restoreMissingTokens);
+      updateIntegrityStatus();
+      closeMissingTokenFixModal();
+      showToast(t('toastFixMissingTokenApplied'), 'success');
     }
 
     function processRestore() {
@@ -4101,10 +4160,8 @@
 
       document.getElementById("restoredOutputView").innerHTML = html;
 
-      const stat = document.getElementById("integrityStatus");
-      if (missing.length > 0) stat.innerHTML = `<span class="text-danger-500" data-i18n="v2RestoreMissingItems" data-i18n-vars='${escapeHtml(JSON.stringify({ count: missing.length }))}'>${t('v2RestoreMissingItems', { count: missing.length })}</span>`;
-      else stat.innerHTML = `<span class="text-brand-600" data-i18n="v2RestoreFully">${t('v2RestoreFully')}</span>`;
-
+      restoreMissingTokens = missing;
+      updateIntegrityStatus();
       renderOriginalWithCapsules(missing);
       renderRestoreChips(missing);
       clearRestoreSelection();
@@ -4120,7 +4177,9 @@
       document.getElementById("restoredOutputView").innerHTML = "";
       document.getElementById("integrityStatus").innerHTML = "";
       document.getElementById("aiReplyInput").style.height = "160px";
+      restoreMissingTokens = [];
       renderOriginalWithCapsules([]);
+      renderRestoreChips([]);
       clearRestoreSelection();
     }
 
@@ -4659,6 +4718,24 @@
       <div class="px-6 py-4 border-t border-line-soft bg-paper-sunken flex justify-end gap-3 flex-shrink-0">
         <button id="genericConfirmCancelBtn" onclick="_resolveGenericConfirm(false)" class="px-4 py-2 bg-white border border-line-strong text-ink-hover rounded-lg text-sm font-medium hover:bg-paper-sunken transition-colors">Cancel</button>
         <button id="genericConfirmOkBtn" onclick="_resolveGenericConfirm(true)" class="px-4 py-2 bg-brand-700 hover:bg-brand-800 text-white rounded-lg text-sm font-semibold shadow-sm transition-colors">OK</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== Fix Missing Tag Modal ==================== -->
+  <div id="missingTokenFixModal" class="hidden fixed inset-0 bg-scrim/40 backdrop-blur-sm z-[110] flex items-center justify-center p-4 opacity-0 transition-opacity duration-300">
+    <div class="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden transform scale-95 transition-transform duration-300 flex flex-col max-h-full border border-line">
+      <div class="px-6 py-4 border-b border-line-soft flex justify-between items-center bg-paper-sunken flex-shrink-0">
+        <h2 class="text-sm font-bold text-ink" data-i18n="fixMissingTokenTitle">Fix Missing Tag</h2>
+        <button onclick="closeMissingTokenFixModal()" class="text-ink-faint hover:text-ink-hover font-medium text-lg">&times;</button>
+      </div>
+      <div class="p-6 overflow-y-auto space-y-3">
+        <p id="missingTokenFixDesc" class="text-sm text-ink-hover"></p>
+        <input type="text" id="missingTokenFixInput" placeholder="Paste the actual text from the AI reply…" data-i18n-placeholder="fixMissingTokenPlaceholder" onkeydown="if(event.key==='Enter'){applyMissingTokenFix();}" class="w-full text-sm p-2 border border-line-strong rounded focus:outline-none focus:border-brand-500">
+      </div>
+      <div class="px-6 py-4 border-t border-line-soft bg-paper-sunken flex justify-end gap-3 flex-shrink-0">
+        <button onclick="closeMissingTokenFixModal()" class="px-4 py-2 bg-white border border-line-strong text-ink-hover rounded-lg text-sm font-medium hover:bg-paper-sunken transition-colors" data-i18n="commonCancel">Cancel</button>
+        <button onclick="applyMissingTokenFix()" class="px-4 py-2 bg-brand-700 hover:bg-brand-800 text-white rounded-lg text-sm font-semibold shadow-sm transition-colors" data-i18n="fixMissingTokenApplyBtn">Apply</button>
       </div>
     </div>
   </div>
