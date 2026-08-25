@@ -666,9 +666,7 @@
         <div class="p-3 border-b border-line-soft bg-paper-sunken/50 flex-shrink-0">
           <label class="font-semibold text-sm text-ink" data-i18n="v3ResultLabel">Detection Result (drag to select multiple, click one to cycle its state)</label>
         </div>
-        <div id="quickMaskOutput" contenteditable="true" class="relative flex-1 p-4 text-sm bg-white overflow-y-auto font-sans leading-[2.25] whitespace-pre-wrap min-h-0 focus:outline-none focus:ring-2 focus:ring-brand-100 transition-shadow" style="tab-size: 4;">
-          <span class="text-ink-faint italic text-xs" data-i18n="v3NotRunYet">Not run yet</span>
-        </div>
+        <div id="quickMaskOutput" contenteditable="true" class="relative flex-1 p-4 text-sm bg-white overflow-y-auto font-sans leading-[2.25] whitespace-pre-wrap min-h-0 focus:outline-none focus:ring-2 focus:ring-brand-100 transition-shadow" style="tab-size: 4;"><span class="text-ink-faint italic text-xs" data-i18n="v3NotRunYet">Not run yet</span></div>
         <div id="quickMaskBatchBar" class="hidden p-3 border-t border-line-soft bg-paper-sunken flex-shrink-0 flex flex-wrap items-center gap-2 text-xs">
           <span class="text-ink-muted"><span data-i18n="v3SelectedPrefix">Selected</span> <span id="quickMaskSelectedCount">0</span></span>
           <button onclick="applyBatchMaskState('2')" class="bg-brand-700 hover:bg-brand-800 text-white font-medium px-3 py-1.5 rounded-md transition-colors" data-i18n="v3MaskPartial">Partial-mask selected</button>
@@ -678,10 +676,13 @@
         </div>
         <p class="px-3 pt-2 text-xs text-ink-faint flex-shrink-0" data-i18n="altDragHint">Tip: hold Alt while dragging to select multiple items for batch masking; a plain drag still selects/edits text normally.</p>
         <div class="p-3 border-t border-line-soft bg-paper-sunken flex-shrink-0 flex gap-2">
+          <button onclick="clearQuickMaskResult()" class="flex-[1] bg-white border border-line-strong hover:bg-paper-sunken text-ink-hover font-medium py-2 px-3 rounded-lg shadow-sm transition-colors text-xs sm:text-sm whitespace-nowrap" data-i18n="v3BtnClearResult">
+            Clear Result
+          </button>
           <button onclick="quickMaskSelectAll()" class="flex-[1] bg-white border border-line-strong hover:bg-paper-sunken text-ink-hover font-medium py-2 px-3 rounded-lg shadow-sm transition-colors text-xs sm:text-sm whitespace-nowrap" data-i18n="v3SelectAll">
             Select All
           </button>
-          <button onclick="copyQuickMaskResult()" class="flex-[3] bg-ink hover:bg-ink-hover text-white font-semibold py-2 px-4 rounded-lg shadow-sm transition-colors text-sm" data-i18n="v3BtnCopy">
+          <button onclick="copyQuickMaskResult()" class="flex-[2] bg-ink hover:bg-ink-hover text-white font-semibold py-2 px-4 rounded-lg shadow-sm transition-colors text-sm" data-i18n="v3BtnCopy">
             Copy Masked Text
           </button>
         </div>
@@ -1599,6 +1600,7 @@
       v3MaskFull: { en: 'Full-mask selected', zh: '全遮蔽已選取', ja: '選択項目を全マスク' },
       v3ClearSelection: { en: 'Clear selection', zh: '取消選取', ja: '選択解除' },
       v3SelectAll: { en: 'Select All', zh: '全選', ja: '全選択' },
+      v3BtnClearResult: { en: 'Clear Result', zh: '清除結果', ja: '結果をクリア' },
       v3BtnCopy: { en: 'Copy Masked Text', zh: '複製遮蔽後文字', ja: 'マスク後のテキストをコピー' },
       toastQuickMaskEmptyWarning: { en: 'Please paste some text first', zh: '請先貼上文字', ja: 'まず文章を貼り付けてください' },
       toastQuickMaskCopied: { en: 'Masked text copied!', zh: '已複製遮蔽後文字！', ja: 'マスク後のテキストをコピーしました！' },
@@ -4340,6 +4342,13 @@
       if (!confirmed) return;
       quickMaskTextarea.value = '';
       triggerQuickMaskPreview();
+      clearQuickMaskResult();
+    }
+
+    function clearQuickMaskResult() {
+      document.getElementById("quickMaskOutput").innerHTML = `<span class="text-ink-faint italic text-xs">${escapeHtml(t('v3NotRunYet'))}</span>`;
+      quickMaskTableMasks = new Set();
+      clearQuickMaskSelection();
     }
 
     // Separate floating menu instance (does not share rawInput's selectionBtn, so the

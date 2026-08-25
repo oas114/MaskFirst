@@ -18,7 +18,7 @@ To recompile:
 [ English | [繁體中文 (TokenShield_README.zh-TW.md)](TokenShield_README.zh-TW.md) ]
 
 > [!NOTE]
-> This is the **English-primary** documentation set — deliberately flipped from EduShield's Chinese-primary convention, since TokenShield is positioned as the international edition. If you update this file, update the Chinese counterpart `TokenShield_README.zh-TW.md` as well.
+> This is the primary version of this document. If you update this file, please also update the Traditional Chinese translation `TokenShield_README.zh-TW.md`.
 
 > [!IMPORTANT]
 > **Disclaimer**: This document and the TokenShield tool itself provide only technical masking/restoration capability to reduce data-exposure risk when submitting content to AI; **neither constitutes legal advice, and using them alone does not guarantee compliance with GDPR or any other privacy regulation**. Whether your data handling is compliant still depends on your (or your organization's) overall data collection, processing, and use practices — consult professional legal advice if in doubt.

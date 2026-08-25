@@ -18,7 +18,7 @@ To recompile:
 [ [English (TokenShield_README.md)](TokenShield_README.md) | 繁體中文 ]
 
 > [!NOTE]
-> TokenShield 的文件組**刻意以英文為主版本**（與 EduShield 中文為主的慣例相反），因為 TokenShield 定位為國際版本。若更新本文件，請同步更新英文版 `TokenShield_README.md`。
+> 本文件為英文版 `TokenShield_README.md` 的繁體中文翻譯。若更新本文件，請同步更新英文版。
 
 > [!IMPORTANT]
 > **免責聲明**：本文件與 TokenShield 工具本身，提供的都只是技術上的遮蔽／還原能力，用於降低送交 AI 處理時的資料外洩風險；**不構成法律建議，也不保證單獨使用即符合 GDPR 或其他隱私法規要求**。資料處理是否合規，仍取決於使用者／所屬機構整體的資料蒐集、處理與利用流程，如有疑慮請諮詢專業法律意見。
