@@ -1473,6 +1473,8 @@
       confirmDefaultTitle: { en: 'Please Confirm', zh: '請確認', ja: '確認してください' },
       confirmDefaultOk: { en: 'OK', zh: '確定', ja: 'OK' },
       confirmDefaultCancel: { en: 'Cancel', zh: '取消', ja: 'キャンセル' },
+      confirmClearInputMessage: { en: 'This will clear the pasted text and the results below — it cannot be undone. Continue?', zh: '這會清除已貼上的文字與下方的結果，且無法復原。確定要繼續嗎？', ja: '貼り付けたテキストと下の結果がクリアされます。元に戻すことはできません。続けますか？' },
+      confirmClearInputOk: { en: 'Clear', zh: '清除', ja: 'クリア' },
       toastCopiedPromptTemplate: { en: 'Copied the {persona} local AI prompt template!', zh: '已複製「{persona}」本機 AI 提示詞範本！', ja: '「{persona}」ローカルAIプロンプトテンプレートをコピーしました！' },
       confirmReloadConfigMessage: { en: 'Reloading will discard any manually edited custom rules and dictionary entries, then re-apply the built-in defaults plus the auto-load config file (if present). Continue?', zh: '重新載入將會捨棄所有手動編輯的自訂規則與詞庫項目，並重新套用內建預設值與自動載入設定檔（若有的話）。要繼續嗎？', ja: '再読み込みすると、手動で編集したカスタムルールと辞書エントリはすべて破棄され、組み込みの既定値と自動読み込み設定ファイル（存在する場合）が再適用されます。続けますか？' },
       confirmReloadConfigOk: { en: 'Reload', zh: '重新載入', ja: '再読み込み' },
@@ -3958,7 +3960,10 @@
       const text = document.getElementById("restoredOutputView").innerText;
       if(text) navigator.clipboard.writeText(text).then(() => showToast(t('toastRestoredTextCopied'), 'success'));
     }
-    function clearLeftInput() {
+    async function clearLeftInput() {
+      if (!textarea.value.trim()) return;
+      const confirmed = await showConfirmModal(t('confirmClearInputMessage'), { okLabel: t('confirmClearInputOk'), cancelLabel: t('commonCancel'), danger: true });
+      if (!confirmed) return;
       textarea.value = "";
       document.getElementById("anonymizedOutput").value = "";
       rawAnonymizedText = "";
@@ -4102,7 +4107,10 @@
       quickMaskBackdrop.scrollLeft = quickMaskTextarea.scrollLeft;
     });
 
-    function clearQuickMaskInput() {
+    async function clearQuickMaskInput() {
+      if (!quickMaskTextarea.value.trim()) return;
+      const confirmed = await showConfirmModal(t('confirmClearInputMessage'), { okLabel: t('confirmClearInputOk'), cancelLabel: t('commonCancel'), danger: true });
+      if (!confirmed) return;
       quickMaskTextarea.value = '';
       triggerQuickMaskPreview();
     }
