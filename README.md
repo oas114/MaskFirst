@@ -4,6 +4,8 @@
 
 > *"Mask sensitive data before sending it to AI. Restore it in one click. 100% in-browser — no data ever leaves your device."*
 
+> **Disclaimer**: This tool provides technical masking/restoration capability to reduce data-exposure risk; **it does not constitute legal advice, and using it alone does not guarantee compliance with GDPR or any other privacy regulation**. Whether your data handling is compliant still depends on your (or your organization's) overall data collection, processing, and use practices.
+
 **Author:** OA (oas114) | **[Support this project (Ko-fi)](https://ko-fi.com/oasgrow)**
 
 ---
