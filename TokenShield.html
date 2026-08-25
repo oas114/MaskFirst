@@ -920,7 +920,7 @@
       <div class="p-6 overflow-y-auto">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
           <p class="text-sm text-ink-secondary" data-i18n="guideIntro">
-            TokenShield ships with a set of regex rules to detect sensitive personal and business data. The table below shows the rules currently active for your selected <strong>Region</strong> (plus the always-on Global baseline) — switch Region in the top toolbar to see a different set.
+            TokenShield uses a two-layer system to detect sensitive personal and business data — this section explains how each layer works and where its limits are. The rules and keywords actually active for your current Region/Persona, and every add/edit/delete action, now live in Manage Custom Protection Rules — including the built-in ones, not just your own custom additions.
           </p>
           <button onclick="toggleGuideInstructions()" class="bg-brand-50 text-brand-800 border border-brand-200 hover:bg-brand-100 px-3 py-1.5 rounded text-xs font-semibold transition-colors whitespace-nowrap" data-i18n="guideHowToEditBtn">
             How to edit these rules
@@ -937,36 +937,30 @@
           <p data-i18n="guideHowToAddIntro">You don't need to hand-edit the HTML source — use the "Manage Custom Protection Rules" button in the toolbar instead:</p>
           <ol class="list-decimal list-inside space-y-1 ml-1 text-ink-secondary">
             <li data-i18n="guideStep1">Click <strong>"Manage Custom Protection Rules"</strong> in the toolbar, then switch to the "Hard Block Keywords" or "Regex Rules" tab.</li>
-            <li data-i18n="guideStep2">Click "+ Add Row" to add a row directly in the table, or click an existing row's fields to edit them in place — regex rules are validated for syntax and ReDoS risk on save. For bulk changes, you can instead download that tab's CSV template, fill it in, and import it, choosing "Merge with Existing" or "Replace All".</li>
+            <li data-i18n="guideStep2">Click "+ Add Row" to add a row directly in the table, or click any row's fields to edit them in place — including the built-in rows for your currently selected Persona/Region, not just your own custom ones (regex rules are validated for syntax and ReDoS risk on save). Edited or deleted built-in rows show a "Revert to Default" option, or you can re-add a deleted one from the "removed from defaults" list below the table. For bulk changes, you can instead download that tab's CSV template, fill it in, and import it, choosing "Merge with Existing" or "Replace All" (this only ever affects your custom layer).</li>
             <li data-i18n="guideStep4">To share your customizations with a colleague or reuse them on another machine, expand "Advanced Settings" (desktop only) in the same panel and click "Export Config File" to download <code class="bg-white border border-line px-1 rounded">tokenshield.config.js</code>; to apply it later, click "Import Config File", pick that file, and confirm the summary. Note: this is a manual import — it does not apply automatically on refresh or the next time you open this file, so you'll need to re-import it each time.</li>
             <li data-i18n="guideStep5">To discard manual edits or imported settings and restore the built-in defaults, open "Manage Custom Protection Rules", expand "Advanced Settings" (desktop only), and click "Reset to Defaults".</li>
           </ol>
         </div>
 
-        <div class="space-y-4">
-          <div class="border border-line rounded-lg overflow-x-auto">
-            <table class="w-full text-sm text-left min-w-[700px]">
-              <thead class="bg-paper-sunken text-ink-secondary border-b border-line">
-                <tr>
-                  <th class="px-4 py-2 font-medium w-1/6" data-i18n="guideColCategory">Data Category</th>
-                  <th class="px-4 py-2 font-medium w-1/6" data-i18n="guideColTag">Replacement Tag</th>
-                  <th class="px-4 py-2 font-medium w-1/4" data-i18n="guideColExample">Example</th>
-                  <th class="px-4 py-2 font-medium w-5/12" data-i18n="guideColRegex">Regular Expression</th>
-                </tr>
-              </thead>
-              <tbody id="guideTableBody" class="divide-y divide-line-soft text-ink-hover">
-                <!-- Generated dynamically by JS -->
-              </tbody>
-            </table>
+        <div class="space-y-3">
+          <div class="border border-line rounded-lg p-4">
+            <h4 class="text-sm font-bold text-ink mb-1" data-i18n="guideLayer1Title">Layer 1: Static Rule Scan (Regex + Hard Block Keywords)</h4>
+            <p class="text-xs text-ink-secondary leading-relaxed" data-i18n="guideLayer1Body">Runs the instant you paste text, using fixed-format rules (e.g. SSNs, IBANs, phone numbers) to catch personal data that follows a describable pattern. Fast and precise, but it can't catch free-form content — like names — that has no fixed format.</p>
           </div>
+          <div class="border border-line rounded-lg p-4">
+            <h4 class="text-sm font-bold text-ink mb-1" data-i18n="guideLayer2Title">Layer 2: Local AI Semantic Scan (optional, requires Ollama)</h4>
+            <p class="text-xs text-ink-secondary leading-relaxed" data-i18n="guideLayer2Body">Runs a small language model on your own machine to catch free-form content regex can't describe (e.g. address variations). Name detection isn't reliable yet — add common names to your Custom Dictionary instead of relying on this layer alone.</p>
+          </div>
+          <div class="border border-danger-100 bg-danger-50 rounded-lg p-4">
+            <h4 class="text-sm font-bold text-danger-700 mb-1" data-i18n="guideHardBlockHeading">Hard Block: why does some content lock copying instead of just being masked?</h4>
+            <p class="text-xs text-danger-600 leading-relaxed" data-i18n="guideHardBlockIntro">Extremely sensitive terms (from your currently selected Persona) aren't safe to send even after masking — the surrounding context alone can be enough to identify who it's about. Content matching these terms locks the copy function entirely, instead of being replaced with a tag.</p>
+          </div>
+        </div>
 
-          <div class="bg-danger-50 p-4 rounded-lg border border-danger-100">
-            <h4 class="text-sm font-bold text-danger-700 mb-1" data-i18n="guideHardBlockHeading">Extremely Sensitive Terms (Hard Block)</h4>
-            <p class="text-xs text-danger-600">
-              <span data-i18n="guideHardBlockIntro">If the source text contains any of the following terms (from the currently selected Persona), TokenShield locks the copy function to prevent accidental exposure:</span><br>
-              <span id="guideHardBlockList" class="font-medium text-danger-700 leading-relaxed"></span>
-            </p>
-          </div>
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-paper-sunken border border-line rounded-lg p-4 mt-4">
+          <p class="text-xs text-ink-secondary" data-i18n="guideGoToManageIntro">The regex rules and hard-block keywords actually active right now — including add/edit/delete and reverting a built-in row to its default — all live in Manage Custom Protection Rules.</p>
+          <button onclick="closeGuide(); openProtectionManagerModal();" class="flex-shrink-0 bg-brand-700 hover:bg-brand-800 text-white px-4 py-2 rounded-lg text-xs font-semibold transition-colors whitespace-nowrap" data-i18n="guideGoToManageBtn">Go to Manage Custom Protection Rules</button>
         </div>
       </div>
     </div>
@@ -1080,7 +1074,7 @@
       <div class="p-6 overflow-y-auto flex-1 bg-white">
         <div id="pmPanelHardBlock" class="pm-panel space-y-3">
           <div class="flex flex-wrap justify-between items-center gap-2">
-            <p class="text-xs text-ink-muted" data-i18n="pmHardBlockIntro">Add or edit rows directly in the table below, or batch-import a single-column CSV (one keyword per row). This only manages your custom layer — the built-in Personal/Business keyword lists aren't editable here (see PII Rule Guide).</p>
+            <p class="text-xs text-ink-muted" data-i18n="pmHardBlockIntro">Shows the keywords active for the currently selected Persona (plus your custom layer). Add or edit rows directly, or batch-import a single-column CSV (one keyword per row); built-in rows can be reverted to their default or deleted.</p>
             <div class="flex gap-2">
               <button onclick="addHardBlockRow()" class="text-xs bg-paper-hover hover:bg-line text-ink-hover px-3 py-1.5 rounded font-medium transition-colors border border-line" data-i18n="pmBtnAddRow">+ Add Row</button>
               <input type="file" id="hardBlockCsvFileInput" accept=".csv" class="hidden" onchange="handleHardBlockCsvUpload(event)" />
@@ -1092,15 +1086,16 @@
             <table class="w-full text-left text-sm">
               <thead class="bg-paper-sunken sticky top-0"><tr>
                 <th class="px-3 py-2 font-medium text-ink-secondary border-b border-line" data-i18n="pmColKeyword">Keyword</th>
-                <th class="px-3 py-2 font-medium text-ink-secondary border-b border-line w-16 text-center" data-i18n="commonDelete">Delete</th>
+                <th class="px-3 py-2 font-medium text-ink-secondary border-b border-line w-28 text-center" data-i18n="pmColActions">Actions</th>
               </tr></thead>
               <tbody id="hardBlockMgmtTbody" class="divide-y divide-line bg-white"></tbody>
             </table>
           </div>
+          <div id="hardBlockRemovedDefaults" class="text-xs text-ink-muted"></div>
         </div>
         <div id="pmPanelRegex" class="pm-panel space-y-3 hidden">
           <div class="flex flex-wrap justify-between items-center gap-2">
-            <p class="text-xs text-ink-muted" data-i18n="pmRegexIntro">Add or edit rows directly in the table below, or batch-import a 4-column CSV (TypeTag,RuleName,Pattern,ExampleText). The Pattern column accepts a bare pattern or a full /pattern/flags literal; edits are validated for syntax and ReDoS risk on save. This only manages your custom layer — the built-in region-specific rules aren't editable here (see PII Rule Guide).</p>
+            <p class="text-xs text-ink-muted" data-i18n="pmRegexIntro">Shows the rules active for the currently selected Region (plus Global and your custom layer). Add or edit rows directly, or batch-import a 4-column CSV (TypeTag,RuleName,Pattern,ExampleText); the Pattern column accepts a bare pattern or a full /pattern/flags literal, validated for syntax and ReDoS risk on save. Built-in rows can be reverted to their default or deleted.</p>
             <div class="flex gap-2">
               <button onclick="addRegexRow()" class="text-xs bg-paper-hover hover:bg-line text-ink-hover px-3 py-1.5 rounded font-medium transition-colors border border-line" data-i18n="pmBtnAddRow">+ Add Row</button>
               <input type="file" id="regexCsvFileInput" accept=".csv" class="hidden" onchange="handleRegexCsvUpload(event)" />
@@ -1115,11 +1110,12 @@
                 <th class="px-3 py-2 font-medium text-ink-secondary border-b border-line" data-i18n="pmColName">Name</th>
                 <th class="px-3 py-2 font-medium text-ink-secondary border-b border-line" data-i18n="pmColPattern">Pattern</th>
                 <th class="px-3 py-2 font-medium text-ink-secondary border-b border-line" data-i18n="pmColExample">Example</th>
-                <th class="px-3 py-2 font-medium text-ink-secondary border-b border-line w-16 text-center" data-i18n="commonDelete">Delete</th>
+                <th class="px-3 py-2 font-medium text-ink-secondary border-b border-line w-28 text-center" data-i18n="pmColActions">Actions</th>
               </tr></thead>
               <tbody id="regexMgmtTbody" class="divide-y divide-line bg-white"></tbody>
             </table>
           </div>
+          <div id="regexRemovedDefaults" class="text-xs text-ink-muted"></div>
         </div>
         <div id="pmPanelPrompts" class="pm-panel space-y-4 hidden">
           <div class="space-y-2">
@@ -1389,22 +1385,24 @@
 
       // ---- PII Rule Guide modal ----
       modalGuideTitle: { en: 'PII Rule Guide', zh: '個資規則說明', ja: 'PIIルールガイド' },
-      guideIntro: { en: `TokenShield ships with a set of regex rules to detect sensitive personal and business data. The table below shows the rules currently active for your selected <strong>Region</strong> (plus the always-on Global baseline) — switch Region in the top toolbar to see a different set.`, zh: `TokenShield 內建一組正則規則，用來偵測敏感的個人與企業資料。下表顯示目前你所選<strong>地區</strong>啟用中的規則（並疊加永遠啟用的全球基準規則）──在頂部工具列切換地區即可看到不同的規則組合。`, ja: `TokenShieldには、機微な個人・業務データを検出するための正規表現ルールが組み込まれています。下の表は、現在選択中の<strong>地域</strong>で有効なルール（常時有効なグローバル基準を含む）を示しています──上部ツールバーで地域を切り替えると別のルールセットが表示されます。` },
+      guideIntro: { en: `TokenShield uses a two-layer system to detect sensitive personal and business data — this section explains how each layer works and where its limits are. The rules and keywords actually active for your current Region/Persona, and every add/edit/delete action, now live in Manage Custom Protection Rules — including the built-in ones, not just your own custom additions.`, zh: `TokenShield 用雙層機制偵測敏感的個人與企業資料，這裡說明兩層各自的運作方式與限制。目前實際套用中的規則/關鍵字，以及所有新增/編輯/刪除操作，都在「管理自訂防護規則」進行──內建規則也可以直接修改，不限自訂項目。`, ja: `TokenShieldは、機微な個人・業務データを検出するために2層のシステムを使用しています──このセクションでは各層の仕組みと限界を説明します。現在のRegion／Personaで実際に有効なルールとキーワード、およびすべての追加/編集/削除操作は、現在「カスタム保護ルールを管理」に集約されています──カスタム項目だけでなく組み込みのものも含まれます。` },
       guideHowToEditBtn: { en: 'How to edit these rules', zh: '如何編輯這些規則', ja: 'これらのルールを編集する方法' },
       guideSafeAskAiTitle: { en: 'Not sure this file is actually safe? Ask an AI.', zh: '不確定這個檔案是否安全？問問 AI 吧。', ja: 'このファイルが本当に安全か不安ですか？AIに聞いてみましょう。' },
       guideSafeAskAiBody: { en: `TokenShield is a single HTML file with no server. Other than loading its stylesheet on first open (Tailwind CSS, tried from a CDN with a local fallback, never involving anything you type in), it makes no background network calls related to your document content. You don't need to read code yourself: paste the entire <code class="bg-white border border-line px-1 rounded">TokenShield.html</code> source into any AI (ChatGPT, Claude, etc.) and ask it directly: "Does this page send any user input anywhere?" Let the AI verify it for you, instead of just taking the developer's word for it.`, zh: `TokenShield 是單一 HTML 檔案，沒有伺服器。除了首次載入版面樣式（Tailwind CSS，會嘗試連線 CDN，失敗則自動改用本機備援，不含任何您輸入的資料）之外，沒有任何與您的文件內容相關的背景連線。你不需要自己看程式碼：把整份 <code class="bg-white border border-line px-1 rounded">TokenShield.html</code> 原始碼貼給任何一個 AI（ChatGPT、Claude 等），直接問它：「這個頁面會把使用者輸入送到任何地方嗎？」讓 AI 幫你驗證，而不是只憑開發者的一面之詞。`, ja: `TokenShieldは単一のHTMLファイルであり、サーバーはありません。初回起動時にスタイルシート（Tailwind CSS。CDNからの取得を試み、失敗した場合はローカルにフォールバックします。入力内容は一切関係ありません）を読み込む以外、文書内容に関連するバックグラウンド通信は一切行いません。自分でコードを読む必要はありません──<code class="bg-white border border-line px-1 rounded">TokenShield.html</code> のソース全体を任意のAI（ChatGPT、Claudeなど）に貼り付け、「このページはユーザーの入力をどこかに送信していますか？」と直接尋ねてみてください。開発者の言葉を鵜呑みにするのではなく、AIに検証してもらいましょう。` },
       guideHowToAddTitle: { en: 'How do I add my own PII rules and Hard Block keywords?', zh: '要怎麼新增自己的個資規則與硬阻斷關鍵字？', ja: '独自のPIIルールやハードブロックキーワードを追加するには？' },
       guideHowToAddIntro: { en: `You don't need to hand-edit the HTML source — use the "Manage Custom Protection Rules" button in the toolbar instead:`, zh: `你不需要手動編輯 HTML 原始碼──改用工具列上的「管理自訂防護規則」按鈕即可：`, ja: `HTMLソースを手動で編集する必要はありません──ツールバーの「カスタム保護ルールを管理」ボタンを使ってください：` },
       guideStep1: { en: `Click <strong>"Manage Custom Protection Rules"</strong> in the toolbar, then switch to the "Hard Block Keywords" or "Regex Rules" tab.`, zh: `點擊工具列上的<strong>「管理自訂防護規則」</strong>，然後切換到「硬阻斷關鍵字」或「正則規則」分頁。`, ja: `ツールバーの<strong>「カスタム保護ルールを管理」</strong>をクリックし、「ハードブロックキーワード」または「正規表現ルール」タブに切り替えます。` },
-      guideStep2: { en: `Click "+ Add Row" to add a row directly in the table, or click an existing row's fields to edit them in place — regex rules are validated for syntax and ReDoS risk on save. For bulk changes, you can instead download that tab's CSV template, fill it in, and import it, choosing "Merge with Existing" or "Replace All".`, zh: `點擊「+ 手動新增一列」直接在表格新增，或點擊既有列的欄位直接修改──正則規則儲存時會自動檢查格式與 ReDoS 風險。若要批次異動，也可以下載該分頁的 CSV 範本填寫後匯入，選擇「與現有規則合併」或「取代全部」。`, ja: `「+ 行を手動追加」をクリックして表に直接行を追加するか、既存の行のフィールドをクリックしてその場で編集できます──正規表現ルールは保存時に構文とReDoSリスクが自動検証されます。一括変更したい場合は、そのタブのCSVテンプレートをダウンロードして記入し、「既存と統合」または「すべて置き換え」を選んでインポートすることもできます。` },
+      guideStep2: { en: `Click "+ Add Row" to add a row directly in the table, or click any row's fields to edit them in place — including the built-in rows for your currently selected Persona/Region, not just your own custom ones (regex rules are validated for syntax and ReDoS risk on save). Edited or deleted built-in rows show a "Revert to Default" option, or you can re-add a deleted one from the "removed from defaults" list below the table. For bulk changes, you can instead download that tab's CSV template, fill it in, and import it, choosing "Merge with Existing" or "Replace All" (this only ever affects your custom layer).`, zh: `點擊「+ 手動新增一列」直接在表格新增，或點擊任一列的欄位直接修改──包含目前所選 Persona／Region 的內建列，不限自訂項目（正則規則儲存時會自動檢查格式與 ReDoS 風險）。已編輯或刪除的內建列會提供「還原預設」選項，或是從表格下方「已從預設清單移除」清單裡把刪除的項目加回來。若要批次異動，也可以下載該分頁的 CSV 範本填寫後匯入，選擇「與現有規則合併」或「取代全部」（此方式只會影響你的自訂層）。`, ja: `「+ 行を手動追加」をクリックして表に直接行を追加するか、任意の行のフィールドをクリックしてその場で編集できます──現在選択中のPersona／Regionの組み込み行も含まれ、カスタム項目に限りません（正規表現ルールは保存時に構文とReDoSリスクが自動検証されます）。編集または削除された組み込み行には「既定値に戻す」オプションが表示され、削除した項目は表の下にある「既定値から削除された」リストから再追加できます。一括変更したい場合は、そのタブのCSVテンプレートをダウンロードして記入し、「既存と統合」または「すべて置き換え」を選んでインポートすることもできます（この方法はカスタム層にのみ影響します）。` },
       guideStep4: { en: `To share your customizations with a colleague or reuse them on another machine, expand "Advanced Settings" (desktop only) in the same panel and click "Export Config File" to download <code class="bg-white border border-line px-1 rounded">tokenshield.config.js</code>; to apply it later, click "Import Config File", pick that file, and confirm the summary. Note: this is a manual import — it does not apply automatically on refresh or the next time you open this file, so you'll need to re-import it each time.`, zh: `如果想把自訂規則分享給同事，或在其他裝置重複使用，展開同一面板中的「進階設定」（僅限桌面版），點擊「轉存為設定檔」下載 <code class="bg-white border border-line px-1 rounded">tokenshield.config.js</code>；之後要套用時，點擊「匯入設定檔」選取該檔案並確認摘要即可。注意：這是手動匯入，不會在重新整理或下次開啟頁面時自動套用，每次都需要重新匯入一次。`, ja: `カスタマイズを同僚と共有したり、別のマシンで再利用したりしたい場合は、同じパネル内の「詳細設定」（デスクトップ版のみ）を展開し、「設定ファイルとしてエクスポート」をクリックして <code class="bg-white border border-line px-1 rounded">tokenshield.config.js</code> をダウンロードしてください。あとで適用する際は「設定ファイルをインポート」をクリックしてそのファイルを選択し、概要を確認してください。注意：これは手動インポートであり、更新時や次回このファイルを開いたときに自動的には適用されません。毎回インポートし直す必要があります。` },
       guideStep5: { en: `To discard manual edits or imported settings and restore the built-in defaults, open "Manage Custom Protection Rules", expand "Advanced Settings" (desktop only), and click "Reset to Defaults".`, zh: `如果想捨棄手動修改或已匯入的內容、回復內建預設值，開啟「管理自訂防護規則」，展開「進階設定」（僅限桌面版），點擊「重設為預設值」。`, ja: `手動での編集やインポート済みの設定を破棄して組み込みの既定値に戻したい場合は、「カスタム保護ルールを管理」を開き、「詳細設定」（デスクトップ版のみ）を展開して「既定値にリセット」をクリックします。` },
-      guideColCategory: { en: 'Data Category', zh: '資料類別', ja: 'データ分類' },
-      guideColTag: { en: 'Replacement Tag', zh: '替換標籤', ja: '置換タグ' },
-      guideColExample: { en: 'Example', zh: '範例', ja: '例' },
-      guideColRegex: { en: 'Regular Expression', zh: '正規表示式', ja: '正規表現' },
-      guideHardBlockHeading: { en: 'Extremely Sensitive Terms (Hard Block)', zh: '極度敏感用語（硬阻斷）', ja: '極めて機微な用語（ハードブロック）' },
-      guideHardBlockIntro: { en: `If the source text contains any of the following terms (from the currently selected Persona), TokenShield locks the copy function to prevent accidental exposure:`, zh: `如果原始文字包含以下任一用語（來自目前選定的身分模式），TokenShield 會鎖定複製功能以避免不慎外流：`, ja: `元のテキストに以下のいずれかの用語（現在選択中のペルソナに基づく）が含まれる場合、TokenShieldは誤った漏洩を防ぐためコピー機能をロックします：` },
+      guideLayer1Title: { en: 'Layer 1: Static Rule Scan (Regex + Hard Block Keywords)', zh: '第一層：靜態規則掃描（正則表示式＋硬阻斷關鍵字）', ja: '第1層：静的ルールスキャン（正規表現＋ハードブロックキーワード）' },
+      guideLayer1Body: { en: `Runs the instant you paste text, using fixed-format rules (e.g. SSNs, IBANs, phone numbers) to catch personal data that follows a describable pattern. Fast and precise, but it can't catch free-form content — like names — that has no fixed format.`, zh: `貼上文字後立即執行，靠固定格式的規則（如身分證字號、IBAN、電話號碼）抓取「有固定寫法可以描述」的個資，準確、速度快，但抓不到姓名這類自由格式、沒有固定寫法的內容。`, ja: `テキストを貼り付けた瞬間に実行され、固定フォーマットのルール（SSN、IBAN、電話番号など）を使って、記述可能なパターンに従う個人データを検出します。高速かつ正確ですが、氏名のように決まった形式のない自由形式のコンテンツは検出できません。` },
+      guideLayer2Title: { en: 'Layer 2: Local AI Semantic Scan (optional, requires Ollama)', zh: '第二層：地端 AI 語意掃描（選用，需另外安裝 Ollama）', ja: '第2層：ローカルAIセマンティックスキャン（任意、Ollamaが必要）' },
+      guideLayer2Body: { en: `Runs a small language model on your own machine to catch free-form content regex can't describe (e.g. address variations). Name detection isn't reliable yet — add common names to your Custom Dictionary instead of relying on this layer alone.`, zh: `在你自己的電腦上執行小型語言模型，補抓正則規則寫不出來的自由格式內容（例如地址的各種寫法變化）。目前姓名判讀還不夠穩定，建議把常見姓名直接加進自訂詞庫，不要只依賴這一層。`, ja: `自分のマシン上で小型の言語モデルを実行し、正規表現では記述できない自由形式のコンテンツ（住所の表記ゆれなど）を検出します。氏名の検出はまだ信頼性が低いため、この層だけに頼らずカスタム辞書によく使う名前を追加してください。` },
+      guideHardBlockHeading: { en: 'Hard Block: why does some content lock copying instead of just being masked?', zh: '硬阻斷：為什麼有些內容不是「遮蔽」，而是直接鎖定複製？', ja: 'ハードブロック：一部のコンテンツがマスクではなくコピーをロックするのはなぜですか？' },
+      guideHardBlockIntro: { en: `Extremely sensitive terms (from your currently selected Persona) aren't safe to send even after masking — the surrounding context alone can be enough to identify who it's about. Content matching these terms locks the copy function entirely, instead of being replaced with a tag.`, zh: `極度敏感用語（來自目前選定的身分模式）就算遮蔽後也不適合送出——因為前後文本身就足以指認當事人。符合這些用語的內容會直接鎖定複製功能，而不是像一般個資只換成標籤。`, ja: `極めて機微な用語（現在選択中のペルソナに基づく）は、マスクした後でも送信するのは安全ではありません──前後の文脈だけで誰のことか特定できてしまう場合があるためです。これらの用語に一致するコンテンツは、タグに置き換えられるのではなく、コピー機能自体が完全にロックされます。` },
+      guideGoToManageIntro: { en: 'The regex rules and hard-block keywords actually active right now — including add/edit/delete and reverting a built-in row to its default — all live in Manage Custom Protection Rules.', zh: '目前實際套用中的正則規則與硬阻斷關鍵字，以及新增/編輯/刪除、還原內建預設值，都在「管理自訂防護規則」。', ja: '現在実際に有効な正規表現ルールとハードブロックキーワード──追加/編集/削除や組み込み行を既定値に戻す操作を含む──はすべて「カスタム保護ルールを管理」にあります。' },
+      guideGoToManageBtn: { en: 'Go to Manage Custom Protection Rules', zh: '前往管理自訂防護規則', ja: 'カスタム保護ルールの管理へ' },
 
       // ---- Unlock confirmation modal ----
       modalUnlockTitle: { en: 'Sensitive Information Block Warning', zh: '敏感資訊阻擋警告', ja: '機微情報ブロックの警告' },
@@ -1442,8 +1440,11 @@
       pmColName: { en: 'Name', zh: '名稱', ja: '名前' },
       pmColPattern: { en: 'Pattern', zh: '規則樣式', ja: 'パターン' },
       pmColExample: { en: 'Example', zh: '說明範例', ja: '例' },
+      pmColActions: { en: 'Actions', zh: '操作', ja: '操作' },
       pmWarnKeywordEmpty: { en: `Keyword can't be empty.`, zh: '關鍵字不能留空。', ja: 'キーワードは空にできません。' },
       pmWarnTagEmpty: { en: `Tag can't be empty.`, zh: '標籤不能留空。', ja: 'タグは空にできません。' },
+      pmBtnRevertDefault: { en: 'Revert to Default', zh: '還原預設', ja: '既定値に戻す' },
+      pmRemovedDefaultsPrefix: { en: '{count} removed from the built-in defaults: ', zh: '已從預設清單移除 {count} 項：', ja: '既定値から{count}件削除されました：' },
       pmChannel1Label: { en: 'Channel 1 — entity extraction prompt ({{TEXT}} is replaced with the actual text to scan)', zh: '通道 1──實體擷取提示詞（{{TEXT}} 會被替換為實際要掃描的文字）', ja: 'チャンネル1──エンティティ抽出プロンプト（{{TEXT}}は実際にスキャンするテキストに置き換えられます）' },
       pmBtnResetDefault: { en: 'Reset to Default', zh: '重設為預設值', ja: '既定値にリセット' },
       pmNoPlaceholderWarning: { en: `No {{TEXT}} placeholder found — the AI won't receive the actual document text.`, zh: `找不到 {{TEXT}} 佔位符──AI 將無法收到實際的文件內容。`, ja: `{{TEXT}} プレースホルダーが見つかりません──AIは実際の文書テキストを受け取れません。` },
@@ -1479,8 +1480,8 @@
       badgeManual: { en: 'Manually imported', zh: '手動匯入', ja: '手動インポート' },
       badgeOverridden: { en: 'Overridden', zh: '已覆寫', ja: '上書き済み' },
       badgeAiSession: { en: 'AI-extracted (session)', zh: 'AI 擷取（本次工作階段）', ja: 'AI抽出（セッション内）' },
-      pmNoCustomHardBlock: { en: 'No custom hard-block keywords yet', zh: '尚無自訂硬阻斷關鍵字', ja: 'カスタムのハードブロックキーワードはまだありません' },
-      pmNoCustomRegex: { en: 'No custom regex rules yet', zh: '尚無自訂正則規則', ja: 'カスタムの正規表現ルールはまだありません' },
+      pmNoCustomHardBlock: { en: 'No hard-block keywords here yet', zh: '目前沒有硬阻斷關鍵字', ja: 'ハードブロックキーワードはまだありません' },
+      pmNoCustomRegex: { en: 'No regex rules here yet', zh: '目前沒有正則規則', ja: '正規表現ルールはまだありません' },
       editCsvRowKeywordPlaceholder: { en: 'Enter a keyword', zh: '輸入關鍵字', ja: 'キーワードを入力' },
       editCsvRowCategoryPlaceholder: { en: 'e.g. NAME', zh: '例如 NAME', ja: '例：NAME' },
       editCsvRowDeleteTitle: { en: 'Delete this row', zh: '刪除此列', ja: 'この行を削除' },
@@ -1756,12 +1757,16 @@
       const a = document.getElementById('regionSelect'); if (a) a.value = val;
       const b = document.getElementById('regionSelectMobile'); if (b) b.value = val;
       triggerPreview();
+      if (typeof refreshGuideModalIfOpen === 'function') refreshGuideModalIfOpen();
+      if (typeof refreshProtectionManagerIfOpen === 'function') refreshProtectionManagerIfOpen();
     }
     function switchPersona(val) {
       currentPersona = val;
       const a = document.getElementById('personaSelect'); if (a) a.value = val;
       const b = document.getElementById('personaSelectMobile'); if (b) b.value = val;
       triggerPreview();
+      if (typeof refreshGuideModalIfOpen === 'function') refreshGuideModalIfOpen();
+      if (typeof refreshProtectionManagerIfOpen === 'function') refreshProtectionManagerIfOpen();
     }
 
     // Built-in defaults, frozen — never mutated. "Reset to Defaults" and merge/replace imports
@@ -2068,20 +2073,28 @@
       }
     }
 
-    // NOTE ON SCOPE: the "custom" bucket is the only layer this management system ever writes to.
-    // The persona-specific (personal/business) and region-specific (us/eu/uk) builtin arrays stay
-    // untouched by merge/replace/import — they remain a library concern, same as before. This keeps
-    // collision handling simple (dedup only within "custom") instead of silently rewriting a specific
-    // persona/region's builtin list from an import that may not even target that persona/region.
+    // NOTE ON SCOPE: CSV/config-file import still only ever writes to the "custom" bucket — the
+    // persona-specific (personal/business) and region-specific (us/eu/uk/...) builtin arrays are never
+    // touched by merge/replace/import, keeping collision handling simple (dedup only within "custom")
+    // instead of silently rewriting a specific persona/region's builtin list from an import that may not
+    // even target that persona/region. The management panel's inline add/edit UI is a separate path: it
+    // reads and writes whichever bucket is currently active (custom + the selected persona/region), so a
+    // user can directly edit or delete a builtin row there — see renderHardBlockMgmtTable()/
+    // renderRegexMgmtTable() and updateHardBlockValue()/updateRegexField(). Those edits are working-copy
+    // state only (same as everything else here): they don't survive a reload and aren't included in
+    // "Export Config File", which still only exports the custom bucket.
     function buildDefaultHardBlockPresetsState() {
+      // defaultValue is a stable link back to HARD_BLOCK_PRESETS_DEFAULT[bucket] that survives inline
+      // edits (see updateHardBlockValue()), so a builtin row can always be reverted/re-added even after
+      // its visible value has changed or the row was deleted.
       return {
-        personal: HARD_BLOCK_PRESETS_DEFAULT.personal.map(value => ({ value, source: 'builtin' })),
-        business: HARD_BLOCK_PRESETS_DEFAULT.business.map(value => ({ value, source: 'builtin' })),
+        personal: HARD_BLOCK_PRESETS_DEFAULT.personal.map(value => ({ value, source: 'builtin', defaultValue: value })),
+        business: HARD_BLOCK_PRESETS_DEFAULT.business.map(value => ({ value, source: 'builtin', defaultValue: value })),
         custom: []
       };
     }
     function buildDefaultRegexPresetsState() {
-      const mapRule = r => ({ type: r.type, pattern: r.regex.source, flags: r.regex.flags, name: r.name, example: r.example, validate: r.validate, source: 'builtin' });
+      const mapRule = r => ({ type: r.type, pattern: r.regex.source, flags: r.regex.flags, name: r.name, example: r.example, validate: r.validate, source: 'builtin', defaultPattern: r.regex.source });
       return {
         global: REGEX_PRESETS_DEFAULT.global.map(mapRule),
         us: REGEX_PRESETS_DEFAULT.us.map(mapRule),
@@ -2379,43 +2392,93 @@
       });
     }
 
+    function bucketTagHtml(bucket) {
+      return ` <span class="badge-source" style="font-size:10px;padding:1px 6px;border-radius:9999px;background:var(--stone-200);color:var(--stone-600);margin-left:4px;white-space:nowrap;">${escapeHtml(bucket.toUpperCase())}</span>`;
+    }
+
     function renderHardBlockMgmtTable() {
       const tbody = document.getElementById('hardBlockMgmtTbody');
       if (!tbody) return;
-      tbody.innerHTML = hardBlockPresets.custom.map((entry, idx) => `
+      const personaBucket = currentPersona === 'business' ? 'business' : 'personal';
+      const rows = [
+        ...hardBlockPresets.custom.map((e, i) => ({ ...e, bucket: 'custom', bucketIdx: i })),
+        ...hardBlockPresets[personaBucket].map((e, i) => ({ ...e, bucket: personaBucket, bucketIdx: i }))
+      ];
+      tbody.innerHTML = rows.map(entry => `
         <tr>
           <td class="px-3 py-2">
-            <input type="text" value="${escapeHtml(entry.value)}" data-idx="${idx}" onchange="updateHardBlockValue(this)" placeholder="${escapeHtml(t('editCsvRowKeywordPlaceholder'))}" class="w-full text-sm bg-transparent border border-transparent hover:border-line-strong focus:border-brand-500 focus:outline-none rounded px-1.5 py-1">${sourceBadgeHtml(entry.source)}
+            <input type="text" value="${escapeHtml(entry.value)}" data-bucket="${entry.bucket}" data-idx="${entry.bucketIdx}" onchange="updateHardBlockValue(this)" placeholder="${escapeHtml(t('editCsvRowKeywordPlaceholder'))}" class="w-full text-sm bg-transparent border border-transparent hover:border-line-strong focus:border-brand-500 focus:outline-none rounded px-1.5 py-1">${sourceBadgeHtml(entry.source)}${entry.bucket !== 'custom' ? bucketTagHtml(entry.bucket) : ''}
           </td>
-          <td class="px-3 py-2 text-center">
-            <button onclick="deleteHardBlockEntryAt(${idx})" class="text-danger-500 hover:text-danger-700 text-xs">${t('commonDelete')}</button>
+          <td class="px-3 py-2 text-center whitespace-nowrap">
+            ${entry.defaultValue !== undefined ? `<button onclick="revertHardBlockEntryAt('${entry.bucket}', ${entry.bucketIdx})" class="text-ink-muted hover:text-ink-hover text-xs mr-2">${t('pmBtnRevertDefault')}</button>` : ''}
+            <button onclick="deleteHardBlockEntryAt('${entry.bucket}', ${entry.bucketIdx})" class="text-danger-500 hover:text-danger-700 text-xs">${t('commonDelete')}</button>
           </td>
         </tr>
       `).join('') || `<tr><td colspan="2" class="px-3 py-4 text-center text-ink-faint text-xs">${t('pmNoCustomHardBlock')}</td></tr>`;
+      renderHardBlockRemovedDefaults();
+    }
+
+    function renderHardBlockRemovedDefaults() {
+      const container = document.getElementById('hardBlockRemovedDefaults');
+      if (!container) return;
+      const personaBucket = currentPersona === 'business' ? 'business' : 'personal';
+      const present = new Set(hardBlockPresets[personaBucket].filter(e => e.defaultValue !== undefined).map(e => e.defaultValue));
+      const removed = HARD_BLOCK_PRESETS_DEFAULT[personaBucket].filter(v => !present.has(v));
+      container.innerHTML = removed.length
+        ? t('pmRemovedDefaultsPrefix', { count: removed.length }) + removed.map(v =>
+            `<button onclick="restoreRemovedHardBlockDefault('${personaBucket}', '${escapeHtml(escapeForInlineJs(v))}')" class="inline-block mt-1 mr-1 px-2 py-0.5 bg-white border border-line-strong rounded hover:bg-paper-sunken text-ink-hover">+ ${escapeHtml(v)}</button>`
+          ).join('')
+        : '';
     }
 
     function renderRegexMgmtTable() {
       const tbody = document.getElementById('regexMgmtTbody');
       if (!tbody) return;
-      tbody.innerHTML = regexPresets.custom.map((rule, idx) => `
+      const rows = [
+        ...regexPresets.global.map((r, i) => ({ ...r, bucket: 'global', bucketIdx: i })),
+        ...regexPresets.custom.map((r, i) => ({ ...r, bucket: 'custom', bucketIdx: i })),
+        ...(regexPresets[currentRegion] || []).map((r, i) => ({ ...r, bucket: currentRegion, bucketIdx: i }))
+      ];
+      tbody.innerHTML = rows.map(rule => `
         <tr>
           <td class="px-3 py-2 font-mono text-xs">
-            <input type="text" value="${escapeHtml(rule.type)}" onchange="updateRegexField(${idx}, 'type', this.value)" placeholder="TYPE" class="w-full text-xs font-mono bg-transparent border border-transparent hover:border-line-strong focus:border-brand-500 focus:outline-none rounded px-1.5 py-1">
+            <input type="text" value="${escapeHtml(rule.type)}" onchange="updateRegexField('${rule.bucket}', ${rule.bucketIdx}, 'type', this.value)" placeholder="TYPE" class="w-full text-xs font-mono bg-transparent border border-transparent hover:border-line-strong focus:border-brand-500 focus:outline-none rounded px-1.5 py-1">
           </td>
           <td class="px-3 py-2">
-            <input type="text" value="${escapeHtml(rule.name)}" onchange="updateRegexField(${idx}, 'name', this.value)" placeholder="${escapeHtml(t('pmColName'))}" class="w-full text-sm bg-transparent border border-transparent hover:border-line-strong focus:border-brand-500 focus:outline-none rounded px-1.5 py-1">${sourceBadgeHtml(rule.source)}
+            <input type="text" value="${escapeHtml(rule.name)}" onchange="updateRegexField('${rule.bucket}', ${rule.bucketIdx}, 'name', this.value)" placeholder="${escapeHtml(t('pmColName'))}" class="w-full text-sm bg-transparent border border-transparent hover:border-line-strong focus:border-brand-500 focus:outline-none rounded px-1.5 py-1">${sourceBadgeHtml(rule.source)}${rule.bucket !== 'custom' ? bucketTagHtml(rule.bucket) : ''}
           </td>
           <td class="px-3 py-2 font-mono text-[10px]">
-            <input type="text" value="${escapeHtml(rule.pattern ? `/${rule.pattern}/${rule.flags}` : '')}" onchange="updateRegexField(${idx}, 'pattern', this.value)" placeholder="/pattern/flags" class="w-full text-[10px] font-mono bg-transparent border border-transparent hover:border-line-strong focus:border-brand-500 focus:outline-none rounded px-1.5 py-1">
+            <input type="text" value="${escapeHtml(rule.pattern ? `/${rule.pattern}/${rule.flags}` : '')}" onchange="updateRegexField('${rule.bucket}', ${rule.bucketIdx}, 'pattern', this.value)" placeholder="/pattern/flags" class="w-full text-[10px] font-mono bg-transparent border border-transparent hover:border-line-strong focus:border-brand-500 focus:outline-none rounded px-1.5 py-1">
           </td>
           <td class="px-3 py-2 text-xs">
-            <input type="text" value="${escapeHtml(rule.example)}" onchange="updateRegexField(${idx}, 'example', this.value)" placeholder="${escapeHtml(t('pmColExample'))}" class="w-full text-xs bg-transparent border border-transparent hover:border-line-strong focus:border-brand-500 focus:outline-none rounded px-1.5 py-1">
+            <input type="text" value="${escapeHtml(rule.example)}" onchange="updateRegexField('${rule.bucket}', ${rule.bucketIdx}, 'example', this.value)" placeholder="${escapeHtml(t('pmColExample'))}" class="w-full text-xs bg-transparent border border-transparent hover:border-line-strong focus:border-brand-500 focus:outline-none rounded px-1.5 py-1">
           </td>
-          <td class="px-3 py-2 text-center">
-            <button onclick="deleteRegexEntryAt(${idx})" class="text-danger-500 hover:text-danger-700 text-xs">${t('commonDelete')}</button>
+          <td class="px-3 py-2 text-center whitespace-nowrap">
+            ${rule.defaultPattern !== undefined ? `<button onclick="revertRegexEntryAt('${rule.bucket}', ${rule.bucketIdx})" class="text-ink-muted hover:text-ink-hover text-xs mr-2">${t('pmBtnRevertDefault')}</button>` : ''}
+            <button onclick="deleteRegexEntryAt('${rule.bucket}', ${rule.bucketIdx})" class="text-danger-500 hover:text-danger-700 text-xs">${t('commonDelete')}</button>
           </td>
         </tr>
       `).join('') || `<tr><td colspan="5" class="px-3 py-4 text-center text-ink-faint text-xs">${t('pmNoCustomRegex')}</td></tr>`;
+      renderRegexRemovedDefaults();
+    }
+
+    function renderRegexRemovedDefaults() {
+      const container = document.getElementById('regexRemovedDefaults');
+      if (!container) return;
+      const present = new Set([...regexPresets.global, ...regexPresets.custom, ...(regexPresets[currentRegion] || [])]
+        .filter(r => r.defaultPattern !== undefined).map(r => r.defaultPattern));
+      const removed = [...REGEX_PRESETS_DEFAULT.global, ...(REGEX_PRESETS_DEFAULT[currentRegion] || [])]
+        .filter(r => !present.has(r.regex.source));
+      container.innerHTML = removed.length
+        ? t('pmRemovedDefaultsPrefix', { count: removed.length }) + removed.map(r =>
+            `<button onclick="restoreRemovedRegexDefault('${REGEX_PRESETS_DEFAULT.global.includes(r) ? 'global' : currentRegion}', '${escapeHtml(escapeForInlineJs(r.regex.source))}')" class="inline-block mt-1 mr-1 px-2 py-0.5 bg-white border border-line-strong rounded hover:bg-paper-sunken text-ink-hover">+ ${escapeHtml(r.name)}</button>`
+          ).join('')
+        : '';
+    }
+
+    function refreshProtectionManagerIfOpen() {
+      const modal = document.getElementById('protectionManagerModal');
+      if (modal && !modal.classList.contains('hidden')) { renderHardBlockMgmtTable(); renderRegexMgmtTable(); }
     }
 
     function addHardBlockRow() {
@@ -2427,23 +2490,40 @@
     }
 
     function updateHardBlockValue(inputEl) {
+      const bucket = inputEl.dataset.bucket;
       const idx = Number(inputEl.dataset.idx);
-      const entry = hardBlockPresets.custom[idx];
+      const arr = hardBlockPresets[bucket];
+      const entry = arr && arr[idx];
       if (!entry) return;
       const newValue = inputEl.value.trim();
       if (!newValue) {
-        if (!entry.value) { hardBlockPresets.custom.splice(idx, 1); renderHardBlockMgmtTable(); return; }
+        if (!entry.value) { arr.splice(idx, 1); renderHardBlockMgmtTable(); return; }
         showToast(t('pmWarnKeywordEmpty'), 'warning');
         inputEl.value = entry.value;
         return;
       }
-      hardBlockPresets.custom[idx] = { value: newValue, source: 'manual' };
+      arr[idx] = { value: newValue, source: entry.source === 'builtin' ? 'overridden' : (entry.source || 'manual'), defaultValue: entry.defaultValue };
       renderHardBlockMgmtTable();
       triggerPreview();
     }
 
-    function deleteHardBlockEntryAt(idx) {
-      hardBlockPresets.custom.splice(idx, 1);
+    function revertHardBlockEntryAt(bucket, idx) {
+      const arr = hardBlockPresets[bucket];
+      const entry = arr && arr[idx];
+      if (!entry || entry.defaultValue === undefined) return;
+      arr[idx] = { value: entry.defaultValue, source: 'builtin', defaultValue: entry.defaultValue };
+      renderHardBlockMgmtTable();
+      triggerPreview();
+    }
+
+    function restoreRemovedHardBlockDefault(bucket, value) {
+      hardBlockPresets[bucket].push({ value, source: 'builtin', defaultValue: value });
+      renderHardBlockMgmtTable();
+      triggerPreview();
+    }
+
+    function deleteHardBlockEntryAt(bucket, idx) {
+      hardBlockPresets[bucket].splice(idx, 1);
       renderHardBlockMgmtTable();
       triggerPreview();
     }
@@ -2456,8 +2536,9 @@
       if (lastInput) lastInput.focus();
     }
 
-    function updateRegexField(idx, field, rawValue) {
-      const rule = regexPresets.custom[idx];
+    function updateRegexField(bucket, idx, field, rawValue) {
+      const arr = regexPresets[bucket];
+      const rule = arr && arr[idx];
       if (!rule) return;
       const value = rawValue.trim();
       if (field === 'pattern') {
@@ -2468,21 +2549,45 @@
           renderRegexMgmtTable();
           return;
         }
-        regexPresets.custom[idx] = { ...check.entry, source: 'manual' };
+        // Preserve the checksum validator (Luhn/TW ID/JP My Number, etc.) across edits — it's a pure
+        // function of the matched string, not tied to the exact pattern text, so an edited TW_ID row
+        // should keep failing non-checksum-valid numbers instead of silently losing that filter.
+        arr[idx] = { ...check.entry, validate: rule.validate, source: rule.source === 'builtin' ? 'overridden' : (rule.source || 'manual'), defaultPattern: rule.defaultPattern };
       } else if (field === 'type') {
         if (!value) { showToast(t('pmWarnTagEmpty'), 'warning'); renderRegexMgmtTable(); return; }
         rule.type = value;
-        rule.source = 'manual';
+        rule.source = rule.source === 'builtin' ? 'overridden' : (rule.source || 'manual');
       } else {
         rule[field] = value;
-        rule.source = 'manual';
+        rule.source = rule.source === 'builtin' ? 'overridden' : (rule.source || 'manual');
       }
       renderRegexMgmtTable();
       triggerPreview();
     }
 
-    function deleteRegexEntryAt(idx) {
-      regexPresets.custom.splice(idx, 1);
+    function revertRegexEntryAt(bucket, idx) {
+      const arr = regexPresets[bucket];
+      const rule = arr && arr[idx];
+      if (!rule || rule.defaultPattern === undefined) return;
+      const defList = bucket === 'global' ? REGEX_PRESETS_DEFAULT.global : (REGEX_PRESETS_DEFAULT[bucket] || []);
+      const def = defList.find(r => r.regex.source === rule.defaultPattern);
+      if (!def) return;
+      arr[idx] = { type: def.type, pattern: def.regex.source, flags: def.regex.flags, name: def.name, example: def.example, validate: def.validate, source: 'builtin', defaultPattern: def.regex.source };
+      renderRegexMgmtTable();
+      triggerPreview();
+    }
+
+    function restoreRemovedRegexDefault(bucket, pattern) {
+      const defList = bucket === 'global' ? REGEX_PRESETS_DEFAULT.global : (REGEX_PRESETS_DEFAULT[bucket] || []);
+      const def = defList.find(r => r.regex.source === pattern);
+      if (!def) return;
+      regexPresets[bucket].push({ type: def.type, pattern: def.regex.source, flags: def.regex.flags, name: def.name, example: def.example, validate: def.validate, source: 'builtin', defaultPattern: def.regex.source });
+      renderRegexMgmtTable();
+      triggerPreview();
+    }
+
+    function deleteRegexEntryAt(bucket, idx) {
+      regexPresets[bucket].splice(idx, 1);
       renderRegexMgmtTable();
       triggerPreview();
     }
@@ -2911,25 +3016,13 @@
 
     function openSettings() { openModal('settingsModal'); }
     function closeSettings() { closeModal('settingsModal'); }
-    function renderGuideTable() {
-      const tbody = document.getElementById("guideTableBody");
-      tbody.innerHTML = getActiveRegexRules().map(rule => `
-        <tr>
-          <td class="px-4 py-2">${rule.name}${sourceBadgeHtml(rule.source)}</td>
-          <td class="px-4 py-2 font-mono text-xs">${rule.type}_X</td>
-          <td class="px-4 py-2 text-ink-muted">${rule.example || ''}</td>
-          <td class="px-4 py-2 font-mono text-[10px] break-all">${escapeHtml(`/${rule.pattern}/${rule.flags}`)}</td>
-        </tr>
-      `).join('');
-      document.getElementById("guideHardBlockList").innerText = getHardBlockKeywords().join(", ");
-    }
     function openGuide() {
-      renderGuideTable();
       openModal('guideModal');
     }
     function refreshGuideModalIfOpen() {
-      const modal = document.getElementById('guideModal');
-      if (modal && !modal.classList.contains('hidden')) renderGuideTable();
+      // No-op: the guide no longer mirrors live rule data (moved to Manage Custom Protection Rules,
+      // see renderHardBlockMgmtTable()/renderRegexMgmtTable()) — kept as a stable hook so callers
+      // elsewhere (language switch, region/persona switch) don't need to know that.
     }
     function closeGuide() { closeModal('guideModal'); }
     function toggleGuideInstructions() {
