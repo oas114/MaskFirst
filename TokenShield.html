@@ -1512,8 +1512,7 @@
       reasonAiEntityExtraction: { en: 'AI entity extraction', zh: 'AI 實體擷取', ja: 'AIエンティティ抽出' },
       reasonAutoLoadedConfig: { en: 'Auto-loaded config', zh: '自動載入設定', ja: '自動読み込み設定' },
       reasonBuiltOnline: { en: 'Built online', zh: '線上建立', ja: 'オンラインで作成' },
-      scanChannel2Starting: { en: 'AI Scan (2/2 starting)', zh: 'AI 掃描（2/2 啟動中）', ja: 'AIスキャン（2/2 開始中）' },
-      scanChannel2Progress: { en: 'Scan (2/2) received {count} chars (click to cancel)', zh: '掃描（2/2）已接收 {count} 字元（點擊可取消）', ja: 'スキャン（2/2）{count}文字を受信（クリックでキャンセル）' },
+      scanChannel2Progress: { en: 'Confirming semantic risk ({current}/{total})', zh: '語意風險確認中 (第 {current}/{total} 次)', ja: '意味リスク確認中 ({current}/{total})' },
       reasonAiDeepScanFlagged: { en: 'AI deep scan flagged: {reason}', zh: 'AI 深度掃描標記：{reason}', ja: 'AI詳細スキャンでフラグ：{reason}' },
       reasonAiDeepScanFallback: { en: 'a potential sensitive-risk finding', zh: '潛在的敏感風險項目', ja: '機微リスクの可能性がある事項' },
       toastScanCompleteBlocked: { en: 'Scan complete!\nAdded {count} new masked entities.\nA sensitive-risk finding was detected — copy has been force-locked!', zh: '掃描完成！\n新增了 {count} 個遮蔽項目。\n偵測到敏感風險項目──複製功能已被強制鎖定！', ja: 'スキャン完了！\n{count}件のマスク項目を追加しました。\n機微リスクが検出されたため、コピー機能を強制的にロックしました！' },
@@ -1935,6 +1934,36 @@
       channel2Personal: `Determine whether the following text contains "extremely sensitive information." Extremely sensitive information includes: self-harm, suicide, sexual assault or abuse, domestic violence, a protective order, a disability or special-needs status (including a psychological/educational assessment), or mental health counseling or treatment records.\nIf it contains any of the above, return this exact JSON: {"critical": true, "reason": "describe the specific risk"}\nIf not, return: {"critical": false, "reason": ""}\n\nText:\n{{TEXT}}`,
       channel2Business: `Determine whether the following text contains "extremely sensitive information." Extremely sensitive information includes: insider trading or material non-public information, an active merger/acquisition, a layoff or workforce reduction plan, unreleased financial results, a data breach or security incident, a whistleblower report, active litigation, or a regulatory investigation.\nIf it contains any of the above, return this exact JSON: {"critical": true, "reason": "describe the specific risk"}\nIf not, return: {"critical": false, "reason": ""}\n\nText:\n{{TEXT}}`
     });
+
+    // Channel 1 = single call, temperature:0 for deterministic extraction, JSON Schema forces a flat
+    // array with an enumerated type (replaces the old loose format:"json", which let the model return
+    // a type-grouped object that silently dropped every category but the first — see todo #15).
+    // Channel 2 = default temperature, kept across CHANNEL2_RUNS so the runs actually diversify;
+    // aggregation is a union of flags (any run critical:true => critical), not majority vote.
+    // num_ctx raised from Ollama's 2048 default so longer pasted text doesn't get silently truncated.
+    const CHANNEL1_RESPONSE_SCHEMA = {
+      type: "array",
+      items: {
+        type: "object",
+        properties: {
+          type: { type: "string", enum: ["PERSON", "VENDOR", "ADDRESS", "PROJECT", "BANK_ACCT"] },
+          value: { type: "string" },
+          reason: { type: "string" }
+        },
+        required: ["type", "value"]
+      }
+    };
+    const CHANNEL1_OPTIONS = { temperature: 0, num_ctx: 8192 };
+    const CHANNEL2_RESPONSE_SCHEMA = {
+      type: "object",
+      properties: {
+        critical: { type: "boolean" },
+        reason: { type: "string" }
+      },
+      required: ["critical", "reason"]
+    };
+    const CHANNEL2_OPTIONS = { num_ctx: 8192 };
+    const CHANNEL2_RUNS = 3;
 
     // ==========================================
     // Custom protection state: builtin defaults -> live working state
@@ -3719,7 +3748,7 @@
           body: JSON.stringify({
             model: model,
             prompt: aiPrompts.channel1.split('{{TEXT}}').join(currentText),
-            stream: true, format: "json"
+            stream: true, format: CHANNEL1_RESPONSE_SCHEMA, options: CHANNEL1_OPTIONS
           })
         });
 
@@ -3811,74 +3840,89 @@
         renderOutputAndReport(newText);
         triggerPreview();
 
-        // Channel 2: risk assessment
-        if (btnText) btnText.textContent = t('scanChannel2Starting');
-
+        // Channel 2: risk assessment — runs CHANNEL2_RUNS times sequentially, union of critical flags.
         const channel2Prompt = currentPersona === 'business' ? aiPrompts.channel2Business : aiPrompts.channel2Personal;
+        const channel2ReasonSet = [];
+        let channel2FailCount = 0;
 
-        const res2 = await fetch(`${url}/api/generate`, {
-          method: "POST", headers: { "Content-Type": "application/json" },
-          signal: controller.signal,
-          body: JSON.stringify({
-            model: model,
-            prompt: channel2Prompt.split('{{TEXT}}').join(currentText),
-            stream: true, format: "json"
-          })
-        });
+        for (let run = 0; run < CHANNEL2_RUNS; run++) {
+          if (btnText) btnText.textContent = t('scanChannel2Progress', { current: run + 1, total: CHANNEL2_RUNS });
 
-        if (!res2.ok) {
-            const errText = await res2.text();
-            throw new Error(`Channel 2 API error (${res2.status}): ${errText}`);
-        }
+          try {
+            const res2 = await fetch(`${url}/api/generate`, {
+              method: "POST", headers: { "Content-Type": "application/json" },
+              signal: controller.signal,
+              body: JSON.stringify({
+                model: model,
+                prompt: channel2Prompt.split('{{TEXT}}').join(currentText),
+                stream: true, format: CHANNEL2_RESPONSE_SCHEMA, options: CHANNEL2_OPTIONS
+              })
+            });
 
-        const reader2 = res2.body.getReader();
-        const decoder2 = new TextDecoder("utf-8");
-        let fullResponse2 = "";
-        let buffer2 = "";
+            if (!res2.ok) {
+                const errText = await res2.text();
+                throw new Error(`Channel 2 API error (${res2.status}): ${errText}`);
+            }
 
-        while (true) {
-          const { done, value } = await reader2.read();
-          if (done) break;
-          buffer2 += decoder2.decode(value, { stream: true });
-          const lines = buffer2.split("\n");
-          buffer2 = lines.pop();
+            const reader2 = res2.body.getReader();
+            const decoder2 = new TextDecoder("utf-8");
+            let fullResponse2 = "";
+            let buffer2 = "";
 
-          for (let line of lines) {
-            if (line.trim()) {
-              try {
-                const parsedLine = JSON.parse(line);
-                if (parsedLine.response) {
-                    fullResponse2 += parsedLine.response;
-                    if (btnText) btnText.textContent = t('scanChannel2Progress', { count: fullResponse2.length });
-                    if (fullResponse2.length > maxAllowedLength) {
-                        throw new Error(`Response length is abnormal (${fullResponse2.length} chars) — safety cutoff triggered.`);
+            while (true) {
+              const { done, value } = await reader2.read();
+              if (done) break;
+              buffer2 += decoder2.decode(value, { stream: true });
+              const lines = buffer2.split("\n");
+              buffer2 = lines.pop();
+
+              for (let line of lines) {
+                if (line.trim()) {
+                  try {
+                    const parsedLine = JSON.parse(line);
+                    if (parsedLine.response) {
+                        fullResponse2 += parsedLine.response;
+                        if (fullResponse2.length > maxAllowedLength) {
+                            throw new Error(`Response length is abnormal (${fullResponse2.length} chars) — safety cutoff triggered.`);
+                        }
                     }
+                  } catch(e) {
+                     if (e.message && e.message.includes("safety cutoff")) throw e;
+                  }
                 }
-              } catch(e) {
-                 if (e.message && e.message.includes("safety cutoff")) throw e;
               }
             }
+
+            if (buffer2.trim()) {
+              try {
+                 const parsedLine = JSON.parse(buffer2);
+                 if (parsedLine.response) fullResponse2 += parsedLine.response;
+              } catch(e) {}
+            }
+
+            try {
+                let parsed2 = JSON.parse(fullResponse2 || "{}");
+                if (Array.isArray(parsed2) && parsed2.length > 0) parsed2 = parsed2[0];
+
+                if (parsed2.critical === true || parsed2.critical === "true") {
+                    const reasonText = parsed2.reason || t('reasonAiDeepScanFallback');
+                    if (!channel2ReasonSet.includes(reasonText)) channel2ReasonSet.push(reasonText);
+                }
+            } catch (e) {
+                console.warn(`Channel 2 run ${run + 1} JSON parse failed:`, fullResponse2);
+            }
+          } catch (err) {
+            if (err.name === 'AbortError') throw err;
+            channel2FailCount++;
+            console.warn(`Channel 2 run ${run + 1} failed:`, err);
           }
         }
 
-        if (buffer2.trim()) {
-          try {
-             const parsedLine = JSON.parse(buffer2);
-             if (parsedLine.response) fullResponse2 += parsedLine.response;
-          } catch(e) {}
+        if (channel2FailCount >= CHANNEL2_RUNS) {
+          throw new Error('Channel 2 semantic risk check failed on all attempts.');
         }
 
-        let criticalReasons = [];
-        try {
-            let parsed2 = JSON.parse(fullResponse2 || "{}");
-            if (Array.isArray(parsed2) && parsed2.length > 0) parsed2 = parsed2[0];
-
-            if (parsed2.critical === true || parsed2.critical === "true") {
-                criticalReasons.push(t('reasonAiDeepScanFlagged', { reason: parsed2.reason || t('reasonAiDeepScanFallback') }));
-            }
-        } catch (e) {
-            console.warn("Channel 2 JSON parse failed:", fullResponse2);
-        }
+        const criticalReasons = channel2ReasonSet.map(reason => t('reasonAiDeepScanFlagged', { reason }));
 
         if (criticalReasons.length > 0) {
             triggerHardBlock(criticalReasons);

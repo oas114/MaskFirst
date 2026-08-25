@@ -123,7 +123,7 @@ let currentPersona = DEFAULT_PERSONA;
 
 ### 2.5 地端 AI 模組（Ollama）
 
-兩個通道，與 EduShield 相同的傳輸協定（`{ollamaUrl}/api/generate`、串流 NDJSON、`{ollamaUrl}/api/tags` 測試連線）：
+兩個通道，與 EduShield 相同的傳輸協定（`{ollamaUrl}/api/generate`、串流 NDJSON、`{ollamaUrl}/api/tags` 測試連線）。`format` 欄位是完整 JSON Schema（不是寬鬆的 `"json"` 字串），強制扁平陣列＋`type` 五選一枚舉（`PERSON`／`VENDOR`／`ADDRESS`／`PROJECT`／`BANK_ACCT`），避免模型回傳依類型分組的物件、被容錯邏輯悄悄只留下第一類。通道一固定 `options: { temperature: 0, num_ctx: 8192 }`；通道二只固定 `options: { num_ctx: 8192 }`（刻意不鎖 `temperature`，理由見下方）。`num_ctx` 從 Ollama 預設的 2048 拉高，避免貼上文字較長時後段被靜默截斷。
 
 | 通道 | 目的 | 是否依身分模式而異 |
 |------|------|---------------------|
@@ -131,6 +131,8 @@ let currentPersona = DEFAULT_PERSONA;
 | 二：風險判定 | 判定「特敏資訊」敘述內容 | **是**——傳給模型的風險類別依 `currentPersona` 而異（`personal`：自傷／受虐／心理健康／移民身分；`business`：內線資訊／併購／裁員／資安事件／訴訟） |
 
 > **已知準確度限制**：實測發現通道一對人名的擷取準確度不夠穩定，`qwen2.5:3b` 這類小模型對自由格式、高度依賴上下文的人名判讀常有漏抓。UI 端已因此把被動提示（`layer1HintBanner`）的建議從「執行深度掃描」改為「加入自訂詞庫」，人名不應被視為通道一的可靠輸出，僅供輔助參考。
+
+> **通道二連續呼叫 3 次、取聯集**：任一次回傳 `critical: true` 即視為風險（非多數決）。三次呼叫刻意維持模型預設 `temperature`（不套用通道一的 `temperature: 0`），否則三次會得到幾乎相同的結果、等於白跑；用真實敘述文字實測發現，語意隱晦的委婉措辭單次呼叫命中率僅約 20%，多次呼叫能提升累積捕捉率。若三次中有呼叫失敗（連線逾時等），會跳過該次繼續執行，只有三次全部失敗才顯示錯誤。按鈕文字也從通道一的逐字元計數，改為通道二顯示第幾次呼叫（例如「語意風險確認中 (第 2/3 次)」），因為通道二輸出短，逐字元進度意義不大。
 
 安全防護機制與 EduShield 相同：前置連線檢查、手動取消、異常字數保護（`maxAllowedLength`）、3 分鐘逾時詢問、`finally` 區塊強制恢復介面狀態。
 

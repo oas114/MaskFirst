@@ -123,7 +123,7 @@ Same mechanism as EduShield, now with a `source` field added to every entry (`bu
 
 ### 2.5 Local AI Module (Ollama)
 
-Two channels, same wire protocol as EduShield (`{ollamaUrl}/api/generate`, streaming NDJSON, `{ollamaUrl}/api/tags` for connection tests):
+Two channels, same wire protocol as EduShield (`{ollamaUrl}/api/generate`, streaming NDJSON, `{ollamaUrl}/api/tags` for connection tests). The `format` field is a full JSON Schema (not the loose `"json"` string) forcing a flat array with a 5-value `type` enum (`PERSON`/`VENDOR`/`ADDRESS`/`PROJECT`/`BANK_ACCT`) — this stops the model from returning a type-grouped object that gets silently reduced to one category by the fallback parser. Channel 1 fixes `options: { temperature: 0, num_ctx: 8192 }`; Channel 2 fixes `options: { num_ctx: 8192 }` only (temperature intentionally left at the model's default — see below). `num_ctx` is raised from Ollama's 2048 default so longer pasted text doesn't get silently truncated.
 
 | Channel | Purpose | Persona-aware? |
 |---------|---------|-----------------|
@@ -131,6 +131,8 @@ Two channels, same wire protocol as EduShield (`{ollamaUrl}/api/generate`, strea
 | 2 — Risk assessment | Flags "extremely sensitive" narrative content | **Yes** — the risk category list sent to the model differs by `currentPersona` (self-harm/abuse/mental-health/immigration for `personal`; insider-info/M&A/layoffs/breach/litigation for `business`) |
 
 > **Known accuracy limitation**: real-world testing shows Channel 1's name extraction is not reliable — small models like `qwen2.5:3b` frequently miss names, since they're a free-form, highly context-dependent entity type. The UI's passive hint (`layer1HintBanner`) points users at the Custom Dictionary for names instead of the deep scan for this reason; treat Channel 1's name output as best-effort, not authoritative.
+
+> **Channel 2 runs 3 sequential calls and unions the results**: any single run returning `critical: true` marks the text as risky (a union, not a majority vote). The 3 runs deliberately keep the model's default `temperature` — not Channel 1's `temperature: 0` — otherwise all 3 runs would return near-identical output and the repetition would be wasted. Testing with real narrative text found softly-worded, indirect phrasing had only a ~20% single-call hit rate; repeating the call raises the cumulative catch rate. A failed run (timeout, dropped connection) is skipped and the remaining runs continue — an error only surfaces if all 3 fail. The button text switches from a live character count (Channel 1) to the current attempt number, e.g. `Confirming semantic risk (2/3)` (Channel 2), since Channel 2's output is too short for a character count to be meaningful.
 
 Same safeguards as EduShield: pre-flight connection check, manual cancel, runaway-output length guard (`maxAllowedLength`), 3-minute timeout confirmation, and `finally`-block UI recovery.
 
