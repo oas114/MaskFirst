@@ -1502,7 +1502,7 @@
       toastClearedCustomDict: { en: 'Custom dictionary cleared!', zh: '已清空自訂詞庫！', ja: 'カスタム辞書をクリアしました！' },
       toastTableEmptyNoExport: { en: 'The table is empty — nothing to export!', zh: '表格是空的──沒有可匯出的內容！', ja: '表が空です──エクスポートする内容がありません！' },
       tooltipCategory: { en: 'Category: {reason}', zh: '類別：{reason}', ja: '分類：{reason}' },
-      toastOllamaConnectFailed: { en: "Couldn't connect. Local AI (Ollama) may not be running or CORS isn't configured. Please start Ollama first.", zh: '無法連線。本機 AI（Ollama）可能尚未啟動，或 CORS 尚未設定完成。請先啟動 Ollama。', ja: '接続できませんでした。ローカルAI（Ollama）が起動していないか、CORSが設定されていない可能性があります。まずOllamaを起動してください。' },
+      toastOllamaConnectFailed: { en: "Couldn't connect to local AI (Ollama). Please make sure Ollama is running; if you haven't finished setup yet, click \"Settings\" and follow the steps.", zh: '無法連線地端 AI（Ollama）。請確認 Ollama 已啟動；若尚未完成連線設定，請點擊「設定」依步驟操作。', ja: 'ローカルAI（Ollama）に接続できませんでした。Ollamaが起動していることを確認してください。まだ設定が完了していない場合は、「設定」をクリックして手順に従ってください。' },
       scanChannel1Starting: { en: 'AI Scan (1/2 starting) - click to cancel', zh: 'AI 掃描（1/2 啟動中）── 點擊可取消', ja: 'AIスキャン（1/2 開始中）── クリックでキャンセル' },
       confirmStillWaitingMessage: { en: 'The AI response has taken longer than 3 minutes.', zh: 'AI 回應時間已超過 3 分鐘。', ja: 'AIの応答が3分以上かかっています。' },
       confirmStillWaitingTitle: { en: 'Still Waiting', zh: '仍在等待中', ja: 'まだ待機中' },
@@ -1518,7 +1518,7 @@
       toastScanCompleteBlocked: { en: 'Scan complete!\nAdded {count} new masked entities.\nA sensitive-risk finding was detected — copy has been force-locked!', zh: '掃描完成！\n新增了 {count} 個遮蔽項目。\n偵測到敏感風險項目──複製功能已被強制鎖定！', ja: 'スキャン完了！\n{count}件のマスク項目を追加しました。\n機微リスクが検出されたため、コピー機能を強制的にロックしました！' },
       toastScanCompleteOk: { en: 'Scan complete! Added {count} new masked entities. No additional sensitive risks found.', zh: '掃描完成！新增了 {count} 個遮蔽項目，未發現其他敏感風險。', ja: 'スキャン完了！{count}件のマスク項目を追加しました。追加の機微リスクは見つかりませんでした。' },
       toastAiScanCancelled: { en: 'AI scan was cancelled.', zh: 'AI 掃描已取消。', ja: 'AIスキャンはキャンセルされました。' },
-      toastAiScanFailed: { en: 'AI scan failed:\n{message}', zh: 'AI 掃描失敗：\n{message}', ja: 'AIスキャンに失敗しました：\n{message}' },
+      toastAiScanFailed: { en: 'AI scan encountered an error. Please check that Ollama is running and try again.', zh: 'AI 掃描發生錯誤，請確認 Ollama 服務正常運作後再試一次。', ja: 'AIスキャンでエラーが発生しました。Ollamaが正常に動作しているか確認してから、もう一度お試しください。' },
       toastPasteAiReplyFirst: { en: 'Please paste the external AI reply first.', zh: '請先貼上外部 AI 的回覆。', ja: '先に外部AIの返信を貼り付けてください。' },
       toastNoMaskingRecordYet: { en: `No masking record yet — please run de-identification in the "De-identify" tab first.`, zh: '尚無遮蔽紀錄──請先在「去識別化」分頁執行去識別化。', ja: 'マスキング記録がまだありません──先に「匿名化」タブで匿名化を実行してください。' },
       toastMaskedPromptCopied: { en: 'Masked prompt copied!', zh: '已複製遮蔽後的提示詞！', ja: 'マスク済みプロンプトをコピーしました！' },
@@ -1526,7 +1526,7 @@
       ollamaTestTesting: { en: 'Testing connection...', zh: '測試連線中……', ja: '接続をテスト中…' },
       ollamaTestSuccess: { en: '✅ Connected successfully!', zh: '✅ 連線成功！', ja: '✅ 接続に成功しました！' },
       ollamaTestModelNotFound: { en: `⚠️ Connected, but model [{model}] wasn't found. Make sure you've run "ollama pull".`, zh: `⚠️ 已連線，但找不到模型 [{model}]。請確認你已執行過「ollama pull」。`, ja: `⚠️ 接続はできましたが、モデル [{model}] が見つかりません。「ollama pull」を実行済みか確認してください。` },
-      ollamaTestFailed: { en: 'Connection failed. Make sure Ollama is running and OLLAMA_ORIGINS is set.', zh: '連線失敗。請確認 Ollama 已啟動，且已設定 OLLAMA_ORIGINS。', ja: '接続に失敗しました。Ollamaが起動しており、OLLAMA_ORIGINSが設定されていることを確認してください。' },
+      ollamaTestFailed: { en: 'Connection failed. Please follow the steps above to finish setup.', zh: '連線失敗。請依照上方步驟完成連線設定。', ja: '接続に失敗しました。上記の手順に従って設定を完了してください。' },
       v1LongTextWarning: { en: 'Text is over 50,000 characters — scanning may be slower.', zh: '文字超過 50,000 字元──掃描速度可能會變慢。', ja: 'テキストが50,000文字を超えています──スキャンが遅くなる場合があります。' },
       commonTableBadge: { en: 'Table', zh: '表格', ja: 'テーブル' },
       reasonManualTableMask: { en: 'Manual table mask', zh: '手動表格遮蔽', ja: '手動テーブルマスク' },
@@ -3936,7 +3936,7 @@
           showToast(t('toastAiScanCancelled'), 'info');
         } else {
           console.error(err);
-          showToast(t('toastAiScanFailed', { message: err.message }), 'danger');
+          showToast(t('toastAiScanFailed'), 'danger');
         }
       } finally {
         clearTimeout(timeoutHandle);
