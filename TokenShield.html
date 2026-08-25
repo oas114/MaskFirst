@@ -4635,6 +4635,15 @@
       initRestoreDragSelect();
     });
 
+    // sessionVault only lives in memory (unlike the persistent mapping vault) -- an accidental tab
+    // close or reload would wipe it without warning and it can't be recovered.
+    window.addEventListener('beforeunload', (e) => {
+      if (Object.keys(sessionVault).length > 0) {
+        e.preventDefault();
+        e.returnValue = '';
+      }
+    });
+
   </script>
 
   <!-- ==================== Generic Confirm Modal (JS-driven) ==================== -->
