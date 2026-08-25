@@ -937,8 +937,7 @@
           <p data-i18n="guideHowToAddIntro">You don't need to hand-edit the HTML source — use the "Manage Custom Protection Rules" button in the toolbar instead:</p>
           <ol class="list-decimal list-inside space-y-1 ml-1 text-ink-secondary">
             <li data-i18n="guideStep1">Click <strong>"Manage Custom Protection Rules"</strong> in the toolbar, then switch to the "Hard Block Keywords" or "Regex Rules" tab.</li>
-            <li data-i18n="guideStep2">Download that tab's CSV template, fill in your keywords or patterns, and save it.</li>
-            <li data-i18n="guideStep3">Click "Import CSV", pick that file, and choose "Merge with Existing" or "Replace All".</li>
+            <li data-i18n="guideStep2">Click "+ Add Row" to add a row directly in the table, or click an existing row's fields to edit them in place — regex rules are validated for syntax and ReDoS risk on save. For bulk changes, you can instead download that tab's CSV template, fill it in, and import it, choosing "Merge with Existing" or "Replace All".</li>
             <li data-i18n="guideStep4">To share your customizations with a colleague or reuse them on another machine, expand "Advanced Settings" (desktop only) in the same panel and click "Export Config File" to download <code class="bg-white border border-line px-1 rounded">tokenshield.config.js</code>; to apply it later, click "Import Config File", pick that file, and confirm the summary. Note: this is a manual import — it does not apply automatically on refresh or the next time you open this file, so you'll need to re-import it each time.</li>
             <li data-i18n="guideStep5">To discard manual edits or imported settings and restore the built-in defaults, open "Manage Custom Protection Rules", expand "Advanced Settings" (desktop only), and click "Reset to Defaults".</li>
           </ol>
@@ -1081,8 +1080,9 @@
       <div class="p-6 overflow-y-auto flex-1 bg-white">
         <div id="pmPanelHardBlock" class="pm-panel space-y-3">
           <div class="flex flex-wrap justify-between items-center gap-2">
-            <p class="text-xs text-ink-muted" data-i18n="pmHardBlockIntro">Single-column CSV, one keyword per row. This only manages your custom layer — the built-in Personal/Business keyword lists aren't editable here (see PII Rule Guide).</p>
+            <p class="text-xs text-ink-muted" data-i18n="pmHardBlockIntro">Add or edit rows directly in the table below, or batch-import a single-column CSV (one keyword per row). This only manages your custom layer — the built-in Personal/Business keyword lists aren't editable here (see PII Rule Guide).</p>
             <div class="flex gap-2">
+              <button onclick="addHardBlockRow()" class="text-xs bg-paper-hover hover:bg-line text-ink-hover px-3 py-1.5 rounded font-medium transition-colors border border-line" data-i18n="pmBtnAddRow">+ Add Row</button>
               <input type="file" id="hardBlockCsvFileInput" accept=".csv" class="hidden" onchange="handleHardBlockCsvUpload(event)" />
               <button onclick="downloadHardBlockCsvTemplate()" class="text-xs bg-white border border-line-strong px-3 py-1.5 rounded hover:bg-paper-sunken" data-i18n="pmBtnDownloadTemplate">Download Template</button>
               <button onclick="document.getElementById('hardBlockCsvFileInput').click()" class="text-xs bg-white border border-line-strong px-3 py-1.5 rounded hover:bg-paper-sunken" data-i18n="pmBtnImportCsv">Import CSV</button>
@@ -1100,19 +1100,21 @@
         </div>
         <div id="pmPanelRegex" class="pm-panel space-y-3 hidden">
           <div class="flex flex-wrap justify-between items-center gap-2">
-            <p class="text-xs text-ink-muted" data-i18n="pmRegexIntro">4-column CSV: TypeTag,RuleName,Pattern,ExampleText. The Pattern column accepts a bare pattern or a full /pattern/flags literal. This only manages your custom layer — the built-in region-specific rules aren't editable here (see PII Rule Guide).</p>
+            <p class="text-xs text-ink-muted" data-i18n="pmRegexIntro">Add or edit rows directly in the table below, or batch-import a 4-column CSV (TypeTag,RuleName,Pattern,ExampleText). The Pattern column accepts a bare pattern or a full /pattern/flags literal; edits are validated for syntax and ReDoS risk on save. This only manages your custom layer — the built-in region-specific rules aren't editable here (see PII Rule Guide).</p>
             <div class="flex gap-2">
+              <button onclick="addRegexRow()" class="text-xs bg-paper-hover hover:bg-line text-ink-hover px-3 py-1.5 rounded font-medium transition-colors border border-line" data-i18n="pmBtnAddRow">+ Add Row</button>
               <input type="file" id="regexCsvFileInput" accept=".csv" class="hidden" onchange="handleRegexCsvUpload(event)" />
               <button onclick="downloadRegexCsvTemplate()" class="text-xs bg-white border border-line-strong px-3 py-1.5 rounded hover:bg-paper-sunken" data-i18n="pmBtnDownloadTemplate">Download Template</button>
               <button onclick="document.getElementById('regexCsvFileInput').click()" class="text-xs bg-white border border-line-strong px-3 py-1.5 rounded hover:bg-paper-sunken" data-i18n="pmBtnImportCsv">Import CSV</button>
             </div>
           </div>
           <div class="border border-line rounded-lg overflow-x-auto max-h-64 overflow-y-auto">
-            <table class="w-full text-left text-sm min-w-[600px]">
+            <table class="w-full text-left text-sm min-w-[760px]">
               <thead class="bg-paper-sunken sticky top-0"><tr>
                 <th class="px-3 py-2 font-medium text-ink-secondary border-b border-line" data-i18n="pmColTag">Tag</th>
                 <th class="px-3 py-2 font-medium text-ink-secondary border-b border-line" data-i18n="pmColName">Name</th>
                 <th class="px-3 py-2 font-medium text-ink-secondary border-b border-line" data-i18n="pmColPattern">Pattern</th>
+                <th class="px-3 py-2 font-medium text-ink-secondary border-b border-line" data-i18n="pmColExample">Example</th>
                 <th class="px-3 py-2 font-medium text-ink-secondary border-b border-line w-16 text-center" data-i18n="commonDelete">Delete</th>
               </tr></thead>
               <tbody id="regexMgmtTbody" class="divide-y divide-line bg-white"></tbody>
@@ -1394,8 +1396,7 @@
       guideHowToAddTitle: { en: 'How do I add my own PII rules and Hard Block keywords?', zh: '要怎麼新增自己的個資規則與硬阻斷關鍵字？', ja: '独自のPIIルールやハードブロックキーワードを追加するには？' },
       guideHowToAddIntro: { en: `You don't need to hand-edit the HTML source — use the "Manage Custom Protection Rules" button in the toolbar instead:`, zh: `你不需要手動編輯 HTML 原始碼──改用工具列上的「管理自訂防護規則」按鈕即可：`, ja: `HTMLソースを手動で編集する必要はありません──ツールバーの「カスタム保護ルールを管理」ボタンを使ってください：` },
       guideStep1: { en: `Click <strong>"Manage Custom Protection Rules"</strong> in the toolbar, then switch to the "Hard Block Keywords" or "Regex Rules" tab.`, zh: `點擊工具列上的<strong>「管理自訂防護規則」</strong>，然後切換到「硬阻斷關鍵字」或「正則規則」分頁。`, ja: `ツールバーの<strong>「カスタム保護ルールを管理」</strong>をクリックし、「ハードブロックキーワード」または「正規表現ルール」タブに切り替えます。` },
-      guideStep2: { en: `Download that tab's CSV template, fill in your keywords or patterns, and save it.`, zh: `下載該分頁的 CSV 範本，填入你的關鍵字或規則，然後儲存。`, ja: `そのタブのCSVテンプレートをダウンロードし、キーワードやパターンを入力して保存します。` },
-      guideStep3: { en: `Click "Import CSV", pick that file, and choose "Merge with Existing" or "Replace All".`, zh: `點擊「匯入 CSV」，選取該檔案，再選擇「與現有規則合併」或「取代全部」。`, ja: `「CSVをインポート」をクリックしてそのファイルを選び、「既存と統合」または「すべて置き換え」を選択します。` },
+      guideStep2: { en: `Click "+ Add Row" to add a row directly in the table, or click an existing row's fields to edit them in place — regex rules are validated for syntax and ReDoS risk on save. For bulk changes, you can instead download that tab's CSV template, fill it in, and import it, choosing "Merge with Existing" or "Replace All".`, zh: `點擊「+ 手動新增一列」直接在表格新增，或點擊既有列的欄位直接修改──正則規則儲存時會自動檢查格式與 ReDoS 風險。若要批次異動，也可以下載該分頁的 CSV 範本填寫後匯入，選擇「與現有規則合併」或「取代全部」。`, ja: `「+ 行を手動追加」をクリックして表に直接行を追加するか、既存の行のフィールドをクリックしてその場で編集できます──正規表現ルールは保存時に構文とReDoSリスクが自動検証されます。一括変更したい場合は、そのタブのCSVテンプレートをダウンロードして記入し、「既存と統合」または「すべて置き換え」を選んでインポートすることもできます。` },
       guideStep4: { en: `To share your customizations with a colleague or reuse them on another machine, expand "Advanced Settings" (desktop only) in the same panel and click "Export Config File" to download <code class="bg-white border border-line px-1 rounded">tokenshield.config.js</code>; to apply it later, click "Import Config File", pick that file, and confirm the summary. Note: this is a manual import — it does not apply automatically on refresh or the next time you open this file, so you'll need to re-import it each time.`, zh: `如果想把自訂規則分享給同事，或在其他裝置重複使用，展開同一面板中的「進階設定」（僅限桌面版），點擊「轉存為設定檔」下載 <code class="bg-white border border-line px-1 rounded">tokenshield.config.js</code>；之後要套用時，點擊「匯入設定檔」選取該檔案並確認摘要即可。注意：這是手動匯入，不會在重新整理或下次開啟頁面時自動套用，每次都需要重新匯入一次。`, ja: `カスタマイズを同僚と共有したり、別のマシンで再利用したりしたい場合は、同じパネル内の「詳細設定」（デスクトップ版のみ）を展開し、「設定ファイルとしてエクスポート」をクリックして <code class="bg-white border border-line px-1 rounded">tokenshield.config.js</code> をダウンロードしてください。あとで適用する際は「設定ファイルをインポート」をクリックしてそのファイルを選択し、概要を確認してください。注意：これは手動インポートであり、更新時や次回このファイルを開いたときに自動的には適用されません。毎回インポートし直す必要があります。` },
       guideStep5: { en: `To discard manual edits or imported settings and restore the built-in defaults, open "Manage Custom Protection Rules", expand "Advanced Settings" (desktop only), and click "Reset to Defaults".`, zh: `如果想捨棄手動修改或已匯入的內容、回復內建預設值，開啟「管理自訂防護規則」，展開「進階設定」（僅限桌面版），點擊「重設為預設值」。`, ja: `手動での編集やインポート済みの設定を破棄して組み込みの既定値に戻したい場合は、「カスタム保護ルールを管理」を開き、「詳細設定」（デスクトップ版のみ）を展開して「既定値にリセット」をクリックします。` },
       guideColCategory: { en: 'Data Category', zh: '資料類別', ja: 'データ分類' },
@@ -1431,14 +1432,18 @@
       pmTabHardBlock: { en: 'Hard Block Keywords', zh: '硬阻斷關鍵字', ja: 'ハードブロックキーワード' },
       pmTabRegex: { en: 'Regex Rules', zh: '正則規則', ja: '正規表現ルール' },
       pmTabPrompts: { en: 'Local AI Prompts', zh: '本機 AI 提示詞', ja: 'ローカルAIプロンプト' },
-      pmHardBlockIntro: { en: `Single-column CSV, one keyword per row. This only manages your custom layer — the built-in Personal/Business keyword lists aren't editable here (see PII Rule Guide).`, zh: `單欄 CSV，每列一個關鍵字。這裡只管理你的自訂層──內建的個人／企業關鍵字清單無法在此編輯（請見個資規則說明）。`, ja: `単一列のCSVで、1行につき1キーワードです。ここで管理できるのはカスタム層のみです──組み込みの個人／ビジネスキーワードリストはここでは編集できません（PIIルールガイドを参照）。` },
+      pmHardBlockIntro: { en: `Add or edit rows directly in the table below, or batch-import a single-column CSV (one keyword per row). This only manages your custom layer — the built-in Personal/Business keyword lists aren't editable here (see PII Rule Guide).`, zh: `可直接在下方表格新增/編輯列，或用單欄 CSV（每列一個關鍵字）批次匯入。這裡只管理你的自訂層──內建的個人／企業關鍵字清單無法在此編輯（請見個資規則說明）。`, ja: `下の表で直接行を追加／編集するか、単一列のCSV（1行につき1キーワード）で一括インポートできます。ここで管理できるのはカスタム層のみです──組み込みの個人／ビジネスキーワードリストはここでは編集できません（PIIルールガイドを参照）。` },
       pmBtnDownloadTemplate: { en: 'Download Template', zh: '下載範本', ja: 'テンプレートをダウンロード' },
       pmBtnImportCsv: { en: 'Import CSV', zh: '匯入 CSV', ja: 'CSVをインポート' },
+      pmBtnAddRow: { en: '+ Add Row', zh: '+ 手動新增一列', ja: '+ 行を手動追加' },
       pmColKeyword: { en: 'Keyword', zh: '關鍵字', ja: 'キーワード' },
-      pmRegexIntro: { en: `4-column CSV: TypeTag,RuleName,Pattern,ExampleText. The Pattern column accepts a bare pattern or a full /pattern/flags literal. This only manages your custom layer — the built-in region-specific rules aren't editable here (see PII Rule Guide).`, zh: `4 欄 CSV：TypeTag,RuleName,Pattern,ExampleText。Pattern 欄位可以是單純的規則字串，也可以是完整的 /pattern/flags 格式。這裡只管理你的自訂層──內建的地區專屬規則無法在此編輯（請見個資規則說明）。`, ja: `4列構成のCSV：TypeTag,RuleName,Pattern,ExampleText。Pattern列には素のパターン、または完全な /pattern/flags 形式のどちらでも指定できます。ここで管理できるのはカスタム層のみです──組み込みの地域別ルールはここでは編集できません（PIIルールガイドを参照）。` },
+      pmRegexIntro: { en: `Add or edit rows directly in the table below, or batch-import a 4-column CSV (TypeTag,RuleName,Pattern,ExampleText). The Pattern column accepts a bare pattern or a full /pattern/flags literal; edits are validated for syntax and ReDoS risk on save. This only manages your custom layer — the built-in region-specific rules aren't editable here (see PII Rule Guide).`, zh: `可直接在下方表格新增/編輯列，或用 4 欄 CSV（TypeTag,RuleName,Pattern,ExampleText）批次匯入。Pattern 欄位可以是單純的規則字串，也可以是完整的 /pattern/flags 格式，儲存時會自動驗證格式與 ReDoS 風險。這裡只管理你的自訂層──內建的地區專屬規則無法在此編輯（請見個資規則說明）。`, ja: `下の表で直接行を追加／編集するか、4列構成のCSV（TypeTag,RuleName,Pattern,ExampleText）で一括インポートできます。Pattern列には素のパターン、または完全な /pattern/flags 形式のどちらでも指定でき、保存時に構文とReDoSリスクを自動検証します。ここで管理できるのはカスタム層のみです──組み込みの地域別ルールはここでは編集できません（PIIルールガイドを参照）。` },
       pmColTag: { en: 'Tag', zh: '標籤', ja: 'タグ' },
       pmColName: { en: 'Name', zh: '名稱', ja: '名前' },
       pmColPattern: { en: 'Pattern', zh: '規則樣式', ja: 'パターン' },
+      pmColExample: { en: 'Example', zh: '說明範例', ja: '例' },
+      pmWarnKeywordEmpty: { en: `Keyword can't be empty.`, zh: '關鍵字不能留空。', ja: 'キーワードは空にできません。' },
+      pmWarnTagEmpty: { en: `Tag can't be empty.`, zh: '標籤不能留空。', ja: 'タグは空にできません。' },
       pmChannel1Label: { en: 'Channel 1 — entity extraction prompt ({{TEXT}} is replaced with the actual text to scan)', zh: '通道 1──實體擷取提示詞（{{TEXT}} 會被替換為實際要掃描的文字）', ja: 'チャンネル1──エンティティ抽出プロンプト（{{TEXT}}は実際にスキャンするテキストに置き換えられます）' },
       pmBtnResetDefault: { en: 'Reset to Default', zh: '重設為預設值', ja: '既定値にリセット' },
       pmNoPlaceholderWarning: { en: `No {{TEXT}} placeholder found — the AI won't receive the actual document text.`, zh: `找不到 {{TEXT}} 佔位符──AI 將無法收到實際的文件內容。`, ja: `{{TEXT}} プレースホルダーが見つかりません──AIは実際の文書テキストを受け取れません。` },
@@ -1922,7 +1927,9 @@
     let regexPresets = { global: [], us: [], eu: [], uk: [], tw: [], jp: [], custom: [] };
 
     function getActiveRegexRules() {
-      return [...regexPresets.global, ...regexPresets.custom, ...(regexPresets[currentRegion] || [])];
+      // .filter(r => r.pattern) drops manually-added custom rows whose pattern is still empty
+      // (see addRegexRow() in the management panel), so an in-progress edit never reaches live detection.
+      return [...regexPresets.global, ...regexPresets.custom.filter(r => r.pattern), ...(regexPresets[currentRegion] || [])];
     }
 
     // ==========================================
@@ -2375,11 +2382,13 @@
     function renderHardBlockMgmtTable() {
       const tbody = document.getElementById('hardBlockMgmtTbody');
       if (!tbody) return;
-      tbody.innerHTML = hardBlockPresets.custom.map(entry => `
+      tbody.innerHTML = hardBlockPresets.custom.map((entry, idx) => `
         <tr>
-          <td class="px-3 py-2">${escapeHtml(entry.value)}${sourceBadgeHtml(entry.source)}</td>
+          <td class="px-3 py-2">
+            <input type="text" value="${escapeHtml(entry.value)}" data-idx="${idx}" onchange="updateHardBlockValue(this)" placeholder="${escapeHtml(t('editCsvRowKeywordPlaceholder'))}" class="w-full text-sm bg-transparent border border-transparent hover:border-line-strong focus:border-brand-500 focus:outline-none rounded px-1.5 py-1">${sourceBadgeHtml(entry.source)}
+          </td>
           <td class="px-3 py-2 text-center">
-            <button onclick="deleteHardBlockEntry('${escapeHtml(escapeForInlineJs(entry.value))}')" class="text-danger-500 hover:text-danger-700 text-xs">${t('commonDelete')}</button>
+            <button onclick="deleteHardBlockEntryAt(${idx})" class="text-danger-500 hover:text-danger-700 text-xs">${t('commonDelete')}</button>
           </td>
         </tr>
       `).join('') || `<tr><td colspan="2" class="px-3 py-4 text-center text-ink-faint text-xs">${t('pmNoCustomHardBlock')}</td></tr>`;
@@ -2388,25 +2397,92 @@
     function renderRegexMgmtTable() {
       const tbody = document.getElementById('regexMgmtTbody');
       if (!tbody) return;
-      tbody.innerHTML = regexPresets.custom.map(rule => `
+      tbody.innerHTML = regexPresets.custom.map((rule, idx) => `
         <tr>
-          <td class="px-3 py-2 font-mono text-xs">${escapeHtml(rule.type)}</td>
-          <td class="px-3 py-2">${escapeHtml(rule.name)}${sourceBadgeHtml(rule.source)}</td>
-          <td class="px-3 py-2 font-mono text-[10px] break-all">${escapeHtml(`/${rule.pattern}/${rule.flags}`)}</td>
+          <td class="px-3 py-2 font-mono text-xs">
+            <input type="text" value="${escapeHtml(rule.type)}" onchange="updateRegexField(${idx}, 'type', this.value)" placeholder="TYPE" class="w-full text-xs font-mono bg-transparent border border-transparent hover:border-line-strong focus:border-brand-500 focus:outline-none rounded px-1.5 py-1">
+          </td>
+          <td class="px-3 py-2">
+            <input type="text" value="${escapeHtml(rule.name)}" onchange="updateRegexField(${idx}, 'name', this.value)" placeholder="${escapeHtml(t('pmColName'))}" class="w-full text-sm bg-transparent border border-transparent hover:border-line-strong focus:border-brand-500 focus:outline-none rounded px-1.5 py-1">${sourceBadgeHtml(rule.source)}
+          </td>
+          <td class="px-3 py-2 font-mono text-[10px]">
+            <input type="text" value="${escapeHtml(rule.pattern ? `/${rule.pattern}/${rule.flags}` : '')}" onchange="updateRegexField(${idx}, 'pattern', this.value)" placeholder="/pattern/flags" class="w-full text-[10px] font-mono bg-transparent border border-transparent hover:border-line-strong focus:border-brand-500 focus:outline-none rounded px-1.5 py-1">
+          </td>
+          <td class="px-3 py-2 text-xs">
+            <input type="text" value="${escapeHtml(rule.example)}" onchange="updateRegexField(${idx}, 'example', this.value)" placeholder="${escapeHtml(t('pmColExample'))}" class="w-full text-xs bg-transparent border border-transparent hover:border-line-strong focus:border-brand-500 focus:outline-none rounded px-1.5 py-1">
+          </td>
           <td class="px-3 py-2 text-center">
-            <button onclick="deleteRegexEntry('${escapeHtml(escapeForInlineJs(rule.pattern))}')" class="text-danger-500 hover:text-danger-700 text-xs">${t('commonDelete')}</button>
+            <button onclick="deleteRegexEntryAt(${idx})" class="text-danger-500 hover:text-danger-700 text-xs">${t('commonDelete')}</button>
           </td>
         </tr>
-      `).join('') || `<tr><td colspan="4" class="px-3 py-4 text-center text-ink-faint text-xs">${t('pmNoCustomRegex')}</td></tr>`;
+      `).join('') || `<tr><td colspan="5" class="px-3 py-4 text-center text-ink-faint text-xs">${t('pmNoCustomRegex')}</td></tr>`;
     }
 
-    function deleteHardBlockEntry(value) {
-      hardBlockPresets.custom = hardBlockPresets.custom.filter(e => e.value !== value);
+    function addHardBlockRow() {
+      hardBlockPresets.custom.push({ value: '', source: 'manual' });
+      renderHardBlockMgmtTable();
+      const tbody = document.getElementById('hardBlockMgmtTbody');
+      const lastInput = tbody.querySelector('tr:last-child input');
+      if (lastInput) lastInput.focus();
+    }
+
+    function updateHardBlockValue(inputEl) {
+      const idx = Number(inputEl.dataset.idx);
+      const entry = hardBlockPresets.custom[idx];
+      if (!entry) return;
+      const newValue = inputEl.value.trim();
+      if (!newValue) {
+        if (!entry.value) { hardBlockPresets.custom.splice(idx, 1); renderHardBlockMgmtTable(); return; }
+        showToast(t('pmWarnKeywordEmpty'), 'warning');
+        inputEl.value = entry.value;
+        return;
+      }
+      hardBlockPresets.custom[idx] = { value: newValue, source: 'manual' };
       renderHardBlockMgmtTable();
       triggerPreview();
     }
-    function deleteRegexEntry(pattern) {
-      regexPresets.custom = regexPresets.custom.filter(r => r.pattern !== pattern);
+
+    function deleteHardBlockEntryAt(idx) {
+      hardBlockPresets.custom.splice(idx, 1);
+      renderHardBlockMgmtTable();
+      triggerPreview();
+    }
+
+    function addRegexRow() {
+      regexPresets.custom.push({ type: 'CUSTOM', pattern: '', flags: 'gi', name: '', example: '', source: 'manual' });
+      renderRegexMgmtTable();
+      const tbody = document.getElementById('regexMgmtTbody');
+      const lastInput = tbody.querySelector('tr:last-child input');
+      if (lastInput) lastInput.focus();
+    }
+
+    function updateRegexField(idx, field, rawValue) {
+      const rule = regexPresets.custom[idx];
+      if (!rule) return;
+      const value = rawValue.trim();
+      if (field === 'pattern') {
+        if (!value) { rule.pattern = ''; renderRegexMgmtTable(); return; } // left blank for now — getActiveRegexRules() filters these out
+        const check = tryCompileRegexRow({ pattern: value, type: rule.type, name: rule.name, example: rule.example }, idx);
+        if (!check.ok) {
+          showToast(check.error, 'danger');
+          renderRegexMgmtTable();
+          return;
+        }
+        regexPresets.custom[idx] = { ...check.entry, source: 'manual' };
+      } else if (field === 'type') {
+        if (!value) { showToast(t('pmWarnTagEmpty'), 'warning'); renderRegexMgmtTable(); return; }
+        rule.type = value;
+        rule.source = 'manual';
+      } else {
+        rule[field] = value;
+        rule.source = 'manual';
+      }
+      renderRegexMgmtTable();
+      triggerPreview();
+    }
+
+    function deleteRegexEntryAt(idx) {
+      regexPresets.custom.splice(idx, 1);
       renderRegexMgmtTable();
       triggerPreview();
     }
