@@ -153,7 +153,7 @@ EduShield 沒有的新增功能：系統設定視窗新增「Local AI Prompt Lib
 
 點擊工具列的「**管理自訂防護規則**」，可對以下四個維度進行自訂、匯入與匯出，不需要手動編輯 HTML 原始碼：名冊/詞庫（見 2.4 節）、硬阻斷詞彙、正則規則，以及地端 AI 提示詞（是實際送去掃描用的提示詞，不是 2.6 節那個複製貼上用的 Prompt Library）。
 
-**範圍決定**：跟地區/身分專屬的內建預設集不同，所有透過自訂/匯入/自動載入新增的硬阻斷詞彙與正則規則，一律只存進一個**永遠合併、不分地區/身分的「custom」桶**（`hardBlockPresets.custom`、`regexPresets.custom`），不會寫進某個特定 persona/region 自己的陣列。這樣可以讓衝突處理維持單純（只在 `custom` 桶內去重複，不會悄悄改動某個特定身分或地區的內建清單），也符合 `customDict` 原本就是不分地區/身分的單一扁平陣列這個既有慣例。這個管理面板的表格只會列出 `custom` 桶的內容；內建的地區/身分規則仍可在「PII Rule Guide」裡唯讀檢視。
+**範圍決定**：跟地區/身分專屬的內建預設集不同，所有透過自訂/CSV 匯入/設定檔匯入新增的硬阻斷詞彙與正則規則，一律只存進一個**永遠合併、不分地區/身分的「custom」桶**（`hardBlockPresets.custom`、`regexPresets.custom`），不會寫進某個特定 persona/region 自己的陣列。這樣可以讓衝突處理維持單純（只在 `custom` 桶內去重複，不會悄悄改動某個特定身分或地區的內建清單），也符合 `customDict` 原本就是不分地區/身分的單一扁平陣列這個既有慣例。這個管理面板的表格只會列出 `custom` 桶的內容；內建的地區/身分規則仍可在「PII Rule Guide」裡唯讀檢視。
 
 內建預設值凍結為 `HARD_BLOCK_PRESETS_DEFAULT`／`REGEX_PRESETS_DEFAULT`／`AI_PROMPTS_DEFAULT`。即時運作狀態：
 ```javascript
@@ -161,7 +161,7 @@ let hardBlockPresets = { personal: [], business: [], custom: [] };
 let regexPresets = { global: [], us: [], eu: [], uk: [], tw: [], jp: [], custom: [] };
 let aiPrompts = { channel1: '', channel2Personal: '', channel2Business: '' };
 ```
-每筆都帶 `source` 欄位並以徽章顯示：`Built-in`／`Auto-loaded`／`Manually imported`／`Overridden`。正則規則改存 `pattern`／`flags` 字串（不再是即時的 `RegExp` 物件），每次使用都經過 `tryCompileRegexRow()` 的 try/catch 保護，格式錯誤的規則會被略過並個別回報，不會中斷其餘掃描。**注意**：內建 `CREDIT_CARD` 規則的 Luhn `validate` 函式只會保留在真正的內建項目上——若剛好被 CSV／設定檔匯入覆蓋掉（CSV／JSON 無法承載函式），驗證會隨之消失，匯入對話框會在這種情況下另外跳出警告。
+每筆都帶 `source` 欄位並以徽章顯示：`Built-in`／`Config file import`／`Manually imported`／`Overridden`。正則規則改存 `pattern`／`flags` 字串（不再是即時的 `RegExp` 物件），每次使用都經過 `tryCompileRegexRow()` 的 try/catch 保護，格式錯誤的規則會被略過並個別回報，不會中斷其餘掃描。**注意**：內建 `CREDIT_CARD` 規則的 Luhn `validate` 函式只會保留在真正的內建項目上——若剛好被 CSV／設定檔匯入覆蓋掉（CSV／JSON 無法承載函式），驗證會隨之消失，匯入對話框會在這種情況下另外跳出警告。
 
 CSV 範本：硬阻斷詞彙為單欄 `Keyword`；正則規則為 4 欄 `TypeTag,RuleName,Pattern,ExampleText`，`Pattern` 欄可填純 pattern（預設補 `g` flag）或完整的 `/pattern/flags` 字面量格式字串。
 
@@ -170,7 +170,7 @@ CSV 範本：硬阻斷詞彙為單欄 `Keyword`；正則規則為 4 欄 `TypeTag
 - **完全取代**：清空該維度的 `custom` 桶，改以本次匯入內容為準。
 - **取消**：不做任何變更。
 
-**同資料夾自動載入**：開機時會動態注入 `<script src="tokenshield.config.js">`（機制仿照既有 Tailwind CDN／本地 style.css 降級 IIFE）——檔案不存在時靜默略過，檔案損毀時僅顯示 Console 警告不影響運作，檔案正常時會合併進 `custom` 桶與提示詞（標籤為 `Auto-loaded`）：
+**手動匯入設定檔**：早期版本曾在開機時以動態注入 `<script src="tokenshield.config.js">` 自動載入同資料夾檔案；這個做法會讓被竄改的檔案在使用者毫無察覺下夾帶任意程式碼執行，牴觸「個資不離開瀏覽器」的核心信任主張，已於 2026-08-25 改為以下的手動匯入流程：
 ```javascript
 window.TOKENSHIELD_AUTO_CONFIG = {
   version: 1,
@@ -180,7 +180,7 @@ window.TOKENSHIELD_AUTO_CONFIG = {
   aiPrompts: { channel1: "...{{TEXT}}", channel2Personal: "...{{TEXT}}", channel2Business: "...{{TEXT}}" }
 };
 ```
-這兩個按鈕都收在「管理自訂防護規則」面板底部的「Advanced Settings: Auto-load Config File」摺疊區塊裡——手機寬度會直接隱藏（同資料夾流程在手機上不實用），透過網址瀏覽時區塊內會顯示提示，說明此功能僅限本機檔案模式生效。其中「**Reload Config**」按鈕（會先跳出確認對話框）把四個維度重置回內建預設值，再重新執行一次自動載入，用來捨棄當次手動調整。「**Export as Auto-load File**」按鈕則會把目前記憶體中四個維度的最新狀態（含所有合併/覆蓋結果，排除 `ai-session` 標籤的暫存名冊項目）打包成同樣格式，下載成固定檔名 `tokenshield.config.js`。
+三個按鈕都收在「管理自訂防護規則」面板底部的「Advanced Settings: Import / Export Config File」摺疊區塊裡（手機寬度會直接隱藏）。「**Import Config File**」開啟檔案選取視窗，選取的檔案只以字串掃描＋`JSON.parse()` 解析（絕不 `eval`／執行檔案內容），套用前會先跳出摘要確認視窗（列出各維度筆數）——套用時會合併進 `custom` 桶與提示詞（標籤為 `Config file import`）。這是**手動**、一次性的操作，不會在重新整理或下次開啟時自動套用，使用者每次都要重新匯入一次；頁面開啟時會有一則常駐提示引導匯入，文字刻意不聲稱「已偵測到」，因為瀏覽器安全機制不允許背景偵測同資料夾檔案是否存在。「**Export Config File**」會把目前記憶體中四個維度的最新狀態（含所有合併/覆蓋結果，排除 `ai-session` 標籤的暫存名冊項目）打包成同樣格式，下載成固定檔名 `tokenshield.config.js`，可分享給同事或在其他裝置重複使用。「**Reset to Defaults**」（會先跳出確認對話框）把四個維度重置回內建預設值，用來捨棄當次手動調整或已匯入的內容。
 
 > [!NOTE]
 > 此機制只處理規則/提示詞設定，完全不涉及使用者實際輸入的文件內容——`sessionVault`、輸入文字框等仍完全遵循 1.2 節提到的既有零持久化承諾，頁面關閉或重整後立即消失。

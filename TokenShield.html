@@ -938,8 +938,8 @@
             <li data-i18n="guideStep1">Click <strong>"Manage Custom Protection Rules"</strong> in the toolbar, then switch to the "Hard Block Keywords" or "Regex Rules" tab.</li>
             <li data-i18n="guideStep2">Download that tab's CSV template, fill in your keywords or patterns, and save it.</li>
             <li data-i18n="guideStep3">Click "Import CSV", pick that file, and choose "Merge with Existing" or "Replace All".</li>
-            <li data-i18n="guideStep4">To have your customizations applied automatically every time you open this file, expand "Advanced Settings" (desktop only) in the same panel, click "Export as Auto-load File", and place the downloaded <code class="bg-white border border-line px-1 rounded">tokenshield.config.js</code> next to <code class="bg-white border border-line px-1 rounded">TokenShield.html</code> — this only takes effect when the page is opened as a local file.</li>
-            <li data-i18n="guideStep5">To discard manual edits and restore the built-in defaults, open "Manage Custom Protection Rules", expand "Advanced Settings" (desktop only), and click "Reload Config".</li>
+            <li data-i18n="guideStep4">To share your customizations with a colleague or reuse them on another machine, expand "Advanced Settings" (desktop only) in the same panel and click "Export Config File" to download <code class="bg-white border border-line px-1 rounded">tokenshield.config.js</code>; to apply it later, click "Import Config File", pick that file, and confirm the summary. Note: this is a manual import — it does not apply automatically on refresh or the next time you open this file, so you'll need to re-import it each time.</li>
+            <li data-i18n="guideStep5">To discard manual edits or imported settings and restore the built-in defaults, open "Manage Custom Protection Rules", expand "Advanced Settings" (desktop only), and click "Reset to Defaults".</li>
           </ol>
         </div>
 
@@ -1148,7 +1148,7 @@
       <div class="border-t border-line-soft bg-paper-sunken flex-shrink-0">
         <details class="hidden sm:block group">
           <summary class="px-6 py-3 text-xs font-semibold text-ink-secondary cursor-pointer hover:bg-paper-hover select-none flex items-center justify-between">
-            <span data-i18n="pmAdvancedSettingsHeading">Advanced Settings: Auto-load Config File</span>
+            <span data-i18n="pmAdvancedSettingsHeading">Advanced Settings: Import / Export Config File</span>
             <span class="text-ink-faint transition-transform group-open:rotate-180">▾</span>
           </summary>
           <div class="px-6 pb-4 space-y-3">
@@ -1395,8 +1395,8 @@
       guideStep1: { en: `Click <strong>"Manage Custom Protection Rules"</strong> in the toolbar, then switch to the "Hard Block Keywords" or "Regex Rules" tab.`, zh: `點擊工具列上的<strong>「管理自訂防護規則」</strong>，然後切換到「硬阻斷關鍵字」或「正則規則」分頁。`, ja: `ツールバーの<strong>「カスタム保護ルールを管理」</strong>をクリックし、「ハードブロックキーワード」または「正規表現ルール」タブに切り替えます。` },
       guideStep2: { en: `Download that tab's CSV template, fill in your keywords or patterns, and save it.`, zh: `下載該分頁的 CSV 範本，填入你的關鍵字或規則，然後儲存。`, ja: `そのタブのCSVテンプレートをダウンロードし、キーワードやパターンを入力して保存します。` },
       guideStep3: { en: `Click "Import CSV", pick that file, and choose "Merge with Existing" or "Replace All".`, zh: `點擊「匯入 CSV」，選取該檔案，再選擇「與現有規則合併」或「取代全部」。`, ja: `「CSVをインポート」をクリックしてそのファイルを選び、「既存と統合」または「すべて置き換え」を選択します。` },
-      guideStep4: { en: `To have your customizations applied automatically every time you open this file, expand "Advanced Settings" (desktop only) in the same panel, click "Export as Auto-load File", and place the downloaded <code class="bg-white border border-line px-1 rounded">tokenshield.config.js</code> next to <code class="bg-white border border-line px-1 rounded">TokenShield.html</code> — this only takes effect when the page is opened as a local file.`, zh: `如果想讓你的自訂規則每次開啟檔案時都自動套用，展開同一面板中的「進階設定」（僅限桌面版），點擊「匯出為自動載入檔案」，並把下載到的 <code class="bg-white border border-line px-1 rounded">tokenshield.config.js</code> 放在 <code class="bg-white border border-line px-1 rounded">TokenShield.html</code> 旁邊──只有在以本機檔案方式開啟頁面時才會生效。`, ja: `カスタマイズをファイルを開くたびに自動で適用させたい場合は、同じパネル内の「詳細設定」（デスクトップ版のみ）を展開し、「自動読み込みファイルとしてエクスポート」をクリックして、ダウンロードした <code class="bg-white border border-line px-1 rounded">tokenshield.config.js</code> を <code class="bg-white border border-line px-1 rounded">TokenShield.html</code> と同じ場所に置いてください──これはページをローカルファイルとして開いた場合のみ有効です。` },
-      guideStep5: { en: `To discard manual edits and restore the built-in defaults, open "Manage Custom Protection Rules", expand "Advanced Settings" (desktop only), and click "Reload Config".`, zh: `如果想捨棄手動修改、回復內建預設值，開啟「管理自訂防護規則」，展開「進階設定」（僅限桌面版），點擊「重新載入設定」。`, ja: `手動での編集を破棄して組み込みの既定値に戻したい場合は、「カスタム保護ルールを管理」を開き、「詳細設定」（デスクトップ版のみ）を展開して「設定を再読み込み」をクリックします。` },
+      guideStep4: { en: `To share your customizations with a colleague or reuse them on another machine, expand "Advanced Settings" (desktop only) in the same panel and click "Export Config File" to download <code class="bg-white border border-line px-1 rounded">tokenshield.config.js</code>; to apply it later, click "Import Config File", pick that file, and confirm the summary. Note: this is a manual import — it does not apply automatically on refresh or the next time you open this file, so you'll need to re-import it each time.`, zh: `如果想把自訂規則分享給同事，或在其他裝置重複使用，展開同一面板中的「進階設定」（僅限桌面版），點擊「轉存為設定檔」下載 <code class="bg-white border border-line px-1 rounded">tokenshield.config.js</code>；之後要套用時，點擊「匯入設定檔」選取該檔案並確認摘要即可。注意：這是手動匯入，不會在重新整理或下次開啟頁面時自動套用，每次都需要重新匯入一次。`, ja: `カスタマイズを同僚と共有したり、別のマシンで再利用したりしたい場合は、同じパネル内の「詳細設定」（デスクトップ版のみ）を展開し、「設定ファイルとしてエクスポート」をクリックして <code class="bg-white border border-line px-1 rounded">tokenshield.config.js</code> をダウンロードしてください。あとで適用する際は「設定ファイルをインポート」をクリックしてそのファイルを選択し、概要を確認してください。注意：これは手動インポートであり、更新時や次回このファイルを開いたときに自動的には適用されません。毎回インポートし直す必要があります。` },
+      guideStep5: { en: `To discard manual edits or imported settings and restore the built-in defaults, open "Manage Custom Protection Rules", expand "Advanced Settings" (desktop only), and click "Reset to Defaults".`, zh: `如果想捨棄手動修改或已匯入的內容、回復內建預設值，開啟「管理自訂防護規則」，展開「進階設定」（僅限桌面版），點擊「重設為預設值」。`, ja: `手動での編集やインポート済みの設定を破棄して組み込みの既定値に戻したい場合は、「カスタム保護ルールを管理」を開き、「詳細設定」（デスクトップ版のみ）を展開して「既定値にリセット」をクリックします。` },
       guideColCategory: { en: 'Data Category', zh: '資料類別', ja: 'データ分類' },
       guideColTag: { en: 'Replacement Tag', zh: '替換標籤', ja: '置換タグ' },
       guideColExample: { en: 'Example', zh: '範例', ja: '例' },
@@ -1469,7 +1469,7 @@
 
       // ---- Source badges & dynamic tables ----
       badgeBuiltin: { en: 'Built-in', zh: '內建', ja: '組み込み' },
-      badgeAutoLoaded: { en: 'Auto-loaded', zh: '自動載入', ja: '自動読み込み' },
+      badgeAutoLoaded: { en: 'Config file import', zh: '設定檔匯入', ja: '設定ファイルインポート' },
       badgeManual: { en: 'Manually imported', zh: '手動匯入', ja: '手動インポート' },
       badgeOverridden: { en: 'Overridden', zh: '已覆寫', ja: '上書き済み' },
       badgeAiSession: { en: 'AI-extracted (session)', zh: 'AI 擷取（本次工作階段）', ja: 'AI抽出（セッション内）' },
@@ -1510,7 +1510,7 @@
       confirmStillWaitingKeepWaiting: { en: 'Keep Waiting', zh: '繼續等待', ja: '待機を続ける' },
       scanChannel1Progress: { en: 'Scan (1/2) received {count} chars (click to cancel)', zh: '掃描（1/2）已接收 {count} 字元（點擊可取消）', ja: 'スキャン（1/2）{count}文字を受信（クリックでキャンセル）' },
       reasonAiEntityExtraction: { en: 'AI entity extraction', zh: 'AI 實體擷取', ja: 'AIエンティティ抽出' },
-      reasonAutoLoadedConfig: { en: 'Auto-loaded config', zh: '自動載入設定', ja: '自動読み込み設定' },
+      reasonAutoLoadedConfig: { en: 'Imported from config file', zh: '設定檔匯入', ja: '設定ファイルからインポート' },
       reasonBuiltOnline: { en: 'Built online', zh: '線上建立', ja: 'オンラインで作成' },
       scanChannel2Progress: { en: 'Confirming semantic risk ({current}/{total})', zh: '語意風險確認中 (第 {current}/{total} 次)', ja: '意味リスク確認中 ({current}/{total})' },
       reasonAiDeepScanFlagged: { en: 'AI deep scan flagged: {reason}', zh: 'AI 深度掃描標記：{reason}', ja: 'AI詳細スキャンでフラグ：{reason}' },
@@ -1746,7 +1746,7 @@
       triggerPreview();
     }
 
-    // Built-in defaults, frozen — never mutated. "Reload Config" and merge/replace imports
+    // Built-in defaults, frozen — never mutated. "Reset to Defaults" and merge/replace imports
     // restore to this baseline. To add your own terms, use the "Manage Custom Protection Rules" UI instead.
     const HARD_BLOCK_PRESETS_DEFAULT = Object.freeze({
       personal: [
@@ -2045,7 +2045,7 @@
     }
 
     // ==========================================
-    // Merge/replace engine, same-folder auto-load config
+    // Merge/replace engine, manual config file import
     // ==========================================
     function mergeByKey(existingArr, incomingArr, keyFn, sourceForNew, sourceForOverwrite) {
       const byKey = new Map(existingArr.map(e => [keyFn(e), e]));

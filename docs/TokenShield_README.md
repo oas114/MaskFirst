@@ -161,7 +161,7 @@ let hardBlockPresets = { personal: [], business: [], custom: [] };
 let regexPresets = { global: [], us: [], eu: [], uk: [], tw: [], jp: [], custom: [] };
 let aiPrompts = { channel1: '', channel2Personal: '', channel2Business: '' };
 ```
-Each entry carries a `source` field shown as a badge: `Built-in` / `Auto-loaded` / `Manually imported` / `Overridden`. Regex rules store `pattern`/`flags` as strings (not a live `RegExp`), reconstructed through the `tryCompileRegexRow()` try/catch guard on every use — a malformed rule is skipped and reported without aborting the rest of the scan. Note: the built-in `CREDIT_CARD` rule's Luhn `validate` function is preserved for built-in entries, but is necessarily lost if a CSV/config import happens to override it (CSV/JSON can't carry a function) — the import dialog surfaces a warning when this happens.
+Each entry carries a `source` field shown as a badge: `Built-in` / `Config file import` / `Manually imported` / `Overridden`. Regex rules store `pattern`/`flags` as strings (not a live `RegExp`), reconstructed through the `tryCompileRegexRow()` try/catch guard on every use — a malformed rule is skipped and reported without aborting the rest of the scan. Note: the built-in `CREDIT_CARD` rule's Luhn `validate` function is preserved for built-in entries, but is necessarily lost if a CSV/config import happens to override it (CSV/JSON can't carry a function) — the import dialog surfaces a warning when this happens.
 
 CSV templates: Hard Block Keywords is a single `Keyword` column; Regex Rules is 4 columns (`TypeTag,RuleName,Pattern,ExampleText`), where `Pattern` accepts a bare pattern (defaults to flag `g`) or a full `/pattern/flags` literal-style string.
 
@@ -170,7 +170,7 @@ Importing a CSV shows a **Merge with Existing / Replace All / Cancel** dialog wh
 - **Replace All**: wipe the `custom` bucket for that dimension and use only the imported content.
 - **Cancel**: no changes.
 
-**Same-folder auto-load**: on startup, `<script src="tokenshield.config.js">` is dynamically injected (same pattern as the Tailwind CDN/local-`style.css` degradation IIFE) — absent file is silently skipped, a broken file logs a console warning without crashing, and a valid file is merged into the `custom` buckets and prompts (tagged `Auto-loaded`):
+**Manual config file import**: an earlier version auto-loaded `tokenshield.config.js` from the same folder on startup via a dynamically-injected `<script src="tokenshield.config.js">`. That approach let a tampered file execute arbitrary code without the user noticing, contradicting the "PII never leaves the browser" trust claim — it was replaced on 2026-08-25 with a manual import flow:
 ```javascript
 window.TOKENSHIELD_AUTO_CONFIG = {
   version: 1,
@@ -180,7 +180,7 @@ window.TOKENSHIELD_AUTO_CONFIG = {
   aiPrompts: { channel1: "...{{TEXT}}", channel2Personal: "...{{TEXT}}", channel2Business: "...{{TEXT}}" }
 };
 ```
-Both actions live inside a collapsible "Advanced Settings: Auto-load Config File" section at the bottom of the "Manage Custom Protection Rules" panel — hidden below desktop viewport widths (the same-folder workflow isn't practical on mobile), and showing an inline notice when the page is loaded via a URL instead of a local file, since the feature only takes effect for local `file://` usage. The "**Reload Config**" button there (with a confirmation prompt) resets all four dimensions to built-in defaults and re-runs the auto-load step — discarding this session's manual edits. The "**Export as Auto-load File**" button packages the current in-memory state (all four dimensions, all merge/override results, excluding `ai-session`-tagged roster entries) into the same format, downloaded as the fixed filename `tokenshield.config.js`.
+The three buttons live inside a collapsible "Advanced Settings: Import / Export Config File" section at the bottom of the "Manage Custom Protection Rules" panel (hidden below desktop viewport widths). **Import Config File** opens a file picker; the selected file is parsed by string-scanning and `JSON.parse()` only (never `eval`, never executed), and a confirmation summary (entry counts per dimension) is shown before anything is applied — merged into the `custom` buckets and prompts (tagged `Config file import`). This is a manual, one-shot action: it does **not** re-apply on refresh or the next launch, so the user re-imports each time; a persistent on-load notice nudges them to do so, worded without claiming a file was "detected" since browser security blocks background-checking whether one exists. **Export Config File** packages the current in-memory state (all four dimensions, all merge/override results, excluding `ai-session`-tagged roster entries) into the same format, downloaded as the fixed filename `tokenshield.config.js`, for sharing with a colleague or reuse on another machine. **Reset to Defaults** (with a confirmation prompt) resets all four dimensions to built-in defaults, discarding this session's manual edits or imported settings.
 
 > [!NOTE]
 > This mechanism only ever touches rule/prompt configuration — never the actual document content typed into the app. The existing zero-persistence promise (everything destroyed on page close/reload, see §1.2) is untouched for `sessionVault` and the input textareas.
