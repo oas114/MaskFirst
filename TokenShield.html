@@ -1458,9 +1458,7 @@
       pmReloadBtnTitle: { en: 'Discard manual edits and imported settings, and reset to built-in defaults', zh: '清除手動編輯與已匯入內容，重設為內建預設值', ja: '手動での編集とインポート済みの設定を破棄し、組み込みの既定値にリセットします' },
       pmBtnReloadConfig: { en: 'Reset to Defaults', zh: '重設為預設值', ja: '既定値にリセット' },
       configImportNotice: { en: 'Import a config file (click to select)', zh: '可匯入設定檔（點擊選取檔案）', ja: '設定ファイルをインポートできます（クリックして選択）' },
-      confirmImportConfigTitle: { en: 'Import Config File', zh: '匯入設定檔', ja: '設定ファイルのインポート' },
-      confirmImportConfigOk: { en: 'Import & Apply', zh: '匯入並套用', ja: 'インポートして適用' },
-      confirmImportConfigMessage: { en: 'About to import: {roster} dictionary entries, {hardBlock} hard-block keywords, {regex} custom regex rules{prompts}. Continue?', zh: '即將匯入：詞庫 {roster} 筆、硬阻斷關鍵字 {hardBlock} 筆、自訂正則規則 {regex} 筆{prompts}。確定要套用嗎？', ja: 'インポート内容：辞書 {roster} 件、ハードブロックキーワード {hardBlock} 件、カスタム正規表現ルール {regex} 件{prompts}。続けますか？' },
+      confirmImportConfigModeMessage: { en: 'About to import: {roster} dictionary entries, {hardBlock} hard-block keywords, {regex} custom regex rules{prompts}. "Merge with Existing" keeps what you already have and only adds/overwrites matching entries. "Replace All" clears every dimension — including edits to built-in Persona/Region rules — and applies exactly what is in this file. If you edited or deleted a built-in rule and want that to actually take effect after a reload, choose Replace All.', zh: '即將匯入：詞庫 {roster} 筆、硬阻斷關鍵字 {hardBlock} 筆、自訂正則規則 {regex} 筆{prompts}。「與現有規則合併」會保留目前已有的內容，只新增/覆蓋同名項目；「完全取代」會清空每一項──包含對內建 Persona/Region 規則的編輯──改成套用這份檔案裡的版本。如果你編輯或刪除過內建規則、想讓它在重新整理後真的生效，請選「完全取代」。', ja: 'インポート内容：辞書 {roster} 件、ハードブロックキーワード {hardBlock} 件、カスタム正規表現ルール {regex} 件{prompts}。「既存と統合」は現在の内容を保持し、一致する項目のみ追加/上書きします。「すべて置き換え」は組み込みのPersona／Regionルールへの編集を含むすべての項目をクリアし、このファイルの内容をそのまま適用します。組み込みルールを編集または削除し、再読み込み後も実際に反映させたい場合は「すべて置き換え」を選んでください。' },
       confirmImportConfigWithPrompts: { en: ', plus custom AI prompts', zh: '，並包含自訂 AI 提示詞', ja: '、カスタムAIプロンプトを含む' },
       toastImportConfigFileReadFailed: { en: "Couldn't read the file: {message}", zh: '無法讀取檔案：{message}', ja: 'ファイルを読み取れませんでした：{message}' },
       toastImportConfigParseFailed: { en: 'Failed to parse the config file: {message}', zh: '設定檔解析失敗：{message}', ja: '設定ファイルの解析に失敗しました：{message}' },
@@ -2148,20 +2146,93 @@
       return { result, errors };
     }
 
-    function applyAutoConfig(cfg) {
+    // A persona/region builtin bucket is "at defaults" only if its entry count matches the default
+    // count and every entry still has source 'builtin' — any inline edit or delete flips this, and
+    // revertHardBlockEntryAt()/revertRegexEntryAt() flip it back. Used to decide what exportAutoConfig()
+    // needs to include, so an untouched bucket doesn't bloat every exported config file.
+    function hardBlockBucketIsDefault(persona) {
+      const arr = hardBlockPresets[persona], defaults = HARD_BLOCK_PRESETS_DEFAULT[persona];
+      return !!arr && !!defaults && arr.length === defaults.length && arr.every(e => e.source === 'builtin');
+    }
+    function regexBucketIsDefault(region) {
+      const arr = regexPresets[region], defaults = REGEX_PRESETS_DEFAULT[region];
+      return !!arr && !!defaults && arr.length === defaults.length && arr.every(r => r.source === 'builtin');
+    }
+
+    function applyAutoConfig(cfg, mode = 'merge') {
+      // mode 'replace' starts each dimension from an empty base before merging the imported rows in —
+      // this is the only way to cleanly reapply an edited/deleted rule: merge keys hard-block keywords
+      // and regex rules by their own content (the value/pattern text), so editing that exact text changes
+      // the merge key and a 'merge' import can't recognize "this is the same rule, updated" — it adds a
+      // duplicate instead of replacing. 'replace' sidesteps that by not trying to correlate at all.
       let errors = [];
       if (Array.isArray(cfg.hardBlock)) {
         const incoming = cfg.hardBlock.filter(v => typeof v === 'string' && v.trim()).map(v => ({ value: v.trim() }));
-        hardBlockPresets.custom = mergeByKey(hardBlockPresets.custom, incoming, e => e.value.toLowerCase(), 'auto-loaded', 'auto-loaded');
+        const base = mode === 'replace' ? [] : hardBlockPresets.custom;
+        hardBlockPresets.custom = mergeByKey(base, incoming, e => e.value.toLowerCase(), 'auto-loaded', 'auto-loaded');
       }
       if (Array.isArray(cfg.roster)) {
         const incoming = cfg.roster.filter(r => r && r.value).map(r => ({ type: r.type || 'CUSTOM', value: r.value, reason: r.reason || t('reasonAutoLoadedConfig') }));
-        customDict = mergeByKey(customDict, incoming, e => e.value, 'auto-loaded', 'auto-loaded');
+        const base = mode === 'replace' ? [] : customDict;
+        customDict = mergeByKey(base, incoming, e => e.value, 'auto-loaded', 'auto-loaded');
       }
       if (Array.isArray(cfg.regexRules)) {
-        const { result, errors: regexErrors } = mergeRegexRules(regexPresets.custom, cfg.regexRules, 'auto-loaded', 'auto-loaded');
+        const base = mode === 'replace' ? [] : regexPresets.custom;
+        const { result, errors: regexErrors } = mergeRegexRules(base, cfg.regexRules, 'auto-loaded', 'auto-loaded');
         regexPresets.custom = result;
         errors = errors.concat(regexErrors);
+      }
+      // hardBlockOverrides/regexOverrides carry edits/deletions made to builtin Persona/Region buckets
+      // (see exportAutoConfig()). Round-tripping through a flat string/row list loses the original
+      // defaultValue/defaultPattern link for anything that was actually edited — an edited entry comes
+      // back as source 'auto-loaded' with no "Revert to Default" of its own, but the edit itself is
+      // correctly reapplied, which is the part that matters when reloading or moving to another machine.
+      // A value that matches a true default exactly is recognized and restored as pristine 'builtin'.
+      if (cfg.hardBlockOverrides && typeof cfg.hardBlockOverrides === 'object') {
+        Object.keys(cfg.hardBlockOverrides).forEach(persona => {
+          const defaults = HARD_BLOCK_PRESETS_DEFAULT[persona];
+          const values = cfg.hardBlockOverrides[persona];
+          if (!defaults || !Array.isArray(values)) return;
+          const defaultSet = new Set(defaults);
+          const incoming = values.filter(v => typeof v === 'string' && v.trim()).map(v => {
+            const trimmed = v.trim();
+            return defaultSet.has(trimmed) ? { value: trimmed, source: 'builtin', defaultValue: trimmed } : { value: trimmed, source: 'auto-loaded' };
+          });
+          if (mode === 'replace') {
+            hardBlockPresets[persona] = incoming;
+          } else {
+            const existingKeys = new Set(hardBlockPresets[persona].map(e => e.value.toLowerCase()));
+            incoming.forEach(e => { if (!existingKeys.has(e.value.toLowerCase())) hardBlockPresets[persona].push(e); });
+          }
+        });
+      }
+      if (cfg.regexOverrides && typeof cfg.regexOverrides === 'object') {
+        Object.keys(cfg.regexOverrides).forEach(region => {
+          const defaults = REGEX_PRESETS_DEFAULT[region];
+          const rows = cfg.regexOverrides[region];
+          if (!defaults || !Array.isArray(rows)) return;
+          const incoming = [];
+          rows.forEach((row, idx) => {
+            const check = tryCompileRegexRow(row, idx);
+            if (!check.ok) { errors.push(check); return; }
+            // Match by type (a stable identifier like "TW_ID") rather than pattern text, so the checksum
+            // validator survives even if the pattern/name/example were edited.
+            const typeMatch = defaults.find(d => d.type === check.entry.type);
+            const isExactDefault = !!typeMatch && typeMatch.regex.source === check.entry.pattern && typeMatch.name === check.entry.name && typeMatch.example === check.entry.example;
+            incoming.push({
+              ...check.entry,
+              validate: typeMatch ? typeMatch.validate : undefined,
+              source: isExactDefault ? 'builtin' : 'auto-loaded',
+              defaultPattern: isExactDefault ? typeMatch.regex.source : undefined
+            });
+          });
+          if (mode === 'replace') {
+            regexPresets[region] = incoming;
+          } else {
+            const existingKeys = new Set(regexPresets[region].map(r => r.pattern));
+            incoming.forEach(r => { if (!existingKeys.has(r.pattern)) regexPresets[region].push(r); });
+          }
+        });
       }
       if (cfg.aiPrompts && typeof cfg.aiPrompts === 'object') {
         if (typeof cfg.aiPrompts.channel1 === 'string' && cfg.aiPrompts.channel1.trim()) aiPrompts.channel1 = cfg.aiPrompts.channel1;
@@ -2219,29 +2290,33 @@
         showToast(t('toastImportConfigParseFailed', { message: e.message }), 'danger');
         return;
       }
+      openConfigImportDialog(cfg);
+    }
+
+    function openConfigImportDialog(cfg) {
+      pendingImport = { dimension: 'config', cfg };
+
       const rosterCount = Array.isArray(cfg.roster) ? cfg.roster.length : 0;
       const hardBlockCount = Array.isArray(cfg.hardBlock) ? cfg.hardBlock.length : 0;
       const regexCount = Array.isArray(cfg.regexRules) ? cfg.regexRules.length : 0;
       const hasPrompts = !!(cfg.aiPrompts && typeof cfg.aiPrompts === 'object' && (cfg.aiPrompts.channel1 || cfg.aiPrompts.channel2Personal || cfg.aiPrompts.channel2Business));
-      const summary = t('confirmImportConfigMessage', {
+
+      const errorList = document.getElementById('importModeErrorList');
+      const regexErrors = Array.isArray(cfg.regexRules) ? cfg.regexRules.map((row, idx) => tryCompileRegexRow(row, idx)).filter(r => !r.ok) : [];
+      if (regexErrors.length) {
+        errorList.classList.remove('hidden');
+        errorList.innerHTML = t('importInvalidPatternIntro', { count: regexErrors.length }) + '<br>' +
+          regexErrors.map(e => t('importInvalidPatternRow', { row: e.idx + 1, pattern: escapeHtml(e.raw.pattern || ''), error: escapeHtml(e.error) })).join('<br>');
+      } else {
+        errorList.classList.add('hidden');
+        errorList.innerHTML = '';
+      }
+
+      document.getElementById('importModeMessage').innerText = t('confirmImportConfigModeMessage', {
         roster: rosterCount, hardBlock: hardBlockCount, regex: regexCount,
         prompts: hasPrompts ? t('confirmImportConfigWithPrompts') : ''
       });
-      const ok = await showConfirmModal(summary, { title: t('confirmImportConfigTitle'), okLabel: t('confirmImportConfigOk') });
-      if (!ok) return;
-      const errors = applyAutoConfig(cfg);
-      updateDictCountLabel();
-      renderHardBlockMgmtTable();
-      renderRegexMgmtTable();
-      renderAiPromptTextareas();
-      triggerPreview();
-      if (errors.length) {
-        showToast(t('toastImportConfigAppliedWithErrors', { count: errors.length }), 'warning');
-      } else {
-        showToast(t('toastImportConfigApplied'), 'success');
-      }
-      const notice = document.getElementById('configImportNotice');
-      if (notice) removeToast(notice);
+      openModal('importModeModal');
     }
 
     // Shows a persistent (non-auto-dismissing) notice on load, letting the user pick a
@@ -2603,7 +2678,7 @@
       downloadTextAsFile(csvContent, 'TokenShield_Regex_Template.csv', 'text/csv;charset=utf-8;');
     }
 
-    let pendingImport = null; // { dimension: 'roster'|'hardBlock'|'regex', rows: [...] }
+    let pendingImport = null; // { dimension: 'roster'|'hardBlock'|'regex', rows: [...] } or { dimension: 'config', cfg: {...} }
 
     function openImportDialog(dimension, rows) {
       if (!rows.length) { showToast(t('toastNoUsableRows'), 'warning'); return; }
@@ -2635,22 +2710,30 @@
 
     function confirmImportMode(mode) {
       if (!pendingImport) { closeModal('importModeModal'); return; }
-      const { dimension, rows } = pendingImport;
+      const { dimension } = pendingImport;
       let importErrors = [];
 
-      if (dimension === 'hardBlock') {
+      if (dimension === 'config') {
+        importErrors = applyAutoConfig(pendingImport.cfg, mode);
+        updateDictCountLabel();
+        renderHardBlockMgmtTable();
+        renderRegexMgmtTable();
+        renderAiPromptTextareas();
+        const notice = document.getElementById('configImportNotice');
+        if (notice) removeToast(notice);
+      } else if (dimension === 'hardBlock') {
         const base = mode === 'replace' ? [] : hardBlockPresets.custom;
-        hardBlockPresets.custom = mergeByKey(base, rows.map(v => ({ value: v })), e => e.value.toLowerCase(), 'manual', 'overridden');
+        hardBlockPresets.custom = mergeByKey(base, pendingImport.rows.map(v => ({ value: v })), e => e.value.toLowerCase(), 'manual', 'overridden');
         renderHardBlockMgmtTable();
       } else if (dimension === 'regex') {
         const base = mode === 'replace' ? [] : regexPresets.custom;
-        const { result, errors } = mergeRegexRules(base, rows, 'manual', 'overridden');
+        const { result, errors } = mergeRegexRules(base, pendingImport.rows, 'manual', 'overridden');
         regexPresets.custom = result;
         importErrors = errors;
         renderRegexMgmtTable();
       } else if (dimension === 'roster') {
         const base = mode === 'replace' ? [] : customDict;
-        customDict = mergeByKey(base, rows, e => e.value, 'manual', 'overridden');
+        customDict = mergeByKey(base, pendingImport.rows, e => e.value, 'manual', 'overridden');
         updateDictCountLabel();
       }
 
@@ -2727,6 +2810,17 @@
     }
 
     function exportAutoConfig() {
+      // Only include a Persona/Region builtin bucket if it's actually been edited/deleted from —
+      // otherwise every exported file would carry a full copy of the entire builtin rule library,
+      // even for users who never touched a builtin row. See hardBlockBucketIsDefault()/regexBucketIsDefault().
+      const hardBlockOverrides = {};
+      Object.keys(HARD_BLOCK_PRESETS_DEFAULT).forEach(persona => {
+        if (!hardBlockBucketIsDefault(persona)) hardBlockOverrides[persona] = hardBlockPresets[persona].map(e => e.value);
+      });
+      const regexOverrides = {};
+      Object.keys(REGEX_PRESETS_DEFAULT).forEach(region => {
+        if (!regexBucketIsDefault(region)) regexOverrides[region] = regexPresets[region].map(r => ({ type: r.type, pattern: r.pattern, flags: r.flags, name: r.name, example: r.example }));
+      });
       const cfg = {
         version: 1,
         // AI-extracted session-only roster entries aren't appropriate to bake into a "load every time" config.
@@ -2735,6 +2829,8 @@
         regexRules: regexPresets.custom.map(r => ({ type: r.type, pattern: r.pattern, flags: r.flags, name: r.name, example: r.example })),
         aiPrompts: { channel1: aiPrompts.channel1, channel2Personal: aiPrompts.channel2Personal, channel2Business: aiPrompts.channel2Business }
       };
+      if (Object.keys(hardBlockOverrides).length) cfg.hardBlockOverrides = hardBlockOverrides;
+      if (Object.keys(regexOverrides).length) cfg.regexOverrides = regexOverrides;
       const content = `// TokenShield config file — use the "Import Config File" button in Manage Custom Protection Rules to select this file\n` +
         `window.TOKENSHIELD_AUTO_CONFIG = ${JSON.stringify(cfg, null, 2)};\n`;
       downloadTextAsFile(content, 'tokenshield.config.js', 'text/javascript;charset=utf-8;');

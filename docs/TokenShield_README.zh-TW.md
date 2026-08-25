@@ -153,7 +153,7 @@ EduShield 沒有的新增功能：系統設定視窗新增「Local AI Prompt Lib
 
 點擊工具列的「**管理自訂防護規則**」，可對以下四個維度進行自訂、匯入與匯出，不需要手動編輯 HTML 原始碼：名冊/詞庫（見 2.4 節）、硬阻斷詞彙、正則規則，以及地端 AI 提示詞（是實際送去掃描用的提示詞，不是 2.6 節那個複製貼上用的 Prompt Library）。
 
-**範圍決定**：跟地區/身分專屬的內建預設集不同，所有透過自訂/CSV 匯入/設定檔匯入新增的硬阻斷詞彙與正則規則，一律只存進一個**永遠合併、不分地區/身分的「custom」桶**（`hardBlockPresets.custom`、`regexPresets.custom`），不會寫進某個特定 persona/region 自己的陣列。這樣可以讓衝突處理維持單純（只在 `custom` 桶內去重複，不會悄悄改動某個特定身分或地區的內建清單），也符合 `customDict` 原本就是不分地區/身分的單一扁平陣列這個既有慣例。這個管理面板的表格只會列出 `custom` 桶的內容；內建的地區/身分規則仍可在「PII Rule Guide」裡唯讀檢視。
+**範圍**：CSV／設定檔的*匯入*仍然只會寫進一個**永遠合併、不分地區/身分的「custom」桶**（`hardBlockPresets.custom`、`regexPresets.custom`），不會寫進某個特定 persona/region 自己的陣列——這樣可以讓衝突處理維持單純（只在 `custom` 桶內去重複，不會悄悄改動某個特定身分或地區、匯入時可能根本不是要改的內建清單）。**這個面板的線上新增/編輯 UI 是另一條獨立路徑**：表格顯示的是目前*實際套用中*的組合（硬阻斷關鍵字：`custom`＋目前選定的 Persona；正則規則：`custom`＋`global`＋目前選定的 Region），任一列都能直接編輯或刪除——包含內建列，不限 `custom`——並標示小徽章（`PERSONAL`／`BUSINESS`／`GLOBAL`／`US` 等）標明所屬桶別。切換 Region 或 Persona 時，若面板（或 PII Rule Guide）已開啟會即時重新渲染。
 
 內建預設值凍結為 `HARD_BLOCK_PRESETS_DEFAULT`／`REGEX_PRESETS_DEFAULT`／`AI_PROMPTS_DEFAULT`。即時運作狀態：
 ```javascript
@@ -161,7 +161,9 @@ let hardBlockPresets = { personal: [], business: [], custom: [] };
 let regexPresets = { global: [], us: [], eu: [], uk: [], tw: [], jp: [], custom: [] };
 let aiPrompts = { channel1: '', channel2Personal: '', channel2Business: '' };
 ```
-每筆都帶 `source` 欄位並以徽章顯示：`Built-in`／`Config file import`／`Manually imported`／`Overridden`。正則規則改存 `pattern`／`flags` 字串（不再是即時的 `RegExp` 物件），每次使用都經過 `tryCompileRegexRow()` 的 try/catch 保護，格式錯誤的規則會被略過並個別回報，不會中斷其餘掃描。**注意**：內建 `CREDIT_CARD` 規則的 Luhn `validate` 函式只會保留在真正的內建項目上——若剛好被 CSV／設定檔匯入覆蓋掉（CSV／JSON 無法承載函式），驗證會隨之消失，匯入對話框會在這種情況下另外跳出警告。
+每筆都帶 `source` 欄位並以徽章顯示：`Built-in`／`Config file import`／`Manually imported`／`Overridden`。正則規則改存 `pattern`／`flags` 字串（不再是即時的 `RegExp` 物件），每次使用都經過 `tryCompileRegexRow()` 的 try/catch 保護，格式錯誤的規則會被略過並個別回報，不會中斷其餘掃描。
+
+內建項目另外帶有 `defaultValue`／`defaultPattern` 欄位——回指對應 `HARD_BLOCK_PRESETS_DEFAULT`／`REGEX_PRESETS_DEFAULT` 原始值的穩定連結，編輯多次也不會遺失。這撐起兩個安全網功能，讓「Reset to Defaults」（會連 `custom` 一起清空）不是唯一的復原手段：任一已編輯/仍存在的內建列都有**「還原預設」**按鈕；已刪除的內建列會出現在表格下方**「已從預設清單移除」**清單，可個別加回（`revertHardBlockEntryAt()`／`restoreRemovedHardBlockDefault()` 與其正則版本）。編輯正則規則列時，內建的 `validate` 檢查碼函式（Luhn、台灣身分證、日本 My Number 等）會被保留——比對依據是規則的 `type`（穩定識別碼）而非 pattern 文字，即使 pattern／名稱／範例都被改過也找得到。這些都是工作階段記憶體狀態，重新整理即回到真正的預設值，除非透過下方的設定檔匯出/匯入保留（因此「Reset to Defaults」與「Export/Import Config File」放在一起說明）。
 
 CSV 範本：硬阻斷詞彙為單欄 `Keyword`；正則規則為 4 欄 `TypeTag,RuleName,Pattern,ExampleText`，`Pattern` 欄可填純 pattern（預設補 `g` flag）或完整的 `/pattern/flags` 字面量格式字串。
 
@@ -177,10 +179,18 @@ window.TOKENSHIELD_AUTO_CONFIG = {
   roster: [ { type: "VENDOR", value: "...", reason: "..." } ],
   hardBlock: [ "custom hard-block term" ],
   regexRules: [ { type: "CUSTOM_CODE", pattern: "CODE-\\d{4}", flags: "g", name: "Custom code", example: "CODE-1234" } ],
+  // 只有真的被編輯/刪除過的 Persona/Region 桶才會出現這兩個欄位——見 hardBlockBucketIsDefault()/regexBucketIsDefault()。
+  // 完全沒動過的桶不會出現，避免從沒編輯過內建規則的人匯出的檔案也帶著整份規則庫。
+  hardBlockOverrides: { personal: [ "..." ] },
+  regexOverrides: { us: [ { type: "US_SSN", pattern: "...", flags: "g", name: "...", example: "..." } ] },
   aiPrompts: { channel1: "...{{TEXT}}", channel2Personal: "...{{TEXT}}", channel2Business: "...{{TEXT}}" }
 };
 ```
-三個按鈕都收在「管理自訂防護規則」面板底部的「Advanced Settings: Import / Export Config File」摺疊區塊裡（手機寬度會直接隱藏）。「**Import Config File**」開啟檔案選取視窗，選取的檔案只以字串掃描＋`JSON.parse()` 解析（絕不 `eval`／執行檔案內容），套用前會先跳出摘要確認視窗（列出各維度筆數）——套用時會合併進 `custom` 桶與提示詞（標籤為 `Config file import`）。這是**手動**、一次性的操作，不會在重新整理或下次開啟時自動套用，使用者每次都要重新匯入一次；頁面開啟時會有一則常駐提示引導匯入，文字刻意不聲稱「已偵測到」，因為瀏覽器安全機制不允許背景偵測同資料夾檔案是否存在。「**Export Config File**」會把目前記憶體中四個維度的最新狀態（含所有合併/覆蓋結果，排除 `ai-session` 標籤的暫存名冊項目）打包成同樣格式，下載成固定檔名 `tokenshield.config.js`，可分享給同事或在其他裝置重複使用。「**Reset to Defaults**」（會先跳出確認對話框）把四個維度重置回內建預設值，用來捨棄當次手動調整或已匯入的內容。
+三個按鈕都收在「管理自訂防護規則」面板底部的「Advanced Settings: Import / Export Config File」摺疊區塊裡（手機寬度會直接隱藏）。
+
+「**Import Config File**」開啟檔案選取視窗，選取的檔案只以字串掃描＋`JSON.parse()` 解析（絕不 `eval`／執行檔案內容），接著會跳出跟 CSV 匯入共用的**「合併／完全取代」**選擇對話框（`openConfigImportDialog()`），列出各維度筆數。**這個選擇在這裡比 CSV 匯入更關鍵**：合併是拿 `custom` 桶項目本身的內容（正則的 pattern 文字、關鍵字文字本身）當比對鍵，如果你編輯的正是這個欄位，合併會認不出「這是同一條規則的新版本」，結果變成新舊並存。`hardBlockOverrides`／`regexOverrides` 讓這點更明顯：因為匯出的清單是不帶身分資訊的純陣列，**合併**只會把新增/變動的值疊加進去（絕不會移除任何東西），只有**完全取代**才能正確重新套用一次刪除，或乾淨地取代掉一個已編輯的值——要讓重新整理後「編輯過或刪除過的內建規則」真正生效，必須選完全取代。有個身分連結的取捨要注意：一個編輯過、文字已經跟真正預設值不完全相同的內建值，匯入回來會標成 `Overridden`／`auto-loaded`，但不會再帶有自己的 `defaultValue`／`defaultPattern` 連結（也就是不會再有專屬的「還原預設」按鈕）——編輯本身會被正確套用，只是「這是編輯前長怎樣」這個麵包屑會遺失。正則的 override 一樣是靠 `type` 找回對應的內建 `validate` 函式。這是**手動**、一次性的操作，不會在重新整理或下次開啟時自動套用，使用者每次都要重新匯入一次；頁面開啟時會有一則常駐提示引導匯入，文字刻意不聲稱「已偵測到」，因為瀏覽器安全機制不允許背景偵測同資料夾檔案是否存在。
+
+「**Export Config File**」會把目前記憶體中四個維度的最新狀態（含所有合併/覆蓋結果，排除 `ai-session` 標籤的暫存名冊項目）打包成同樣格式，下載成固定檔名 `tokenshield.config.js`，可分享給同事或在其他裝置重複使用——`hardBlockOverrides`／`regexOverrides` 只會針對跟真正預設值不同的桶才加入。「**Reset to Defaults**」（會先跳出確認對話框）把四個維度重置回內建預設值，用來捨棄當次手動調整或已匯入的內容。
 
 > [!NOTE]
 > 此機制只處理規則/提示詞設定，完全不涉及使用者實際輸入的文件內容——`sessionVault`、輸入文字框等仍完全遵循 1.2 節提到的既有零持久化承諾，頁面關閉或重整後立即消失。
@@ -197,9 +207,9 @@ function t(key, vars) { /* 查找 I18N[key][currentLang]，找不到就退回 en
 function applyLanguage(lang) { /* 設定 currentLang、寫入 localStorage、掃描套用所有 data-i18n*、呼叫 refreshDynamicText() */ }
 ```
 
-靜態畫面透過 `data-i18n`（設定 `innerHTML`）、`data-i18n-placeholder`、`data-i18n-title`、`data-i18n-aria-label` 這幾個屬性接入字典。動態組出來的字串（toast 訊息、`showConfirmModal()` 的訊息、`renderHardBlockMgmtTable()`／`renderRegexMgmtTable()`／`renderGuideTable()` 這類表格渲染函式）則直接呼叫 `t()`，不再把英文字面字串寫死。`refreshDynamicText()` 會重新執行這些「純渲染」函式，讓當下已經開啟的面板在切換語言的當下就立即反映新語言，不需要使用者重新開啟一次。
+靜態畫面透過 `data-i18n`（設定 `innerHTML`）、`data-i18n-placeholder`、`data-i18n-title`、`data-i18n-aria-label` 這幾個屬性接入字典。動態組出來的字串（toast 訊息、`showConfirmModal()` 的訊息、`renderHardBlockMgmtTable()`／`renderRegexMgmtTable()` 這類表格渲染函式）則直接呼叫 `t()`，不再把英文字面字串寫死。`refreshDynamicText()` 會重新執行這些「純渲染」函式，讓當下已經開啟的面板在切換語言的當下就立即反映新語言，不需要使用者重新開啟一次。PII Rule Guide 已不再渲染即時規則表格（`renderGuideTable()` 已移除，指南改為純概念說明，見 2.8 節）——`refreshGuideModalIfOpen()` 保留成一個有記錄的空函式，這樣其他呼叫它的地方不用知道這件事。
 
-**刻意不翻譯的部分**（視為技術／參考內容，跟「PII Rule Guide 裡的 Regular Expression 欄位從不翻譯」是同一個判斷邏輯）：`REGEX_PRESETS_DEFAULT`／`HARD_BLOCK_PRESETS_DEFAULT` 規則庫本身（規則的 `name`／`example` 欄位、硬阻斷關鍵字清單——翻譯關鍵字清單會直接改變實際偵測行為，不只是顯示文字而已），以及 `LOCAL_AI_PROMPTS`／`aiPrompts` 這些提示詞內容（這些是要送給另一個 AI 模型的指令，不是給使用者看的介面文字）。`localStorage` 持久化是刻意對 TokenShield「設計上零持久化」原則（見 1.2 節）的例外——這是顯示偏好設定，不是文件內容或掃描狀態。
+**刻意不翻譯的部分**（視為技術／參考內容）：`REGEX_PRESETS_DEFAULT`／`HARD_BLOCK_PRESETS_DEFAULT` 規則庫本身（規則的 `name`／`example` 欄位、硬阻斷關鍵字清單——翻譯關鍵字清單會直接改變實際偵測行為，不只是顯示文字而已），以及 `LOCAL_AI_PROMPTS`／`aiPrompts` 這些提示詞內容（這些是要送給另一個 AI 模型的指令，不是給使用者看的介面文字）。`localStorage` 持久化是刻意對 TokenShield「設計上零持久化」原則（見 1.2 節）的例外——這是顯示偏好設定，不是文件內容或掃描狀態。
 
 ---
 
@@ -241,10 +251,10 @@ function applyLanguage(lang) { /* 設定 currentLang、寫入 localStorage、掃
 ## 四、進階開發者資訊
 
 ### 4.1 新增 Hard Block 詞彙
-個人化自訂不需要改原始碼，透過「管理自訂防護規則」→「硬阻斷詞彙」分頁匯入 CSV 即可（見 2.8 節）。若要直接改內建的 `personal`／`business` 清單本身，開啟 `TokenShield.html`，搜尋 `HARD_BLOCK_PRESETS_DEFAULT`，於對應陣列中加入字串。
+完全不需要改原始碼——透過「管理自訂防護規則」→「硬阻斷詞彙」分頁（見 2.8 節）：點「+ Add Row」新增 `custom` 項目，或直接點擊目前 Persona 顯示中的任一列編輯/刪除內建項目，CSV 匯入則用於批次異動。這只會影響你自己的工作副本（工作階段狀態，或你匯出的設定檔）——如果要改變這個檔案分享給所有人時的 `personal`／`business` **預設值**本身，請改到 `TokenShield.html` 原始碼編輯 `HARD_BLOCK_PRESETS_DEFAULT`。
 
 ### 4.2 新增偵測規則
-透過「管理自訂防護規則」→「正則規則」分頁匯入 4 欄 CSV（見 2.8 節）。若要直接改內建的某地區規則本身，搜尋 `REGEX_PRESETS_DEFAULT`，於 `global`（永遠開啟）或特定地區陣列（`us`／`eu`／`uk`／`tw`／`jp`）中加入 `{ type: "TAG_NAME", regex: /您的正規表示式/g, name: "顯示名稱", example: "範例" }`。
+透過「管理自訂防護規則」→「正則規則」分頁（見 2.8 節）：點「+ Add Row」新增 `custom` 項目，或直接點擊目前 Region 顯示中的任一列編輯/刪除內建項目（儲存時會自動驗證格式與 ReDoS 風險），CSV 匯入則用於批次異動。範圍限制同上——這只會影響你的工作副本；若要改變出廠預設值，請到原始碼在 `REGEX_PRESETS_DEFAULT` 的 `global`（永遠開啟）或特定地區陣列（`us`／`eu`／`uk`／`tw`／`jp`）中加入 `{ type: "TAG_NAME", regex: /您的正規表示式/g, name: "顯示名稱", example: "範例" }`。
 
 ### 4.3 新增地區預設集
 於 `REGEX_PRESETS_DEFAULT` 與 `buildDefaultRegexPresetsState()` 的初始化邏輯中新增一個鍵值（例如加拿大用 `ca`），並在 HTML 中的 `#regionSelect` 加入對應 `<option>`。新地區規則與現有五組一樣，會疊加於 `global` 之上。`tw`／`jp` 兩組就是照這個擴充點加入的範例，可直接參考它們的寫法。
