@@ -128,11 +128,7 @@ TokenShield ships with US / EU / UK / Taiwan / Japan region presets — not ever
 
 ## Roadmap
 
-TokenShield is under active development. Planned directions include (in priority order):
-
-1. **Persistent Mask Mapping Storage**: A way to save the mask ↔ original mapping so a session can be resumed later.
-2. **File Upload Masking**: Direct masking support for uploaded Excel, Word, and PDF files, not just pasted text.
-3. **Enterprise-grade Features**: Audit logs and related governance features for the Business persona.
+TokenShield's core feature set — detection, masking, restoration, the persistent Mapping Vault, custom rules — is stable and feature-complete for its current scope. Further development is driven by real user needs rather than a fixed schedule. If you have a specific use case (including institutional or enterprise needs) you'd like to discuss, see Contact below.
 
 ---
 
