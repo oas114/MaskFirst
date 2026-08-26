@@ -210,7 +210,11 @@ function applyLanguage(lang) { /* 設定 currentLang、寫入 localStorage、掃
 
 靜態畫面透過 `data-i18n`（設定 `innerHTML`）、`data-i18n-placeholder`、`data-i18n-title`、`data-i18n-aria-label` 這幾個屬性接入字典。動態組出來的字串（toast 訊息、`showConfirmModal()` 的訊息、`renderHardBlockMgmtTable()`／`renderRegexMgmtTable()` 這類表格渲染函式）則直接呼叫 `t()`，不再把英文字面字串寫死。`refreshDynamicText()` 會重新執行這些「純渲染」函式，讓當下已經開啟的面板在切換語言的當下就立即反映新語言，不需要使用者重新開啟一次。PII Rule Guide 已不再渲染即時規則表格（`renderGuideTable()` 已移除，指南改為純概念說明，見 2.8 節）——`refreshGuideModalIfOpen()` 保留成一個有記錄的空函式，這樣其他呼叫它的地方不用知道這件事。
 
-**刻意不翻譯的部分**（視為技術／參考內容）：`REGEX_PRESETS_DEFAULT`／`HARD_BLOCK_PRESETS_DEFAULT` 規則庫本身（規則的 `name`／`example` 欄位、硬阻斷關鍵字清單——翻譯關鍵字清單會直接改變實際偵測行為，不只是顯示文字而已），以及 `LOCAL_AI_PROMPTS`／`aiPrompts` 這些提示詞內容（這些是要送給另一個 AI 模型的指令，不是給使用者看的介面文字）。這裡（以及 Region／Persona，見 2.1 節）的 `localStorage` 持久化，是刻意對 MaskFirst 資料生命週期承諾（見 1.2 節）的一個範圍受限的例外——這些都是介面偏好設定，不是文件內容或掃描狀態，後者仍然每次重整都會消滅。
+**`HARD_BLOCK_PRESETS_DEFAULT`（`personal`／`business` 關鍵字清單）把英文／繁體中文／日文三種語言的詞彙同時放進同一個 bucket，三者永遠同時生效**——這**不是**跟著 `currentLang` 切換的。比對方式是單純的字串包含掃描（`getHardBlockKeywords()` → `lowerText.includes(kw.toLowerCase())`），所以真正決定貼上內容會不會觸發硬阻斷的是**內容本身的語言**，不是介面顯示語言；不管 `currentLang` 設成什麼，三種文字都保持同時生效，才能讓貼上中文或日文的極敏感內容，跟貼上英文內容一樣觸發同一層防護，而不是只有貼上內容剛好跟介面顯示語言一致時才會觸發。
+
+**`LOCAL_AI_PROMPTS` 與 `AI_PROMPTS_DEFAULT`（`aiPrompts` 的來源）則改為依顯示語言分別存放**（`en`／`zh`／`ja`），跟上面的硬阻斷清單做法不同——這些是給人看、給人編輯的內容（複製到剪貼簿的提示詞庫，見 2.6 節；管理自訂防護規則的「AI 提示詞」分頁，見 2.8 節），不是拿去跟貼上的內容做比對，所以讓使用者依照介面設定的語言看到內容（而不是預設使用者看得懂英文）才是這裡真正在意的事。`applyLanguage()` 會在每次切換語言時，把提示詞換成新語言的預設文字，但**只換掉還維持原語言預設值、使用者沒動過的欄位**——任何使用者在「AI 提示詞」面板自訂過的內容，切換語言時都會原封不動保留。提示詞裡要求模型回傳的 JSON 欄位名稱與列舉值（`type`／`value`／`reason`、`PERSON`／`VENDOR`／`ADDRESS`／`PROJECT`／`BANK_ACCT`、`critical`）在三種語言版本裡都維持英文不變，因為 `CHANNEL1_RESPONSE_SCHEMA`／`CHANNEL2_RESPONSE_SCHEMA` 與解析模型回傳 JSON 的程式碼都依賴這些固定字面值。
+
+**仍然刻意不翻譯的部分**：`REGEX_PRESETS_DEFAULT` 規則的 `name`／`example` 欄位（技術／參考用的標籤文字，不是拿去比對偵測用的輸入內容）。這裡（以及 Region／Persona，見 2.1 節）的 `localStorage` 持久化，是刻意對 MaskFirst 資料生命週期承諾（見 1.2 節）的一個範圍受限的例外——這些都是介面偏好設定，不是文件內容或掃描狀態，後者仍然每次重整都會消滅。
 
 ---
 

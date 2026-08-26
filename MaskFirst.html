@@ -1525,6 +1525,7 @@
       reasonBuiltOnline: { en: 'Built online', zh: '線上建立', ja: 'オンラインで作成' },
       scanChannel2Progress: { en: 'Confirming semantic risk ({current}/{total})', zh: '語意風險確認中 (第 {current}/{total} 次)', ja: '意味リスク確認中 ({current}/{total})' },
       reasonAiDeepScanFlagged: { en: 'AI deep scan flagged: {reason}', zh: 'AI 深度掃描標記：{reason}', ja: 'AI詳細スキャンでフラグ：{reason}' },
+      reasonStaticKeywordMatch: { en: 'Static keyword match: detected "{keywords}"', zh: '靜態關鍵字比對：偵測到「{keywords}」', ja: '静的キーワード照合：「{keywords}」を検出' },
       reasonAiDeepScanFallback: { en: 'a potential sensitive-risk finding', zh: '潛在的敏感風險項目', ja: '機微リスクの可能性がある事項' },
       toastScanCompleteBlocked: { en: 'Scan complete!\nAdded {count} new masked entities.\nA sensitive-risk finding was detected — copy has been force-locked!', zh: '掃描完成！\n新增了 {count} 個遮蔽項目。\n偵測到敏感風險項目──複製功能已被強制鎖定！', ja: 'スキャン完了！\n{count}件のマスク項目を追加しました。\n機微リスクが検出されたため、コピー機能を強制的にロックしました！' },
       toastScanCompleteOk: { en: 'Scan complete! Added {count} new masked entities. No additional sensitive risks found.', zh: '掃描完成！新增了 {count} 個遮蔽項目，未發現其他敏感風險。', ja: 'スキャン完了！{count}件のマスク項目を追加しました。追加の機微リスクは見つかりませんでした。' },
@@ -1641,7 +1642,9 @@
     }
 
     function applyLanguage(lang) {
+      const prevLang = currentLang;
       currentLang = lang;
+      if (typeof syncAiPromptsToLanguage === 'function') syncAiPromptsToLanguage(prevLang, lang);
       localStorage.setItem(LANG_STORAGE_KEY, lang);
       document.documentElement.lang = lang === 'zh' ? 'zh-Hant' : (lang === 'ja' ? 'ja' : 'en');
       document.querySelectorAll('[data-i18n]').forEach(el => {
@@ -1681,6 +1684,7 @@
       updateDictCountLabel();
       if (typeof renderHardBlockMgmtTable === 'function') renderHardBlockMgmtTable();
       if (typeof renderRegexMgmtTable === 'function') renderRegexMgmtTable();
+      if (typeof renderAiPromptTextareas === 'function') renderAiPromptTextareas();
       if (typeof refreshGuideModalIfOpen === 'function') refreshGuideModalIfOpen();
     }
 
@@ -1778,20 +1782,44 @@
 
     // Built-in defaults, frozen — never mutated. "Reset to Defaults" and merge/replace imports
     // restore to this baseline. To add your own terms, use the "Manage Custom Protection Rules" UI instead.
+    // Each bucket carries EN + ZH (Traditional) + JA equivalents side by side (not switched by display
+    // language) — matching is a flat substring scan (see getHardBlockKeywords()), so keeping all three
+    // scripts always active is what actually catches sensitive content regardless of what language the
+    // pasted text itself is in, independent of whatever language the UI happens to be displaying.
     const HARD_BLOCK_PRESETS_DEFAULT = Object.freeze({
       personal: [
         "sexual assault", "sexual abuse", "domestic violence", "child abuse", "self-harm",
         "suicidal ideation", "suicide attempt", "substance abuse treatment", "mental health diagnosis",
         "psychiatric treatment", "HIV status", "sexually transmitted infection", "sexual orientation",
         "gender transition", "immigration status", "asylum status", "undocumented status",
-        "child custody dispute", "protective order", "eviction notice", "bankruptcy filing"
+        "child custody dispute", "protective order", "eviction notice", "bankruptcy filing",
+        "性侵害", "性虐待", "家庭暴力", "兒童虐待", "自我傷害",
+        "自殺意念", "自殺未遂", "藥物濫用治療", "精神疾病診斷",
+        "精神科治療", "HIV感染狀態", "性傳染病", "性傾向",
+        "性別轉換", "移民身分", "庇護身分", "無證移民身分",
+        "子女監護權糾紛", "保護令", "驅離通知", "破產申請",
+        "性的暴行", "性的虐待", "家庭内暴力", "児童虐待", "自傷行為",
+        "自殺念慮", "自殺未遂", "薬物乱用治療", "精神疾患の診断",
+        "精神科治療", "HIV感染状況", "性感染症", "性的指向",
+        "性別移行", "在留資格", "難民認定状況", "非正規滞在状況",
+        "親権争い", "保護命令", "立ち退き通知", "破産申立て"
       ],
       business: [
         "insider information", "material non-public information", "trade secret", "merger and acquisition",
         "acquisition target", "reduction in force", "layoff plan", "unreleased earnings",
         "pending patent application", "data breach", "security incident", "whistleblower report",
         "internal investigation", "attorney-client privileged", "pending litigation", "regulatory investigation",
-        "non-disclosure breach", "confidential settlement", "bribery allegation", "antitrust investigation"
+        "non-disclosure breach", "confidential settlement", "bribery allegation", "antitrust investigation",
+        "內線消息", "重大非公開資訊", "營業秘密", "併購案",
+        "收購目標", "組織精簡裁員", "裁員計畫", "未公布財報",
+        "待審專利申請", "資料外洩", "資安事件", "吹哨者檢舉",
+        "內部調查", "律師與當事人保密特權", "待審訴訟", "主管機關調查",
+        "保密協議違反", "保密和解", "賄賂指控", "反壟斷調查",
+        "インサイダー情報", "重要未公開情報", "営業秘密", "合併買収",
+        "買収対象企業", "人員削減計画", "解雇計画", "未公表決算",
+        "出願中の特許", "データ漏えい", "セキュリティインシデント", "内部告発",
+        "内部調査", "弁護士秘匿特権", "係属中の訴訟", "規制当局の調査",
+        "秘密保持契約違反", "秘密和解", "贈収賄疑惑", "独占禁止法調査"
       ]
     });
 
@@ -1946,25 +1974,55 @@
 
     // ==========================================
     // Local AI prompt library
+    // Keyed by display language so the copy-to-clipboard text is something the user can actually read
+    // themselves, not just something an external LLM can parse — copyLocalPrompt() picks currentLang.
     // ==========================================
     const LOCAL_AI_PROMPTS = {
-      personal: `You are a privacy-conscious assistant running locally and fully offline on this device. The text below has already been de-identified: names, contact details, and other personal identifiers have been replaced with placeholder tokens such as {{PERSON_1}}. Do not attempt to guess, infer, or reconstruct the original identities. Preserve every {{TAG_N}} token exactly as-is, unchanged and in place, in your response. Do not summarize, log, or reference this content outside of this local session.`,
-      business: `You are a privacy-conscious assistant running locally and fully offline on this device. The text below is confidential business information that has already been de-identified: names, account numbers, and other identifying details have been replaced with placeholder tokens such as {{VENDOR_1}}. Treat the underlying content as a trade secret. Preserve every {{TAG_N}} token exactly as-is, unchanged and in place, in your response. Do not summarize, log, or reference this content outside of this local session.`
+      en: {
+        personal: `You are a privacy-conscious assistant running locally and fully offline on this device. The text below has already been de-identified: names, contact details, and other personal identifiers have been replaced with placeholder tokens such as {{PERSON_1}}. Do not attempt to guess, infer, or reconstruct the original identities. Preserve every {{TAG_N}} token exactly as-is, unchanged and in place, in your response. Do not summarize, log, or reference this content outside of this local session.`,
+        business: `You are a privacy-conscious assistant running locally and fully offline on this device. The text below is confidential business information that has already been de-identified: names, account numbers, and other identifying details have been replaced with placeholder tokens such as {{VENDOR_1}}. Treat the underlying content as a trade secret. Preserve every {{TAG_N}} token exactly as-is, unchanged and in place, in your response. Do not summarize, log, or reference this content outside of this local session.`
+      },
+      zh: {
+        personal: `你是一個注重隱私、在本機完全離線執行的助理。以下文字已經過去識別化處理：姓名、聯絡方式及其他個人識別資訊已被替換成如 {{PERSON_1}} 的佔位符記號。請不要嘗試猜測、推論或還原原始身分。請在你的回覆中，將每一個 {{TAG_N}} 記號原封不動保留在原本的位置。請勿在此次本機工作階段之外摘要、記錄或引用這些內容。`,
+        business: `你是一個注重隱私、在本機完全離線執行的助理。以下文字是已經過去識別化處理的機密商業資訊：姓名、帳號及其他識別資訊已被替換成如 {{VENDOR_1}} 的佔位符記號。請將其中內容視為營業秘密處理。請在你的回覆中，將每一個 {{TAG_N}} 記號原封不動保留在原本的位置。請勿在此次本機工作階段之外摘要、記錄或引用這些內容。`
+      },
+      ja: {
+        personal: `あなたはこの端末上でローカルかつ完全にオフラインで動作する、プライバシーに配慮したアシスタントです。以下のテキストはすでに匿名化されており、氏名・連絡先などの個人識別情報は {{PERSON_1}} のようなプレースホルダートークンに置き換えられています。元の身元を推測・推論・復元しようとしないでください。回答中のすべての {{TAG_N}} トークンは、変更せずそのままの位置で保持してください。この内容をローカルセッション外で要約・記録・言及しないでください。`,
+        business: `あなたはこの端末上でローカルかつ完全にオフラインで動作する、プライバシーに配慮したアシスタントです。以下のテキストはすでに匿名化された機密の業務情報であり、氏名・口座番号などの識別情報は {{VENDOR_1}} のようなプレースホルダートークンに置き換えられています。この内容は営業秘密として扱ってください。回答中のすべての {{TAG_N}} トークンは、変更せずそのままの位置で保持してください。この内容をローカルセッション外で要約・記録・言及しないでください。`
+      }
     };
     function copyLocalPrompt(which) {
-      const text = LOCAL_AI_PROMPTS[which];
+      const lib = LOCAL_AI_PROMPTS[currentLang] || LOCAL_AI_PROMPTS.en;
+      const text = lib[which];
       if (text) navigator.clipboard.writeText(text).then(() => showToast(t('toastCopiedPromptTemplate', { persona: which === 'business' ? t('personaBusiness') : t('personaPersonal') }), 'success'));
     }
 
     // ==========================================
     // Actual local AI scan prompts (used by processAnonymizePhase2 below) — unrelated to
     // LOCAL_AI_PROMPTS above, which is only a copy-to-clipboard convenience for external chat tools.
-    // {{TEXT}} is replaced with the real text to scan at call time.
+    // {{TEXT}} is replaced with the real text to scan at call time. Keyed by display language for the
+    // same reason as LOCAL_AI_PROMPTS above — a user reading/editing these in the Prompt Library panel
+    // shouldn't have to read English to understand what's being sent to their own local model. The JSON
+    // field names/enum values (type/value/reason, PERSON/VENDOR/ADDRESS/PROJECT/BANK_ACCT, critical) stay
+    // in English in every language variant since CHANNEL1_RESPONSE_SCHEMA/CHANNEL2_RESPONSE_SCHEMA and the
+    // code that parses the model's JSON reply depend on those exact tokens.
     // ==========================================
     const AI_PROMPTS_DEFAULT = Object.freeze({
-      channel1: `Find any un-masked "person names (PERSON)" (including title-before forms like "English teacher John Carter"; title-after forms like "Mary Smith, teacher"; colon-separated forms like "Student: Jane Doe"; and plain names or nicknames like "Robert Johnson" or "Bob". Extract the name portion only into the PERSON category, excluding the title), "vendors/organizations (VENDOR)" (including informal shops without a formal company suffix, e.g. "Sunny Diner"), "addresses (ADDRESS)", "project/event names (PROJECT)", and "bank/payment account numbers (BANK_ACCT)".\nReturn ONLY a JSON array like [{"type":"PERSON","value":"Jane Doe","reason":"..."}]. Return [] if nothing is found. Text:\n{{TEXT}}`,
-      channel2Personal: `Determine whether the following text contains "extremely sensitive information." Extremely sensitive information includes: self-harm, suicide, sexual assault or abuse, domestic violence, a protective order, a disability or special-needs status (including a psychological/educational assessment), or mental health counseling or treatment records.\nIf it contains any of the above, return this exact JSON: {"critical": true, "reason": "describe the specific risk"}\nIf not, return: {"critical": false, "reason": ""}\n\nText:\n{{TEXT}}`,
-      channel2Business: `Determine whether the following text contains "extremely sensitive information." Extremely sensitive information includes: insider trading or material non-public information, an active merger/acquisition, a layoff or workforce reduction plan, unreleased financial results, a data breach or security incident, a whistleblower report, active litigation, or a regulatory investigation.\nIf it contains any of the above, return this exact JSON: {"critical": true, "reason": "describe the specific risk"}\nIf not, return: {"critical": false, "reason": ""}\n\nText:\n{{TEXT}}`
+      en: {
+        channel1: `Find any un-masked "person names (PERSON)" (including title-before forms like "English teacher John Carter"; title-after forms like "Mary Smith, teacher"; colon-separated forms like "Student: Jane Doe"; and plain names or nicknames like "Robert Johnson" or "Bob". Extract the name portion only into the PERSON category, excluding the title), "vendors/organizations (VENDOR)" (including informal shops without a formal company suffix, e.g. "Sunny Diner"), "addresses (ADDRESS)", "project/event names (PROJECT)", and "bank/payment account numbers (BANK_ACCT)".\nReturn ONLY a JSON array like [{"type":"PERSON","value":"Jane Doe","reason":"..."}]. Return [] if nothing is found. Text:\n{{TEXT}}`,
+        channel2Personal: `Determine whether the following text contains "extremely sensitive information." Extremely sensitive information includes: self-harm, suicide, sexual assault or abuse, domestic violence, a protective order, a disability or special-needs status (including a psychological/educational assessment), or mental health counseling or treatment records.\nIf it contains any of the above, return this exact JSON: {"critical": true, "reason": "describe the specific risk"}\nIf not, return: {"critical": false, "reason": ""}\n\nText:\n{{TEXT}}`,
+        channel2Business: `Determine whether the following text contains "extremely sensitive information." Extremely sensitive information includes: insider trading or material non-public information, an active merger/acquisition, a layoff or workforce reduction plan, unreleased financial results, a data breach or security incident, a whistleblower report, active litigation, or a regulatory investigation.\nIf it contains any of the above, return this exact JSON: {"critical": true, "reason": "describe the specific risk"}\nIf not, return: {"critical": false, "reason": ""}\n\nText:\n{{TEXT}}`
+      },
+      zh: {
+        channel1: `請找出所有尚未遮蔽的「人名（PERSON）」（包含頭銜在前的形式，如「英文老師 John Carter」；頭銜在後的形式，如「Mary Smith，老師」；冒號分隔形式，如「學生：Jane Doe」；以及一般姓名或暱稱，如「Robert Johnson」或「Bob」。只擷取姓名本身列入 PERSON 類別，不含頭銜）、「廠商／機構（VENDOR）」（包含沒有正式公司字尾的非正式店家，例如「Sunny Diner」）、「地址（ADDRESS）」、「專案／活動名稱（PROJECT）」，以及「銀行／付款帳號（BANK_ACCT）」。\n只回傳一個 JSON 陣列，格式如 [{"type":"PERSON","value":"Jane Doe","reason":"..."}]。若沒有找到任何項目請回傳 []。文字內容：\n{{TEXT}}`,
+        channel2Personal: `請判斷以下文字是否包含「極度敏感的資訊」。極度敏感的資訊包括：自我傷害、自殺、性侵害或性虐待、家庭暴力、保護令、身心障礙或特殊需求狀態（包含心理／教育評估）、或心理諮商／治療紀錄。\n若包含上述任一項，請回傳這個精確的 JSON：{"critical": true, "reason": "描述具體風險"}\n若沒有，請回傳：{"critical": false, "reason": ""}\n\n文字內容：\n{{TEXT}}`,
+        channel2Business: `請判斷以下文字是否包含「極度敏感的資訊」。極度敏感的資訊包括：內線交易或重大非公開資訊、進行中的併購案、裁員或組織精簡計畫、尚未公布的財務結果、資料外洩或資安事件、吹哨者檢舉、進行中的訴訟，或主管機關調查。\n若包含上述任一項，請回傳這個精確的 JSON：{"critical": true, "reason": "描述具體風險"}\n若沒有，請回傳：{"critical": false, "reason": ""}\n\n文字內容：\n{{TEXT}}`
+      },
+      ja: {
+        channel1: `以下のうち、まだマスクされていない「人名（PERSON）」（「英語教師の John Carter」のような肩書き前置き形式、「Mary Smith、教師」のような肩書き後置き形式、「学生：Jane Doe」のようなコロン区切り形式、および「Robert Johnson」や「Bob」のような通常の氏名・愛称を含む。肩書きを除き、氏名部分のみを PERSON カテゴリとして抽出）、「取引先／組織（VENDOR）」（正式な会社名の接尾辞がない非公式な店舗、例：「Sunny Diner」を含む）、「住所（ADDRESS）」、「プロジェクト／イベント名（PROJECT）」、「銀行・支払口座番号（BANK_ACCT）」をすべて見つけてください。\nJSON配列のみを返してください。例：[{"type":"PERSON","value":"Jane Doe","reason":"..."}]。何も見つからない場合は [] を返してください。テキスト：\n{{TEXT}}`,
+        channel2Personal: `以下のテキストに「極めて機微な情報」が含まれているかを判定してください。極めて機微な情報には、自傷行為、自殺、性的暴行や性的虐待、家庭内暴力、保護命令、障害や特別な支援を要する状態（心理・教育評価を含む）、心理カウンセリングや治療の記録が含まれます。\n上記のいずれかが含まれる場合は、次の正確なJSONを返してください：{"critical": true, "reason": "具体的なリスクを記述"}\n含まれない場合は次を返してください：{"critical": false, "reason": ""}\n\nテキスト：\n{{TEXT}}`,
+        channel2Business: `以下のテキストに「極めて機微な情報」が含まれているかを判定してください。極めて機微な情報には、インサイダー取引や重要未公開情報、進行中の合併・買収、解雇や人員削減計画、未公表の決算情報、データ漏えいやセキュリティインシデント、内部告発、係属中の訴訟、規制当局の調査が含まれます。\n上記のいずれかが含まれる場合は、次の正確なJSONを返してください：{"critical": true, "reason": "具体的なリスクを記述"}\n含まれない場合は次を返してください：{"critical": false, "reason": ""}\n\nテキスト：\n{{TEXT}}`
+      }
     });
 
     // Channel 1 = single call, temperature:0 for deterministic extraction, JSON Schema forces a flat
@@ -2112,8 +2170,25 @@
         custom: []
       };
     }
+    function currentAiPromptDefaults() {
+      return AI_PROMPTS_DEFAULT[currentLang] || AI_PROMPTS_DEFAULT.en;
+    }
     function buildDefaultAiPromptsState() {
-      return { channel1: AI_PROMPTS_DEFAULT.channel1, channel2Personal: AI_PROMPTS_DEFAULT.channel2Personal, channel2Business: AI_PROMPTS_DEFAULT.channel2Business };
+      const d = currentAiPromptDefaults();
+      return { channel1: d.channel1, channel2Personal: d.channel2Personal, channel2Business: d.channel2Business };
+    }
+    // Called from applyLanguage() on every display-language switch. A prompt that's still exactly the
+    // previous language's default text (i.e. the user never edited it) is swapped to the new language's
+    // default; anything the user has customized is left alone so switching the UI language never clobbers
+    // an edit. This mirrors how hardBlockPresets/regexPresets distinguish an untouched builtin row from
+    // one the user changed (source === 'builtin' there; an exact string match to the old default here).
+    function syncAiPromptsToLanguage(prevLang, lang) {
+      if (prevLang === lang) return;
+      const prevDefaults = AI_PROMPTS_DEFAULT[prevLang] || AI_PROMPTS_DEFAULT.en;
+      const newDefaults = AI_PROMPTS_DEFAULT[lang] || AI_PROMPTS_DEFAULT.en;
+      ['channel1', 'channel2Personal', 'channel2Business'].forEach(channel => {
+        if (aiPrompts[channel] === prevDefaults[channel]) aiPrompts[channel] = newDefaults[channel];
+      });
     }
     function initCustomProtectionState() {
       hardBlockPresets = buildDefaultHardBlockPresetsState();
@@ -2797,6 +2872,7 @@
     }
 
     function renderAiPromptTextareas() {
+      if (!document.getElementById('aiPromptChannel1Textarea')) return;
       document.getElementById('aiPromptChannel1Textarea').value = aiPrompts.channel1;
       document.getElementById('aiPromptChannel2PersonalTextarea').value = aiPrompts.channel2Personal;
       document.getElementById('aiPromptChannel2BusinessTextarea').value = aiPrompts.channel2Business;
@@ -2814,7 +2890,7 @@
     }
 
     function resetAiPrompt(channel) {
-      aiPrompts[channel] = AI_PROMPTS_DEFAULT[channel];
+      aiPrompts[channel] = currentAiPromptDefaults()[channel];
       renderAiPromptTextareas();
     }
 
@@ -3952,7 +4028,7 @@
       const blockedHits = getHardBlockKeywords().filter(kw => lowerText.includes(kw.toLowerCase()));
       const isHardBlocked = blockedHits.length > 0;
       if (isHardBlocked) {
-        triggerHardBlock([`Static keyword match: detected "${blockedHits.join('", "')}"`]);
+        triggerHardBlock([t('reasonStaticKeywordMatch', { keywords: blockedHits.join(', ') })]);
       } else {
         resetHardBlockState();
       }
