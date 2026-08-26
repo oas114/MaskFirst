@@ -63,7 +63,7 @@ let currentPersona = localStorage.getItem(PERSONA_STORAGE_KEY) || DEFAULT_PERSON
 
 您的地區／身分選擇會在每次變更時存入 `localStorage`，下次開啟頁面自動還原，不需要每次都重新選一次。`DEFAULT_REGION`／`DEFAULT_PERSONA` 只在裝置**第一次**開啟（尚未存過任何值）時才會用到。若想改變全新瀏覽器/使用者設定檔的起始值，請用文字編輯器開啟 `MaskFirst.html`，找到 `<script>` 區塊開頭附近的這兩個常數並修改其值。
 
-**依顯示語言決定起始地區的一次性提示。** 若地區從未被明確存過值，把顯示語言（見 2.9 節）切成繁體中文時，地區會被帶到 `tw`，不會落回 `DEFAULT_REGION`——大多數選擇中文介面的使用者，處理的本來就是台灣相關文件，這樣可以省掉開啟工具後還要多點一次地區下拉選單的步驟。原始碼裡的 `LANG_TO_STARTER_REGION` 控制這個對應；`ja` 那個對應項（→ `jp`）目前處於休眠狀態，因為日文顯示語言已停用（見 2.9 節）——保留在原始碼裡沒有刪除，之後要重新啟用 `ja` 就不用把這部分邏輯重做一次。這是**一次性的起始提示，不是持續性的連動**：只要地區還沒被存過值（用 `localStorage.getItem(REGION_STORAGE_KEY) === null` 判斷）才會生效——地區一旦有了任何明確值（不管是被這個機制帶入的，還是使用者自己手動選的），之後不管怎麼切換語言都不會再被改動。想要「EU 規則庫＋繁體中文介面」這種組合（見 2.9 節）的使用者仍然完全支援——只要曾經碰過地區下拉選單一次即可（哪怕只是點開 `#regionSelect` 選了跟原本一樣的值）。
+**依顯示語言決定起始地區的一次性提示。** 若地區從未被明確存過值，把顯示語言（見 2.9 節）切成繁體中文時，地區會被帶到 `tw`，不會落回 `DEFAULT_REGION`——大多數選擇中文介面的使用者，處理的本來就是台灣相關文件，這樣可以省掉開啟工具後還要多點一次地區下拉選單的步驟。原始碼裡的 `LANG_TO_STARTER_REGION` 控制這個對應（現在只剩 `{ zh: 'tw' }`——`ja` → `jp` 那個對應項已隨著日文支援一起刪除，見 2.9 節）。這是**一次性的起始提示，不是持續性的連動**：只要地區還沒被存過值（用 `localStorage.getItem(REGION_STORAGE_KEY) === null` 判斷）才會生效——地區一旦有了任何明確值（不管是被這個機制帶入的，還是使用者自己手動選的），之後不管怎麼切換語言都不會再被改動。想要「EU 規則庫＋繁體中文介面」這種組合（見 2.9 節）的使用者仍然完全支援——只要曾經碰過地區下拉選單一次即可（哪怕只是點開 `#regionSelect` 選了跟原本一樣的值）。
 
 同一時間僅有**一組**地區規則生效，疊加於永遠開啟的 `global` 底層規則之上——這是刻意設計以避免不同國家格式互相誤判（例如同一個 9 碼數字不該同時被當作美國 SSN 又被當作其他東西）。身分模式邏輯相同，同一時間僅有一組詞庫生效。
 
@@ -113,14 +113,16 @@ let currentPersona = localStorage.getItem(PERSONA_STORAGE_KEY) || DEFAULT_PERSON
 
 ### 2.3 安全阻斷防線（`HARD_BLOCK_PRESETS_DEFAULT`）
 
-`personal` 與 `business` 兩組陣列，各約 20～21 個**概念**——不是扁平的關鍵字字串。每個概念是一個 `{ en, zh, ja }` 三語組合，例如 `{ en: "sexual assault", zh: "性侵害", ja: "性的暴行" }`。`getHardBlockKeywords()` 會把目前生效身分（加上維持單一數值的 `custom` 層）裡每個概念、每個非空欄位攤平成一份字串包含掃描清單——**三種語言永遠同時生效，不受 `currentLang`／`currentRegion` 影響**。真正決定會不會觸發的是**貼上內容本身的語言**，不是介面顯示語言或選定的地區；三種文字永遠保持同時生效，才能讓貼上中文或日文的內容跟貼上英文一樣觸發同一層防護。只要攤平後的清單裡有任何一個詞命中輸入文字，MaskFirst 就會鎖定介面：
+`personal` 與 `business` 兩組陣列，各約 20～21 個**概念**——不是扁平的關鍵字字串。每個概念是一個 `{ en, zh }` 組合，例如 `{ en: "sexual assault", zh: "性侵害" }`。`getHardBlockKeywords()` 會把目前生效身分（加上維持單一數值的 `custom` 層）裡每個概念、每個非空欄位攤平成一份字串包含掃描清單——**兩種語言永遠同時生效，不受 `currentLang`／`currentRegion` 影響**。真正決定會不會觸發的是**貼上內容本身的語言**，不是介面顯示語言或選定的地區；兩種文字永遠保持同時生效，才能讓貼上中文的內容跟貼上英文一樣觸發同一層防護。只要攤平後的清單裡有任何一個詞命中輸入文字，MaskFirst 就會鎖定介面：
 - 顯示**紅色警示橫幅**
 - **複製按鈕停用**
 - 使用者須透過解鎖視窗明確**確認並解除鎖定**
 
 與 EduShield 的中文詞彙比對（不需處理大小寫）不同，`extractStaticEntities()` 的 `addEnt()` 裡的關鍵字比對採**不區分大小寫**：將文字與關鍵字皆轉小寫以定位命中位置，再從**原始文字**中依原始大小寫切出對應子字串，確保報表顯示的是文字實際出現的樣貌，而非小寫關鍵字本身。
 
-「管理自訂防護規則」面板（見 2.8 節）裡每個概念顯示成一列、三個並排欄位（讀中文/日文的人通常也讀得懂英文，這樣比捲動三份各自獨立、內容其實是同一批約 20 個概念的清單更直觀）。編輯或清空單一欄位只會影響那個語言——欄位清空代表該語言不參與比對，但列本身不會被刪除；刪除整列才會三個語言一起移除。`custom` 詞庫不受這個機制影響——維持原本的單一自由文字值，透過「+ 新增一列」或 CSV 匯入新增，沒有語言結構。
+「管理自訂防護規則」面板（見 2.8 節）裡每個概念顯示成一列、兩個並排欄位（讀中文的人通常也讀得懂英文，這樣比捲動兩份各自獨立、內容其實是同一批約 20 個概念的清單更直觀）。編輯或清空單一欄位只會影響那個語言——欄位清空代表該語言不參與比對，但列本身不會被刪除；刪除整列才會兩個語言一起移除。`custom` 詞庫不受這個機制影響——維持原本的單一自由文字值，透過「+ 新增一列」或 CSV 匯入新增，沒有語言結構。
+
+> 這裡在 2026-08-27 之前還有 `ja` 欄位/欄（見 2.9 節）——連同日文支援一起刪除，不是只是隱藏。
 
 ### 2.4 自訂詞庫（`customDict`）
 
@@ -168,7 +170,7 @@ let aiPrompts = { channel1: '', channel2Personal: '', channel2Business: '' };
 ```
 每筆都帶 `source` 欄位並以徽章顯示：`Built-in`／`Config file import`／`Manually imported`／`Overridden`。正則規則改存 `pattern`／`flags` 字串（不再是即時的 `RegExp` 物件），每次使用都經過 `tryCompileRegexRow()` 的 try/catch 保護，格式錯誤的規則會被略過並個別回報，不會中斷其餘掃描。
 
-內建項目另外帶有回指對應原始值的穩定連結，編輯多次也不會遺失——硬阻斷是 `default: { en, zh, ja }`（整組三語一起存，因為「還原預設」是一次還原全部三個欄位），正則規則是 `defaultPattern`。這撐起兩個安全網功能，讓「Reset to Defaults」（會連 `custom` 一起清空）不是唯一的復原手段：任一已編輯/仍存在的內建列都有**「還原預設」**按鈕；已刪除的內建列會出現在表格下方**「已從預設清單移除」**清單，可個別加回（`revertHardBlockEntryAt()`／`restoreRemovedHardBlockDefault()` 與其正則版本——硬阻斷版本靠 `en` 欄位找回被移除的概念，因為 `en` 在同一個 bucket 裡永遠存在且唯一）。編輯正則規則列時，內建的 `validate` 檢查碼函式（Luhn、台灣身分證、日本 My Number 等）會被保留——比對依據是規則的 `type`（穩定識別碼）而非 pattern 文字，即使 pattern／名稱／範例都被改過也找得到；正則規則另外還帶一個獨立的 `defaultNameByLang` 連結（即時 `name` 字串當初取自哪一組 `{en,zh,ja}` 三語組合），讓切換顯示語言時能分辨這個名稱是使用者編輯過的、還是還沒動過的預設值——詳見 2.9 節。這些都是工作階段記憶體狀態，重新整理即回到真正的預設值，除非透過下方的設定檔匯出/匯入保留（因此「Reset to Defaults」與「Export/Import Config File」放在一起說明）。
+內建項目另外帶有回指對應原始值的穩定連結，編輯多次也不會遺失——硬阻斷是 `default: { en, zh }`（整組一起存，因為「還原預設」是一次還原兩個欄位），正則規則是 `defaultPattern`。這撐起兩個安全網功能，讓「Reset to Defaults」（會連 `custom` 一起清空）不是唯一的復原手段：任一已編輯/仍存在的內建列都有**「還原預設」**按鈕；已刪除的內建列會出現在表格下方**「已從預設清單移除」**清單，可個別加回（`revertHardBlockEntryAt()`／`restoreRemovedHardBlockDefault()` 與其正則版本——硬阻斷版本靠 `en` 欄位找回被移除的概念，因為 `en` 在同一個 bucket 裡永遠存在且唯一）。編輯正則規則列時，內建的 `validate` 檢查碼函式（Luhn、台灣身分證、日本 My Number 等）會被保留——比對依據是規則的 `type`（穩定識別碼）而非 pattern 文字，即使 pattern／名稱／範例都被改過也找得到；正則規則另外還帶一個獨立的 `defaultNameByLang` 連結（即時 `name` 字串當初取自哪一組 `{en,zh}` 組合），讓切換顯示語言時能分辨這個名稱是使用者編輯過的、還是還沒動過的預設值——詳見 2.9 節。這些都是工作階段記憶體狀態，重新整理即回到真正的預設值，除非透過下方的設定檔匯出/匯入保留（因此「Reset to Defaults」與「Export/Import Config File」放在一起說明）。
 
 CSV 範本：硬阻斷詞彙為單欄 `Keyword`；正則規則為 4 欄 `TypeTag,RuleName,Pattern,ExampleText`，`Pattern` 欄可填純 pattern（預設補 `g` flag）或完整的 `/pattern/flags` 字面量格式字串。
 
@@ -186,7 +188,7 @@ window.TOKENSHIELD_AUTO_CONFIG = {
   regexRules: [ { type: "CUSTOM_CODE", pattern: "CODE-\\d{4}", flags: "g", name: "Custom code", example: "CODE-1234" } ],
   // 只有真的被編輯/刪除過的 Persona/Region 桶才會出現這兩個欄位——見 hardBlockBucketIsDefault()/regexBucketIsDefault()。
   // 完全沒動過的桶不會出現，避免從沒編輯過內建規則的人匯出的檔案也帶著整份規則庫。
-  hardBlockOverrides: { personal: [ { en: "...", zh: "...", ja: "..." } ] },
+  hardBlockOverrides: { personal: [ { en: "...", zh: "..." } ] },
   regexOverrides: { us: [ { type: "US_SSN", pattern: "...", flags: "g", name: "...", example: "..." } ] },
   aiPrompts: { channel1: "...{{TEXT}}", channel2Personal: "...{{TEXT}}", channel2Business: "...{{TEXT}}" }
 };
@@ -205,23 +207,23 @@ window.TOKENSHIELD_AUTO_CONFIG = {
 頂部工具列的 `#langSelect` 下拉選單可切換介面在**英文／繁體中文**之間顯示，刻意與 `currentRegion`／`currentPersona`（見 2.1 節）脫鉤——Region／Persona 決定套用哪一組*規則資料*，這裡只決定介面文字用哪個*語言*呈現，所以「套用 EU 規則庫、介面顯示繁體中文」這種組合是完全支援的。唯一的例外是 2.1 節提到的一次性起始提示：地區從未被碰過時，切到繁體中文會把地區帶到 `tw`——地區一旦被碰過一次之後，這兩者在該瀏覽器往後的使用期間就完全獨立，不會再互相影響。
 
 > [!NOTE]
-> **日文介面已停用（2026-08-27）**：`#langSelect` 不再提供 `ja` 選項——目前還沒有已驗證的日文使用者需求，權衡下來扛不起之後每次改動內容都要多付一份翻譯的持續成本。這只是顯示語言層面的決定：`SUPPORTED_DISPLAY_LANGS = ['en', 'zh']` 限制了 `currentLang` 能解析出的值（包含把 `localStorage` 裡殘留的舊 `ja` 值退回 `en`），但底層的 `ja` 翻譯內容完全沒有刪除——I18N 字典裡的 `ja` 條目、`HARD_BLOCK_PRESETS_DEFAULT`／`REGEX_PRESETS_DEFAULT` 的 `ja` 欄位，以及 `AI_PROMPTS_DEFAULT`／`LOCAL_AI_PROMPTS` 的 `ja` 版本全部都還在，只是下拉選單暫時碰不到而已。以下兩件事不受影響、行為維持本節後續說明的樣子：硬阻斷的 `ja` 詞彙（不論顯示語言為何，永遠參與比對）與 `jp` 地區規則庫（My Number／電話／郵遞區號，這是格式層面的事，不是介面語言層面的事）。之後要重新啟用只要兩處還原：把兩個 `<option value="ja">日本語</option>` 加回去，並拿掉 `SUPPORTED_DISPLAY_LANGS` 這道限制。
+> **日文已移除（2026-08-27）**：`#langSelect` 現在只提供英文／繁體中文——目前還沒有已驗證的日文使用者需求，權衡下來扛不起之後每次改動內容都要多付一份翻譯的持續成本。這是真正的刪除，不是藏起來保留：每一份 `ja` 翻譯都被移除了——I18N 字典裡的 `ja` 條目、`HARD_BLOCK_PRESETS_DEFAULT`／`REGEX_PRESETS_DEFAULT` 的 `ja` 欄位（每個概念/規則從三語物件改回 `{ en, zh }`，硬阻斷管理表格的第三欄也一併拿掉）、`AI_PROMPTS_DEFAULT.ja`／`LOCAL_AI_PROMPTS.ja`，以及檔案最上方「無網路連線」救援畫面裡的 `ja` 分支。`SUPPORTED_DISPLAY_LANGS = ['en', 'zh']` 用來防呆：如果使用者的 `localStorage` 還殘留著改動前存下的 `ja` 值，會被強制退回 `en`。`jp` **地區**規則庫（My Number／電話／郵遞區號格式偵測）不受影響——那是格式層面的事，跟顯示語言或硬阻斷內容無關。之後要重新加回日文，等於要重新把翻譯寫一次，不是切換一個開關就好——可以參考這個日期之前的 git 歷史紀錄找回被刪除的內容當起點。
 
 ```javascript
 const LANG_STORAGE_KEY = 'maskfirst_display_lang';
 let currentLang = localStorage.getItem(LANG_STORAGE_KEY) || 'en'; // 會被記住，跟 Region/Persona（見 2.1 節）做法一致
-const I18N = { someKey: { en: '...', zh: '...', ja: '...' }, /* 約 220 組 key */ };
+const I18N = { someKey: { en: '...', zh: '...' }, /* 約 310 組 key */ };
 function t(key, vars) { /* 查找 I18N[key][currentLang]，找不到就退回 en，再退回 key 本身；支援 {placeholder} 變數插值 */ }
 function applyLanguage(lang) { /* 設定 currentLang、寫入 localStorage、掃描套用所有 data-i18n*、呼叫 refreshDynamicText() */ }
 ```
 
 靜態畫面透過 `data-i18n`（設定 `innerHTML`）、`data-i18n-placeholder`、`data-i18n-title`、`data-i18n-aria-label` 這幾個屬性接入字典。動態組出來的字串（toast 訊息、`showConfirmModal()` 的訊息、`renderHardBlockMgmtTable()`／`renderRegexMgmtTable()` 這類表格渲染函式）則直接呼叫 `t()`，不再把英文字面字串寫死。`refreshDynamicText()` 會重新執行這些「純渲染」函式，讓當下已經開啟的面板在切換語言的當下就立即反映新語言，不需要使用者重新開啟一次。PII Rule Guide 已不再渲染即時規則表格（`renderGuideTable()` 已移除，指南改為純概念說明，見 2.8 節）——`refreshGuideModalIfOpen()` 保留成一個有記錄的空函式，這樣其他呼叫它的地方不用知道這件事。
 
-**`HARD_BLOCK_PRESETS_DEFAULT`（`personal`／`business` 關鍵字清單）把英文／繁體中文／日文三種語言的詞彙同時放進同一個 bucket，三者永遠同時生效**——這**不是**跟著 `currentLang` 切換的。比對方式是單純的字串包含掃描（`getHardBlockKeywords()` → `lowerText.includes(kw.toLowerCase())`），所以真正決定貼上內容會不會觸發硬阻斷的是**內容本身的語言**，不是介面顯示語言；不管 `currentLang` 設成什麼，三種文字都保持同時生效，才能讓貼上中文或日文的極敏感內容，跟貼上英文內容一樣觸發同一層防護，而不是只有貼上內容剛好跟介面顯示語言一致時才會觸發。
+**`HARD_BLOCK_PRESETS_DEFAULT`（`personal`／`business` 關鍵字清單）把英文／繁體中文兩種語言的詞彙同時放進同一個 bucket，兩者永遠同時生效**——這**不是**跟著 `currentLang` 切換的。比對方式是單純的字串包含掃描（`getHardBlockKeywords()` → `lowerText.includes(kw.toLowerCase())`），所以真正決定貼上內容會不會觸發硬阻斷的是**內容本身的語言**，不是介面顯示語言；不管 `currentLang` 設成什麼，兩種文字都保持同時生效，才能讓貼上中文的極敏感內容，跟貼上英文內容一樣觸發同一層防護，而不是只有貼上內容剛好跟介面顯示語言一致時才會觸發。
 
-**`LOCAL_AI_PROMPTS` 與 `AI_PROMPTS_DEFAULT`（`aiPrompts` 的來源）則改為依顯示語言分別存放**（`en`／`zh`／`ja`），跟上面的硬阻斷清單做法不同——這些是給人看、給人編輯的內容（複製到剪貼簿的提示詞庫，見 2.6 節；管理自訂防護規則的「AI 提示詞」分頁，見 2.8 節），不是拿去跟貼上的內容做比對，所以讓使用者依照介面設定的語言看到內容（而不是預設使用者看得懂英文）才是這裡真正在意的事。`applyLanguage()` 會在每次切換語言時，把提示詞換成新語言的預設文字，但**只換掉還維持原語言預設值、使用者沒動過的欄位**——任何使用者在「AI 提示詞」面板自訂過的內容，切換語言時都會原封不動保留。提示詞裡要求模型回傳的 JSON 欄位名稱與列舉值（`type`／`value`／`reason`、`PERSON`／`VENDOR`／`ADDRESS`／`PROJECT`／`BANK_ACCT`、`critical`）在三種語言版本裡都維持英文不變，因為 `CHANNEL1_RESPONSE_SCHEMA`／`CHANNEL2_RESPONSE_SCHEMA` 與解析模型回傳 JSON 的程式碼都依賴這些固定字面值。
+**`LOCAL_AI_PROMPTS` 與 `AI_PROMPTS_DEFAULT`（`aiPrompts` 的來源）則改為依顯示語言分別存放**（`en`／`zh`），跟上面的硬阻斷清單做法不同——這些是給人看、給人編輯的內容（複製到剪貼簿的提示詞庫，見 2.6 節；管理自訂防護規則的「AI 提示詞」分頁，見 2.8 節），不是拿去跟貼上的內容做比對，所以讓使用者依照介面設定的語言看到內容（而不是預設使用者看得懂英文）才是這裡真正在意的事。`applyLanguage()` 會在每次切換語言時，把提示詞換成新語言的預設文字，但**只換掉還維持原語言預設值、使用者沒動過的欄位**——任何使用者在「AI 提示詞」面板自訂過的內容，切換語言時都會原封不動保留。提示詞裡要求模型回傳的 JSON 欄位名稱與列舉值（`type`／`value`／`reason`、`PERSON`／`VENDOR`／`ADDRESS`／`PROJECT`／`BANK_ACCT`、`critical`）在兩種語言版本裡都維持英文不變，因為 `CHANNEL1_RESPONSE_SCHEMA`／`CHANNEL2_RESPONSE_SCHEMA` 與解析模型回傳 JSON 的程式碼都依賴這些固定字面值。
 
-**`REGEX_PRESETS_DEFAULT` 規則的 `name` 欄位也改為依顯示語言分別存放**（`{ en, zh, ja }`，透過規則資料旁的 `N()` 小工具函式建立）——規則的 `name` 不只是管理面板裡的標籤文字，它會直接流進 `entities.push({ ..., reason: rule.name, ... })`，變成即時預覽 entity chip 上顯示的類別文字（見 2.2 節的 `data.reason`），所以之前只有英文版，會讓中文/日文介面的 chip 標籤仍然顯示英文。`regexNameFor(def)` 會把某條規則的 `name` 物件解析成 `currentLang` 對應的即時字串（找不到就退回英文）；`syncRegexNamesToLanguage()` 比照 `syncAiPromptsToLanguage()`「還維持原語言預設值才換、使用者編輯過就不動」的規則，逐條規則各自判斷（靠每條內建規則活的資料上都帶著的 `defaultNameByLang` 連結），所以使用者在管理面板編輯過的規則名稱，切換語言時會原封不動保留。切換當下畫面上已經顯示的 chip，標籤會維持切換前的語言直到下次重新掃描，這跟既有「切換地區不會馬上生效」的先例（見 3.3 節疑難排解表格）是同一套邏輯。
+**`REGEX_PRESETS_DEFAULT` 規則的 `name` 欄位也改為依顯示語言分別存放**（`{ en, zh }`，透過規則資料旁的 `N()` 小工具函式建立）——規則的 `name` 不只是管理面板裡的標籤文字，它會直接流進 `entities.push({ ..., reason: rule.name, ... })`，變成即時預覽 entity chip 上顯示的類別文字（見 2.2 節的 `data.reason`），所以之前只有英文版，會讓中文介面的 chip 標籤仍然顯示英文。`regexNameFor(def)` 會把某條規則的 `name` 物件解析成 `currentLang` 對應的即時字串（找不到就退回英文）；`syncRegexNamesToLanguage()` 比照 `syncAiPromptsToLanguage()`「還維持原語言預設值才換、使用者編輯過就不動」的規則，逐條規則各自判斷（靠每條內建規則活的資料上都帶著的 `defaultNameByLang` 連結），所以使用者在管理面板編輯過的規則名稱，切換語言時會原封不動保留。切換當下畫面上已經顯示的 chip，標籤會維持切換前的語言直到下次重新掃描，這跟既有「切換地區不會馬上生效」的先例（見 3.3 節疑難排解表格）是同一套邏輯。
 
 **仍然刻意不翻譯的部分**：`REGEX_PRESETS_DEFAULT` 規則的 `example` 欄位——比對範例本身是格式示範（數字、標點符號），不是語言內容，翻譯「192.168.1.1」或「4111 1111 1111 1111」這類範例沒有意義；唯一的例外 `TW_ADDRESS` 的範例本來就已經是一個實際的台灣地址，用的正是這條規則要比對的語言。`type` 在三種語言版本裡也都維持不翻譯——它是被 token 產生機制（`{{TYPE_N}}`）與 CSV／設定檔匯入比對邏輯依賴的穩定技術標籤，不是給人讀的文字。這裡（以及 Region／Persona，見 2.1 節）的 `localStorage` 持久化，是刻意對 MaskFirst 資料生命週期承諾（見 1.2 節）的一個範圍受限的例外——這些都是介面偏好設定，不是文件內容或掃描狀態，後者仍然每次重整都會消滅。
 

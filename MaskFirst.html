@@ -174,11 +174,10 @@
             var failSafeLang = (function () {
               try {
                 var stored = localStorage.getItem('maskfirst_display_lang');
-                if (stored === 'zh' || stored === 'ja' || stored === 'en') return stored;
+                if (stored === 'zh' || stored === 'en') return stored;
               } catch (e) {}
               var nav = (navigator.language || '').toLowerCase();
               if (nav.indexOf('zh') === 0) return 'zh';
-              if (nav.indexOf('ja') === 0) return 'ja';
               return 'en';
             })();
             var FAIL_SAFE_TEXT = {
@@ -197,14 +196,6 @@
                 step2: '把 <code style="background:#f5f5f4;border-radius:4px;padding:2px 4px;font-size:.85em;">style.css</code> 放在與 <code style="background:#f5f5f4;border-radius:4px;padding:2px 4px;font-size:.85em;">MaskFirst.html</code> <strong>相同的資料夾</strong>中。',
                 step3: '重新整理此頁面（<kbd style="border:1px solid #d4d4d4;border-radius:4px;padding:1px 6px;background:#fafaf9;">F5</kbd>）。',
                 reload: '重新整理'
-              },
-              ja: {
-                title: '起動に失敗しました（ネットワーク接続なし）',
-                body: 'この端末は<strong>オフライン</strong>のようで、ローカルのスタイルシート <code style="background:#f5f5f4;border-radius:4px;padding:2px 6px;font-size:.85em;">style.css</code> も見つかりませんでした。',
-                step1: 'プロジェクトのリリースページから <code style="background:#f5f5f4;border-radius:4px;padding:2px 4px;font-size:.85em;">style.css</code> をダウンロードしてください。',
-                step2: '<code style="background:#f5f5f4;border-radius:4px;padding:2px 4px;font-size:.85em;">style.css</code> を <code style="background:#f5f5f4;border-radius:4px;padding:2px 4px;font-size:.85em;">MaskFirst.html</code> と<strong>同じフォルダ</strong>に置いてください。',
-                step3: 'このページを再読み込みしてください（<kbd style="border:1px solid #d4d4d4;border-radius:4px;padding:1px 6px;background:#fafaf9;">F5</kbd>）。',
-                reload: '再読み込み'
               }
             };
             var FS = FAIL_SAFE_TEXT[failSafeLang];
@@ -1088,7 +1079,6 @@
               <thead class="bg-paper-sunken sticky top-0"><tr>
                 <th class="px-3 py-2 font-medium text-ink-secondary border-b border-line">English</th>
                 <th class="px-3 py-2 font-medium text-ink-secondary border-b border-line">繁體中文</th>
-                <th class="px-3 py-2 font-medium text-ink-secondary border-b border-line">日本語</th>
                 <th class="px-3 py-2 font-medium text-ink-secondary border-b border-line w-28 text-center" data-i18n="pmColActions">Actions</th>
               </tr></thead>
               <tbody id="hardBlockMgmtTbody" class="divide-y divide-line bg-white"></tbody>
@@ -1281,359 +1271,359 @@
     // Region/Persona select which rule data is active; this only controls display language.
     // ==========================================
     const LANG_STORAGE_KEY = 'maskfirst_display_lang';
-    // Japanese UI disabled 2026-08-27 (no validated demand yet, recurring 3-way translation cost on every
-    // future content change) — #langSelect no longer offers "ja", so a fresh pick can never produce it.
-    // This guards the other path: a returning visitor whose localStorage still has "ja" from before this
-    // change would otherwise silently keep getting Japanese strings from I18N (t() doesn't know "ja" was
-    // removed from the picker) while the dropdown itself shows nothing selected. Not a removal of the
-    // underlying ja translation data (I18N dict entries, HARD_BLOCK_PRESETS_DEFAULT/REGEX_PRESETS_DEFAULT
-    // ja fields, AI_PROMPTS_DEFAULT.ja/LOCAL_AI_PROMPTS.ja) — Hard Block's ja terms stay active in
-    // matching regardless of display language (see getHardBlockKeywords()), and the `jp` Region ruleset
-    // is unaffected; only the ja *display language* is turned off, and only at this one fallback point,
-    // so re-enabling later is a two-line revert (this guard + the two <option value="ja"> in the header).
+    // Japanese removed 2026-08-27 (no validated demand yet, recurring translation cost on every future
+    // content change) — #langSelect no longer offers "ja", and all `ja` translation content was deleted:
+    // I18N dict entries, HARD_BLOCK_PRESETS_DEFAULT/REGEX_PRESETS_DEFAULT `ja` fields, AI_PROMPTS_DEFAULT.ja,
+    // LOCAL_AI_PROMPTS.ja, and the fail-safe (no-network) screen's `ja` branch near the top of this file.
+    // The `jp` Region ruleset (My Number, phone, postal code format detection) is unrelated and untouched —
+    // it's a structural-format concern, not a translation one. SUPPORTED_DISPLAY_LANGS guards a returning
+    // visitor whose localStorage still has "ja" from a visit before this change: without this, t() would
+    // silently fall through I18N's own `entry.en` fallback for every key (since `entry.ja` no longer
+    // exists), which happens to read as English anyway — but `currentLang` staying 'ja' internally would
+    // still be wrong state to carry around, so it's coerced back to 'en' explicitly at the source.
     const SUPPORTED_DISPLAY_LANGS = ['en', 'zh'];
     let currentLang = localStorage.getItem(LANG_STORAGE_KEY) || 'en';
     if (!SUPPORTED_DISPLAY_LANGS.includes(currentLang)) currentLang = 'en';
 
     const I18N = {
       // ---- Header / nav ----
-      headerTagline: { en: 'Privacy Shield for AI', zh: 'AI 隱私防護盾', ja: 'AIのためのプライバシーシールド' },
-      tabDeidentify: { en: 'De-identify', zh: '去識別化', ja: '匿名化' },
-      tabRestore: { en: 'Restore', zh: '還原', ja: '復元' },
-      langSelectLabel: { en: 'Display language', zh: '顯示語言', ja: '表示言語' },
-      langSelectTitle: { en: 'Display language — independent from the Region ruleset below', zh: '顯示語言──與下方的地區規則庫彼此獨立', ja: '表示言語──下の地域ルールセットとは独立しています' },
-      regionSelectLabel: { en: 'Region ruleset', zh: '地區規則庫', ja: '地域ルールセット' },
-      regionSelectTitle: { en: 'Regional PII ruleset — only one is active at a time, plus the always-on Global baseline', zh: '地區個資規則庫──同時間只會啟用一個地區，並疊加永遠啟用的全球基準規則', ja: '地域別PIIルールセット──常時有効なグローバル基準に加え、一度に1つの地域のみ有効になります' },
-      personaSelectLabel: { en: 'Persona', zh: '身分模式', ja: 'ペルソナ' },
-      personaSelectTitle: { en: 'Hard Block keyword set — Personal privacy terms vs. Business confidentiality terms', zh: '硬阻斷關鍵字集──個人隱私用語 vs. 企業機密用語', ja: 'ハードブロックキーワードセット──個人のプライバシー用語 と 企業の機密用語' },
-      personaPersonal: { en: 'Personal', zh: '個人', ja: '個人' },
-      personaBusiness: { en: 'Business', zh: '企業', ja: 'ビジネス' },
-      dictCountLabel: { en: 'Dictionary: {count}', zh: '詞庫：{count}', ja: '辞書：{count}' },
-      btnPiiGuide: { en: 'PII Rule Guide', zh: '個資規則說明', ja: 'PIIルールガイド' },
-      btnPiiGuideShort: { en: 'Guide', zh: '指南', ja: 'ガイド' },
-      btnSettings: { en: 'Settings', zh: '設定', ja: '設定' },
-      btnManageRules: { en: 'Manage Custom Protection Rules', zh: '管理自訂防護規則', ja: 'カスタム保護ルールを管理' },
-      btnManageRulesShort: { en: 'Manage Rules', zh: '管理規則', ja: 'ルール管理' },
-      hardBlockBannerText: { en: 'Warning: extremely sensitive terms detected. The copy function has been locked to prevent accidental exposure.', zh: '警告：偵測到極度敏感的用語，複製功能已被鎖定以避免不慎外流。', ja: '警告：極めて機微な用語が検出されました。誤った漏洩を防ぐため、コピー機能をロックしました。' },
-      hardBlockBannerBtn: { en: 'View Details & Unlock', zh: '查看詳情並解鎖', ja: '詳細を見て解除' },
-      moreMenuLabel: { en: 'More', zh: '更多', ja: 'その他' },
-      toastAppliedCustomDict: { en: 'Applied {count} custom dictionary entries!', zh: '已套用 {count} 筆自訂詞庫項目！', ja: 'カスタム辞書エントリを{count}件適用しました！' },
+      headerTagline: { en: 'Privacy Shield for AI', zh: 'AI 隱私防護盾' },
+      tabDeidentify: { en: 'De-identify', zh: '去識別化' },
+      tabRestore: { en: 'Restore', zh: '還原' },
+      langSelectLabel: { en: 'Display language', zh: '顯示語言' },
+      langSelectTitle: { en: 'Display language — independent from the Region ruleset below', zh: '顯示語言──與下方的地區規則庫彼此獨立' },
+      regionSelectLabel: { en: 'Region ruleset', zh: '地區規則庫' },
+      regionSelectTitle: { en: 'Regional PII ruleset — only one is active at a time, plus the always-on Global baseline', zh: '地區個資規則庫──同時間只會啟用一個地區，並疊加永遠啟用的全球基準規則' },
+      personaSelectLabel: { en: 'Persona', zh: '身分模式' },
+      personaSelectTitle: { en: 'Hard Block keyword set — Personal privacy terms vs. Business confidentiality terms', zh: '硬阻斷關鍵字集──個人隱私用語 vs. 企業機密用語' },
+      personaPersonal: { en: 'Personal', zh: '個人' },
+      personaBusiness: { en: 'Business', zh: '企業' },
+      dictCountLabel: { en: 'Dictionary: {count}', zh: '詞庫：{count}' },
+      btnPiiGuide: { en: 'PII Rule Guide', zh: '個資規則說明' },
+      btnPiiGuideShort: { en: 'Guide', zh: '指南' },
+      btnSettings: { en: 'Settings', zh: '設定' },
+      btnManageRules: { en: 'Manage Custom Protection Rules', zh: '管理自訂防護規則' },
+      btnManageRulesShort: { en: 'Manage Rules', zh: '管理規則' },
+      hardBlockBannerText: { en: 'Warning: extremely sensitive terms detected. The copy function has been locked to prevent accidental exposure.', zh: '警告：偵測到極度敏感的用語，複製功能已被鎖定以避免不慎外流。' },
+      hardBlockBannerBtn: { en: 'View Details & Unlock', zh: '查看詳情並解鎖' },
+      moreMenuLabel: { en: 'More', zh: '更多' },
+      toastAppliedCustomDict: { en: 'Applied {count} custom dictionary entries!', zh: '已套用 {count} 筆自訂詞庫項目！' },
 
       // ---- Common / shared strings ----
-      commonClear: { en: 'Clear', zh: '清除', ja: 'クリア' },
-      commonNoData: { en: 'No data', zh: '尚無資料', ja: 'データなし' },
-      commonNotRunYet: { en: 'Not run yet', zh: '尚未執行', ja: '未実行' },
-      commonEnlargeView: { en: 'Enlarge View', zh: '放大檢視', ja: '拡大表示' },
-      commonAiReplyPlaceholder: { en: 'Paste the reply from ChatGPT / Claude here...', zh: '在此貼上 ChatGPT／Claude 的回覆……', ja: 'ここにChatGPT／Claudeの返信を貼り付けてください…' },
-      commonPasteClipboard: { en: 'Paste from Clipboard', zh: '從剪貼簿貼上', ja: 'クリップボードから貼り付け' },
+      commonClear: { en: 'Clear', zh: '清除' },
+      commonNoData: { en: 'No data', zh: '尚無資料' },
+      commonNotRunYet: { en: 'Not run yet', zh: '尚未執行' },
+      commonEnlargeView: { en: 'Enlarge View', zh: '放大檢視' },
+      commonAiReplyPlaceholder: { en: 'Paste the reply from ChatGPT / Claude here...', zh: '在此貼上 ChatGPT／Claude 的回覆……' },
+      commonPasteClipboard: { en: 'Paste from Clipboard', zh: '從剪貼簿貼上' },
 
       // ---- View 1: De-identification ----
-      v1OriginalInputLabel: { en: 'Original Data Input', zh: '原始資料輸入', ja: '元データ入力' },
-      v1RawInputPlaceholder: { en: "Paste a document, email, or spreadsheet here... Select text for a quick 'mark as sensitive' menu.", zh: '在此貼上文件、電子郵件或試算表內容……選取文字可快速開啟「標記為敏感」選單。', ja: 'ここに文書、メール、表計算データなどを貼り付けてください…テキストを選択すると「機微情報としてマーク」メニューをすぐに開けます。' },
-      v1DetectedItemsLabel: { en: 'Detected Items (click to un-mask)', zh: '已偵測項目（點擊可取消遮蔽）', ja: '検出された項目（クリックでマスク解除）' },
-      v1BtnExecute: { en: 'Execute De-identification', zh: '執行去識別化', ja: '匿名化を実行' },
-      v1MaskingDetailsLabel: { en: 'Masking Details', zh: '遮蔽明細', ja: 'マスキング詳細' },
-      v1DeidentifiedDataLabel: { en: 'De-identified Data', zh: '去識別化後資料', ja: '匿名化後のデータ' },
-      v1OutputPlaceholder: { en: 'Output will appear here after running de-identification...', zh: '執行去識別化後，結果會顯示在這裡……', ja: '匿名化を実行すると、結果がここに表示されます…' },
-      v1BtnScanLocalAi: { en: 'Scan with Local AI', zh: '使用本機 AI 掃描', ja: 'ローカルAIでスキャン' },
-      v1BtnCopyMasked: { en: 'Copy Masked Data', zh: '複製遮蔽後資料', ja: 'マスク済みデータをコピー' },
-      v1Layer1HintBanner: { en: 'Only basic pattern matching has run — names and irregular PII may still be exposed. Add recurring names to the Custom Dictionary for reliable masking; local AI deep scan is not reliable enough for names and should only be used as a supplementary check.', zh: '僅完成基礎掃描（正則比對），姓名等不規則個資可能仍未遮蔽。姓名建議加入「自訂詞庫」以確保穩定遮蔽，地端 AI 深度掃描對姓名的判讀仍不夠穩定，僅能作為輔助。', ja: '基本パターン照合のみ実行済みです。氏名などの不規則な個人情報が検出されていない可能性があります。氏名は「カスタム辞書」に追加すると確実にマスキングできます。ローカルAIによる詳細スキャンは氏名の判定精度がまだ十分ではなく、補助的な用途にとどめてください。' },
+      v1OriginalInputLabel: { en: 'Original Data Input', zh: '原始資料輸入' },
+      v1RawInputPlaceholder: { en: "Paste a document, email, or spreadsheet here... Select text for a quick 'mark as sensitive' menu.", zh: '在此貼上文件、電子郵件或試算表內容……選取文字可快速開啟「標記為敏感」選單。' },
+      v1DetectedItemsLabel: { en: 'Detected Items (click to un-mask)', zh: '已偵測項目（點擊可取消遮蔽）' },
+      v1BtnExecute: { en: 'Execute De-identification', zh: '執行去識別化' },
+      v1MaskingDetailsLabel: { en: 'Masking Details', zh: '遮蔽明細' },
+      v1DeidentifiedDataLabel: { en: 'De-identified Data', zh: '去識別化後資料' },
+      v1OutputPlaceholder: { en: 'Output will appear here after running de-identification...', zh: '執行去識別化後，結果會顯示在這裡……' },
+      v1BtnScanLocalAi: { en: 'Scan with Local AI', zh: '使用本機 AI 掃描' },
+      v1BtnCopyMasked: { en: 'Copy Masked Data', zh: '複製遮蔽後資料' },
+      v1Layer1HintBanner: { en: 'Only basic pattern matching has run — names and irregular PII may still be exposed. Add recurring names to the Custom Dictionary for reliable masking; local AI deep scan is not reliable enough for names and should only be used as a supplementary check.', zh: '僅完成基礎掃描（正則比對），姓名等不規則個資可能仍未遮蔽。姓名建議加入「自訂詞庫」以確保穩定遮蔽，地端 AI 深度掃描對姓名的判讀仍不夠穩定，僅能作為輔助。' },
 
       // ---- View 2: Restore & Compare ----
-      v2OriginalRecordLabel: { en: 'Original Data & Masking Record', zh: '原始資料與遮蔽紀錄', ja: '元データとマスキング記録' },
-      v2ReadOnlyPlaceholder: { en: 'Please run de-identification in the "De-identify" view first.', zh: '請先在「去識別化」畫面執行去識別化。', ja: 'まず「匿名化」画面で匿名化を実行してください。' },
-      v2MaskedItemsLabel: { en: 'Masked Items (hover to see the tag)', zh: '已遮蔽項目（將滑鼠移到上方可查看標籤）', ja: 'マスク済み項目（ホバーでタグを表示）' },
-      v2ExternalAiReplyLabel: { en: 'External AI Reply', zh: '外部 AI 回覆', ja: '外部AIの返信' },
-      v2BtnRunRestore: { en: 'Run Restore', zh: '執行還原', ja: '復元を実行' },
-      v2RestoreResultLabel: { en: 'Restore Result', zh: '還原結果', ja: '復元結果' },
-      v2MaskSymbolLabel: { en: 'Mask symbol:', zh: '遮蔽符號：', ja: 'マスク記号：' },
-      v2BtnClearResult: { en: 'Clear Result', zh: '清除結果', ja: '結果をクリア' },
-      v2BtnCopyRestored: { en: 'Copy Restored Text', zh: '複製還原後文字', ja: '復元後のテキストをコピー' },
+      v2OriginalRecordLabel: { en: 'Original Data & Masking Record', zh: '原始資料與遮蔽紀錄' },
+      v2ReadOnlyPlaceholder: { en: 'Please run de-identification in the "De-identify" view first.', zh: '請先在「去識別化」畫面執行去識別化。' },
+      v2MaskedItemsLabel: { en: 'Masked Items (hover to see the tag)', zh: '已遮蔽項目（將滑鼠移到上方可查看標籤）' },
+      v2ExternalAiReplyLabel: { en: 'External AI Reply', zh: '外部 AI 回覆' },
+      v2BtnRunRestore: { en: 'Run Restore', zh: '執行還原' },
+      v2RestoreResultLabel: { en: 'Restore Result', zh: '還原結果' },
+      v2MaskSymbolLabel: { en: 'Mask symbol:', zh: '遮蔽符號：' },
+      v2BtnClearResult: { en: 'Clear Result', zh: '清除結果' },
+      v2BtnCopyRestored: { en: 'Copy Restored Text', zh: '複製還原後文字' },
 
       // ---- Enlarge AI Reply modal ----
-      modalAiReplyTitle: { en: 'Edit External AI Reply (Enlarged)', zh: '編輯外部 AI 回覆（放大檢視）', ja: '外部AIの返信を編集（拡大表示）' },
-      modalAiReplyApplyBtn: { en: 'Apply & Restore', zh: '套用並還原', ja: '適用して復元' },
-      commonCancel: { en: 'Cancel', zh: '取消', ja: 'キャンセル' },
+      modalAiReplyTitle: { en: 'Edit External AI Reply (Enlarged)', zh: '編輯外部 AI 回覆（放大檢視）' },
+      modalAiReplyApplyBtn: { en: 'Apply & Restore', zh: '套用並還原' },
+      commonCancel: { en: 'Cancel', zh: '取消' },
 
       // ---- Settings modal ----
-      modalSettingsTitle: { en: 'Settings & Advanced Features', zh: '設定與進階功能', ja: '設定と高度な機能' },
-      settingsAuthorLine: { en: `Author: <strong>OA (oas114)</strong>`, zh: `作者：<strong>OA (oas114)</strong>`, ja: `作成者：<strong>OA (oas114)</strong>` },
-      settingsKofiLink: { en: 'Support on Ko-fi', zh: '在 Ko-fi 贊助', ja: 'Ko-fiで支援する' },
-      settingsRegionPersonaHeading: { en: 'Region & Persona Presets', zh: '地區與身分模式預設', ja: '地域とペルソナのプリセット' },
-      settingsRegionPersonaBody: { en: `The <strong>Region</strong> selector (top toolbar) swaps which country/region regex ruleset is layered on top of the always-on <strong>Global</strong> baseline (email, IP addresses, credit card numbers, generic dates). Only one region is active at a time to avoid cross-country format collisions (e.g. a bare 9-digit number shouldn't simultaneously be treated as a US SSN and something else). The <strong>Persona</strong> selector swaps the Hard Block keyword set between <strong>Personal</strong> privacy terms and <strong>Business</strong> confidentiality terms.`, zh: `<strong>地區</strong>選單（頂部工具列）用來切換要疊加在永遠啟用的<strong>全球</strong>基準規則（電子郵件、IP 位址、信用卡卡號、常見日期格式）之上的是哪個國家／地區的正則規則庫。同時間只會啟用一個地區，避免跨國格式互相衝突（例如一組純 9 位數字，不該同時被當成美國社會安全碼又被當成別的東西）。<strong>身分模式</strong>選單則用來切換硬阻斷關鍵字集，在<strong>個人</strong>隱私用語與<strong>企業</strong>機密用語之間切換。`, ja: `<strong>地域</strong>セレクター（上部ツールバー）は、常時有効な<strong>グローバル</strong>基準ルール（メールアドレス、IPアドレス、クレジットカード番号、一般的な日付形式）の上に、どの国・地域の正規表現ルールセットを重ねるかを切り替えます。国ごとの形式が衝突しないよう、一度に有効になる地域は1つだけです（例：9桁の数字だけでは、米国のSSNと他の何かを同時に表すことはできません）。<strong>ペルソナ</strong>セレクターは、ハードブロックのキーワードセットを<strong>個人</strong>のプライバシー用語と<strong>ビジネス</strong>の機密用語との間で切り替えます。` },
-      settingsRegionPersonaWarning: { en: `<strong>Nothing here is saved.</strong> MaskFirst destroys all state on reload by design, so your Region/Persona choice resets every time you open the file. If you always work in one region or persona, open <code class="bg-white border border-warning-200 px-1 rounded">MaskFirst.html</code> in a text editor, search for <code class="bg-white border border-warning-200 px-1 rounded">DEFAULT_REGION</code> and <code class="bg-white border border-warning-200 px-1 rounded">DEFAULT_PERSONA</code> near the top of the <code class="bg-white border border-warning-200 px-1 rounded">&lt;script&gt;</code> block, and change the value — that becomes your new startup default.`, zh: `<strong>這裡的設定不會被儲存。</strong>MaskFirst 的設計就是每次重新整理都會清空所有狀態，所以每次開啟檔案時 Region／Persona 都會重設。如果你固定只用某個地區或身分模式，可以用文字編輯器打開 <code class="bg-white border border-warning-200 px-1 rounded">MaskFirst.html</code>，在 <code class="bg-white border border-warning-200 px-1 rounded">&lt;script&gt;</code> 區塊開頭附近搜尋 <code class="bg-white border border-warning-200 px-1 rounded">DEFAULT_REGION</code> 與 <code class="bg-white border border-warning-200 px-1 rounded">DEFAULT_PERSONA</code>，把值改掉──那就會成為你新的預設啟動值。`, ja: `<strong>ここでの設定は保存されません。</strong>MaskFirstは仕様上、再読み込みのたびにすべての状態を破棄するため、Region／Personaの選択も開くたびにリセットされます。いつも同じ地域やペルソナで作業する場合は、テキストエディタで <code class="bg-white border border-warning-200 px-1 rounded">MaskFirst.html</code> を開き、<code class="bg-white border border-warning-200 px-1 rounded">&lt;script&gt;</code> ブロックの冒頭付近にある <code class="bg-white border border-warning-200 px-1 rounded">DEFAULT_REGION</code> と <code class="bg-white border border-warning-200 px-1 rounded">DEFAULT_PERSONA</code> を検索して値を変更してください──それが新しい起動時の既定値になります。` },
-      settingsCustomDictHeading: { en: 'Custom Dictionary (CSV)', zh: '自訂詞庫（CSV）', ja: 'カスタム辞書（CSV）' },
-      settingsCustomDictBody: { en: `Batch-import your own keywords, names, or project codenames. Download the template and fill it out using the "Keyword,Category" format. <strong>Category is optional</strong> — it defaults to CUSTOM if left blank. The system generates matching tags automatically (e.g. NAME_1, CUSTOM_1).<br><span class="text-warning-700 font-medium">Note: keyword values cannot contain commas — this will break CSV parsing. If a term itself contains a comma, use "Build Dictionary Online" instead.</span>`, zh: `批次匯入你自己的關鍵字、姓名或專案代號。下載範本後依「Keyword,Category」格式填寫，<strong>Category 欄位可留空</strong>──留空時預設歸類為 CUSTOM，系統會自動產生對應標籤（例如 NAME_1、CUSTOM_1）。<br><span class="text-warning-700 font-medium">注意：關鍵字內容不能包含逗號，否則會破壞 CSV 解析。如果詞彙本身就含有逗號，請改用「線上建立詞庫」功能。</span>`, ja: `キーワード、氏名、プロジェクトのコードネームなどを一括インポートできます。テンプレートをダウンロードし、「Keyword,Category」形式で入力してください。<strong>Category列は省略可</strong>──空欄の場合はCUSTOMとして扱われ、システムが自動でタグ（NAME_1、CUSTOM_1など）を生成します。<br><span class="text-warning-700 font-medium">注意：キーワードにカンマを含めることはできません（CSVの解析が壊れます）。カンマを含む語句を登録したい場合は、「オンラインで辞書を作成」を使用してください。</span>` },
-      commonDownloadCsvTemplate: { en: 'Download CSV Template', zh: '下載 CSV 範本', ja: 'CSVテンプレートをダウンロード' },
-      settingsBtnBuildDictOnline: { en: 'Build / Edit Dictionary Online', zh: '線上建立／編輯詞庫', ja: 'オンラインで辞書を作成／編集' },
-      settingsPromptLibHeading: { en: 'Local AI Prompt Library', zh: '本機 AI 提示詞庫', ja: 'ローカルAIプロンプトライブラリ' },
-      settingsPromptLibBody: { en: `Ready-to-copy system prompts for local models (Ollama, LM Studio, etc.). Paste one of these ahead of your masked text so the model's own instructions also stay privacy-aware — reinforcing that nothing, including your prompt phrasing, needs to leave this machine.`, zh: `提供可直接複製的系統提示詞，適用於本機模型（Ollama、LM Studio 等）。在遮蔽後的文字前貼上其中一段，讓模型本身的指令也具備隱私意識──強調包含提示詞措辭在內的一切內容，都不需要離開這台機器。`, ja: `ローカルモデル（Ollama、LM Studioなど）向けに、そのままコピーして使えるシステムプロンプトです。マスク済みテキストの前にこれらのいずれかを貼り付けることで、モデル自身の指示もプライバシーを意識したものになります──プロンプトの文言も含め、何も外部に出す必要がないことを強調します。` },
-      commonCopy: { en: 'Copy', zh: '複製', ja: 'コピー' },
-      settingsPromptPersonalDesc: { en: 'For personal documents — reminds the model that names/contacts are tokenized and must stay untouched.', zh: '適用於個人文件──提醒模型姓名／聯絡方式已被標記化，必須維持原樣不得更動。', ja: '個人向け文書用──氏名・連絡先がトークン化されていること、それらを変更してはならないことをモデルに念押しします。' },
-      settingsPromptBusinessDesc: { en: 'For business documents — frames the content as confidential/trade-secret material.', zh: '適用於企業文件──將內容定調為機密／營業秘密等級的資料。', ja: 'ビジネス向け文書用──内容を機密情報・営業秘密として扱うよう位置づけます。' },
-      settingsOllamaHeading: { en: 'Local AI (Ollama) Connection Setup', zh: '本機 AI（Ollama）連線設定', ja: 'ローカルAI（Ollama）接続設定' },
-      settingsOllamaInstallBox: { en: `<strong>Don't have Ollama installed yet?</strong><br>Download it from the <a href="https://ollama.com/download" target="_blank" class="underline font-bold text-brand-700 hover:text-brand-900">official Ollama website</a> and install it. Then open a terminal (Command Prompt / PowerShell / Terminal) and run the following command to install the default model:<br><code class="block mt-1 bg-white border border-brand-200 px-2 py-1 rounded font-mono text-ink">ollama run qwen2.5:3b</code>`, zh: `<strong>還沒安裝 Ollama？</strong><br>請前往<a href="https://ollama.com/download" target="_blank" class="underline font-bold text-brand-700 hover:text-brand-900">Ollama 官方網站</a>下載並安裝。安裝完成後開啟終端機（命令提示字元／PowerShell／Terminal），執行以下指令安裝預設模型：<br><code class="block mt-1 bg-white border border-brand-200 px-2 py-1 rounded font-mono text-ink">ollama run qwen2.5:3b</code>`, ja: `<strong>まだOllamaをインストールしていませんか？</strong><br><a href="https://ollama.com/download" target="_blank" class="underline font-bold text-brand-700 hover:text-brand-900">Ollama公式サイト</a>からダウンロードしてインストールしてください。インストール後、ターミナル（コマンドプロンプト／PowerShell／Terminal）を開き、以下のコマンドを実行して既定のモデルをインストールします：<br><code class="block mt-1 bg-white border border-brand-200 px-2 py-1 rounded font-mono text-ink">ollama run qwen2.5:3b</code>` },
-      settingsOllamaRiskBox: { en: `<strong class="text-warning-900">Why is this setting needed? And a risk warning</strong><br>Ollama blocks all web page access by default (a security protection). You need to add an "environment variable" named <code>OLLAMA_ORIGINS</code> set to <code>*</code> so Ollama allows this local MaskFirst page to connect.<br><br><strong class="text-danger-700">⚠️ Security risk notice:</strong><br>Setting the origin to <code>*</code> allows any web page to call your local model. This only affects your own user account and doesn't require administrator rights, but it does carry some risk of abuse by other malicious pages.<br><br><strong>We strongly recommend fully quitting Ollama from the system tray when you're not using this tool, or removing the environment variable afterward.</strong>`, zh: `<strong class="text-warning-900">為什麼需要這個設定？以及風險提醒</strong><br>Ollama 預設會封鎖所有網頁的存取（這是一項安全保護機制）。你需要新增一個名為 <code>OLLAMA_ORIGINS</code>、值設為 <code>*</code> 的「環境變數」，Ollama 才會允許這個本機的 MaskFirst 頁面連線。<br><br><strong class="text-danger-700">⚠️ 安全風險提醒：</strong><br>將 origin 設為 <code>*</code> 代表任何網頁都能呼叫你的本機模型。這僅影響你自己的使用者帳戶、不需要系統管理員權限，但仍存在被惡意網頁濫用的風險。<br><br><strong>強烈建議在不使用本工具時，於系統匣中完全關閉 Ollama，或事後移除該環境變數。</strong>`, ja: `<strong class="text-warning-900">なぜこの設定が必要か、そしてリスクについての注意</strong><br>Ollamaは既定ですべてのWebページからのアクセスをブロックします（セキュリティ保護のためです）。ローカルのMaskFirstページからの接続を許可するには、<code>OLLAMA_ORIGINS</code>という名前の「環境変数」を追加し、値を<code>*</code>に設定する必要があります。<br><br><strong class="text-danger-700">⚠️ セキュリティリスクに関する注意：</strong><br>originを<code>*</code>に設定すると、どのWebページからでもローカルモデルを呼び出せるようになります。これは自分のユーザーアカウントにのみ影響し、管理者権限は不要ですが、悪意あるページに悪用されるリスクが多少あります。<br><br><strong>本ツールを使用しないときはシステムトレイからOllamaを完全に終了するか、使用後にこの環境変数を削除することを強くお勧めします。</strong>` },
-      settingsOllamaStepsHeading: { en: 'Setup steps (one-time; persists across reboots after that)', zh: '設定步驟（只需設定一次，之後重開機也會保留）', ja: 'セットアップ手順（一度設定すれば、再起動後も保持されます）' },
-      settingsStep1Title: { en: 'Quit Ollama first', zh: '先關閉 Ollama', ja: 'まずOllamaを終了する' },
-      settingsStep1Body: { en: `Find the Ollama icon in your <strong>system tray</strong> (bottom-right, near the clock), <strong>right-click</strong> it, and choose "<strong>Quit Ollama</strong>" to fully close it.`, zh: `在<strong>系統匣</strong>（畫面右下角、時鐘附近）找到 Ollama 圖示，<strong>按右鍵</strong>後選擇「<strong>Quit Ollama</strong>」將它完全關閉。`, ja: `<strong>システムトレイ</strong>（右下、時計の近く）でOllamaのアイコンを見つけて<strong>右クリック</strong>し、「<strong>Quit Ollama</strong>」を選んで完全に終了してください。` },
-      settingsStep2Title: { en: `Open your OS's "Environment Variables" dialog`, zh: '開啟作業系統的「環境變數」設定視窗', ja: 'OSの「環境変数」ダイアログを開く' },
-      settingsStep2BodyWin: { en: `<strong>Windows:</strong> click Start, search "<strong>Edit environment variables for your account</strong>", and open it. Or press <code class="bg-paper-hover px-1 rounded">Win + R</code>, type <code class="bg-paper-hover px-1 rounded">sysdm.cpl</code>, press Enter, then "Advanced" → "Environment Variables".`, zh: `<strong>Windows：</strong>點擊開始功能表，搜尋「<strong>編輯您帳戶的環境變數</strong>」並開啟。或是按下 <code class="bg-paper-hover px-1 rounded">Win + R</code>，輸入 <code class="bg-paper-hover px-1 rounded">sysdm.cpl</code> 後按 Enter，再點「進階」→「環境變數」。`, ja: `<strong>Windows：</strong>スタートをクリックし、「<strong>アカウントの環境変数を編集</strong>」を検索して開きます。または <code class="bg-paper-hover px-1 rounded">Win + R</code> を押して <code class="bg-paper-hover px-1 rounded">sysdm.cpl</code> と入力しEnterキーを押した後、「詳細設定」→「環境変数」を選択します。` },
-      settingsStep2BodyMac: { en: `<strong>macOS/Linux:</strong> set <code class="bg-paper-hover px-1 rounded">OLLAMA_ORIGINS=*</code> in your shell profile (e.g. <code class="bg-paper-hover px-1 rounded">~/.zshrc</code>) or launch Ollama with the variable set for the session.`, zh: `<strong>macOS／Linux：</strong>在你的 shell 設定檔（例如 <code class="bg-paper-hover px-1 rounded">~/.zshrc</code>）中設定 <code class="bg-paper-hover px-1 rounded">OLLAMA_ORIGINS=*</code>，或是在啟動 Ollama 的當次工作階段中設定該變數。`, ja: `<strong>macOS／Linux：</strong>シェルの設定ファイル（例：<code class="bg-paper-hover px-1 rounded">~/.zshrc</code>）に <code class="bg-paper-hover px-1 rounded">OLLAMA_ORIGINS=*</code> を設定するか、その変数を設定した状態でOllamaをセッション単位で起動してください。` },
-      settingsStep3Title: { en: 'Add a new entry under "User variables"', zh: '在「使用者變數」下新增一筆項目', ja: '「ユーザー環境変数」に新しい項目を追加する' },
-      settingsStep3Body: { en: `Click "<strong>New...</strong>" under the <strong>upper half (your personal account variables)</strong> and enter:`, zh: `在<strong>上半部（你個人帳戶的變數）</strong>點擊「<strong>新增...</strong>」，並輸入以下內容：`, ja: `<strong>上半分（個人アカウントの変数）</strong>にある「<strong>新規...</strong>」をクリックし、以下を入力してください：` },
-      settingsVarNameLabel: { en: 'Variable name', zh: '變數名稱', ja: '変数名' },
-      settingsVarValueLabel: { en: 'Variable value', zh: '變數值', ja: '変数値' },
-      settingsStep3Footer: { en: 'Click OK, then OK again to close the dialog.', zh: '點擊確定，再點一次確定以關閉視窗。', ja: 'OKをクリックし、もう一度OKをクリックしてダイアログを閉じます。' },
-      settingsStep4Title: { en: 'Restart Ollama', zh: '重新啟動 Ollama', ja: 'Ollamaを再起動する' },
-      settingsStep4Body: { en: `Reopen the Ollama app from the Start menu, wait for the tray icon to appear, then come back here and click "<strong>Test Connection</strong>" to confirm.`, zh: `從開始功能表重新開啟 Ollama 應用程式，等待系統匣圖示出現後，回到這裡點擊「<strong>測試連線</strong>」確認是否成功。`, ja: `スタートメニューからOllamaアプリを再度開き、トレイアイコンが表示されるのを待ってから、ここに戻って「<strong>接続テスト</strong>」をクリックして確認してください。` },
-      settingsUndoTitle: { en: 'How do I undo this later?', zh: '之後要怎麼還原這個設定？', ja: 'あとで元に戻すには？' },
-      settingsUndoBody: { en: `Repeat step 2, find the <code class="bg-paper-hover px-1 rounded font-mono">OLLAMA_ORIGINS</code> entry under "User variables", select it, click "<strong>Delete</strong>", and restart Ollama.`, zh: `重複步驟 2，在「使用者變數」中找到 <code class="bg-paper-hover px-1 rounded font-mono">OLLAMA_ORIGINS</code> 項目，選取後點擊「<strong>刪除</strong>」，再重新啟動 Ollama。`, ja: `手順2をもう一度行い、「ユーザー環境変数」の中から <code class="bg-paper-hover px-1 rounded font-mono">OLLAMA_ORIGINS</code> を選択して「<strong>削除</strong>」をクリックし、Ollamaを再起動してください。` },
-      settingsAutostartTitle: { en: 'How do I stop Ollama from auto-starting?', zh: '要怎麼讓 Ollama 不要自動啟動？', ja: 'Ollamaの自動起動を止めるには？' },
-      settingsAutostartBody: { en: `On Windows: open Task Manager (right-click the taskbar) → "Startup apps" tab → find Ollama → set to "Disabled" so it won't launch in the background at boot.`, zh: `在 Windows：開啟工作管理員（在工作列按右鍵）→「啟動應用程式」分頁 → 找到 Ollama → 設為「已停用」，開機時就不會在背景自動啟動。`, ja: `Windowsの場合：タスクマネージャーを開き（タスクバーを右クリック）→「スタートアップ アプリ」タブ → Ollamaを見つけて「無効」に設定すると、起動時にバックグラウンドで自動起動しなくなります。` },
-      settingsConnModelHeading: { en: 'Connection & Model Settings', zh: '連線與模型設定', ja: '接続とモデルの設定' },
-      settingsApiUrlLabel: { en: 'API URL', zh: 'API 網址', ja: 'API URL' },
-      settingsModelNameLabel: { en: 'Model Name', zh: '模型名稱', ja: 'モデル名' },
-      settingsModelDefault: { en: 'qwen2.5:3b (default)', zh: 'qwen2.5:3b（預設）', ja: 'qwen2.5:3b（既定）' },
-      settingsModelCustom: { en: 'Custom (type your own)', zh: '自訂（手動輸入）', ja: 'カスタム（自分で入力）' },
-      settingsModelInputPlaceholder: { en: 'Enter model name', zh: '輸入模型名稱', ja: 'モデル名を入力' },
-      settingsModelHint: { en: `※ Make sure you've pulled this model via Ollama. Developers can edit these default options directly in the source (MaskFirst.html).`, zh: `※ 請確認你已經透過 Ollama pull 過這個模型。開發者可以直接在原始碼（MaskFirst.html）中編輯這些預設選項。`, ja: `※ このモデルをOllamaで事前にpullしていることを確認してください。開発者はソースコード（MaskFirst.html）内でこれらの既定オプションを直接編集できます。` },
-      settingsBtnTestConnection: { en: 'Test Connection', zh: '測試連線', ja: '接続テスト' },
+      modalSettingsTitle: { en: 'Settings & Advanced Features', zh: '設定與進階功能' },
+      settingsAuthorLine: { en: `Author: <strong>OA (oas114)</strong>`, zh: `作者：<strong>OA (oas114)</strong>` },
+      settingsKofiLink: { en: 'Support on Ko-fi', zh: '在 Ko-fi 贊助' },
+      settingsRegionPersonaHeading: { en: 'Region & Persona Presets', zh: '地區與身分模式預設' },
+      settingsRegionPersonaBody: { en: `The <strong>Region</strong> selector (top toolbar) swaps which country/region regex ruleset is layered on top of the always-on <strong>Global</strong> baseline (email, IP addresses, credit card numbers, generic dates). Only one region is active at a time to avoid cross-country format collisions (e.g. a bare 9-digit number shouldn't simultaneously be treated as a US SSN and something else). The <strong>Persona</strong> selector swaps the Hard Block keyword set between <strong>Personal</strong> privacy terms and <strong>Business</strong> confidentiality terms.`, zh: `<strong>地區</strong>選單（頂部工具列）用來切換要疊加在永遠啟用的<strong>全球</strong>基準規則（電子郵件、IP 位址、信用卡卡號、常見日期格式）之上的是哪個國家／地區的正則規則庫。同時間只會啟用一個地區，避免跨國格式互相衝突（例如一組純 9 位數字，不該同時被當成美國社會安全碼又被當成別的東西）。<strong>身分模式</strong>選單則用來切換硬阻斷關鍵字集，在<strong>個人</strong>隱私用語與<strong>企業</strong>機密用語之間切換。` },
+      settingsRegionPersonaWarning: { en: `<strong>Nothing here is saved.</strong> MaskFirst destroys all state on reload by design, so your Region/Persona choice resets every time you open the file. If you always work in one region or persona, open <code class="bg-white border border-warning-200 px-1 rounded">MaskFirst.html</code> in a text editor, search for <code class="bg-white border border-warning-200 px-1 rounded">DEFAULT_REGION</code> and <code class="bg-white border border-warning-200 px-1 rounded">DEFAULT_PERSONA</code> near the top of the <code class="bg-white border border-warning-200 px-1 rounded">&lt;script&gt;</code> block, and change the value — that becomes your new startup default.`, zh: `<strong>這裡的設定不會被儲存。</strong>MaskFirst 的設計就是每次重新整理都會清空所有狀態，所以每次開啟檔案時 Region／Persona 都會重設。如果你固定只用某個地區或身分模式，可以用文字編輯器打開 <code class="bg-white border border-warning-200 px-1 rounded">MaskFirst.html</code>，在 <code class="bg-white border border-warning-200 px-1 rounded">&lt;script&gt;</code> 區塊開頭附近搜尋 <code class="bg-white border border-warning-200 px-1 rounded">DEFAULT_REGION</code> 與 <code class="bg-white border border-warning-200 px-1 rounded">DEFAULT_PERSONA</code>，把值改掉──那就會成為你新的預設啟動值。` },
+      settingsCustomDictHeading: { en: 'Custom Dictionary (CSV)', zh: '自訂詞庫（CSV）' },
+      settingsCustomDictBody: { en: `Batch-import your own keywords, names, or project codenames. Download the template and fill it out using the "Keyword,Category" format. <strong>Category is optional</strong> — it defaults to CUSTOM if left blank. The system generates matching tags automatically (e.g. NAME_1, CUSTOM_1).<br><span class="text-warning-700 font-medium">Note: keyword values cannot contain commas — this will break CSV parsing. If a term itself contains a comma, use "Build Dictionary Online" instead.</span>`, zh: `批次匯入你自己的關鍵字、姓名或專案代號。下載範本後依「Keyword,Category」格式填寫，<strong>Category 欄位可留空</strong>──留空時預設歸類為 CUSTOM，系統會自動產生對應標籤（例如 NAME_1、CUSTOM_1）。<br><span class="text-warning-700 font-medium">注意：關鍵字內容不能包含逗號，否則會破壞 CSV 解析。如果詞彙本身就含有逗號，請改用「線上建立詞庫」功能。</span>` },
+      commonDownloadCsvTemplate: { en: 'Download CSV Template', zh: '下載 CSV 範本' },
+      settingsBtnBuildDictOnline: { en: 'Build / Edit Dictionary Online', zh: '線上建立／編輯詞庫' },
+      settingsPromptLibHeading: { en: 'Local AI Prompt Library', zh: '本機 AI 提示詞庫' },
+      settingsPromptLibBody: { en: `Ready-to-copy system prompts for local models (Ollama, LM Studio, etc.). Paste one of these ahead of your masked text so the model's own instructions also stay privacy-aware — reinforcing that nothing, including your prompt phrasing, needs to leave this machine.`, zh: `提供可直接複製的系統提示詞，適用於本機模型（Ollama、LM Studio 等）。在遮蔽後的文字前貼上其中一段，讓模型本身的指令也具備隱私意識──強調包含提示詞措辭在內的一切內容，都不需要離開這台機器。` },
+      commonCopy: { en: 'Copy', zh: '複製' },
+      settingsPromptPersonalDesc: { en: 'For personal documents — reminds the model that names/contacts are tokenized and must stay untouched.', zh: '適用於個人文件──提醒模型姓名／聯絡方式已被標記化，必須維持原樣不得更動。' },
+      settingsPromptBusinessDesc: { en: 'For business documents — frames the content as confidential/trade-secret material.', zh: '適用於企業文件──將內容定調為機密／營業秘密等級的資料。' },
+      settingsOllamaHeading: { en: 'Local AI (Ollama) Connection Setup', zh: '本機 AI（Ollama）連線設定' },
+      settingsOllamaInstallBox: { en: `<strong>Don't have Ollama installed yet?</strong><br>Download it from the <a href="https://ollama.com/download" target="_blank" class="underline font-bold text-brand-700 hover:text-brand-900">official Ollama website</a> and install it. Then open a terminal (Command Prompt / PowerShell / Terminal) and run the following command to install the default model:<br><code class="block mt-1 bg-white border border-brand-200 px-2 py-1 rounded font-mono text-ink">ollama run qwen2.5:3b</code>`, zh: `<strong>還沒安裝 Ollama？</strong><br>請前往<a href="https://ollama.com/download" target="_blank" class="underline font-bold text-brand-700 hover:text-brand-900">Ollama 官方網站</a>下載並安裝。安裝完成後開啟終端機（命令提示字元／PowerShell／Terminal），執行以下指令安裝預設模型：<br><code class="block mt-1 bg-white border border-brand-200 px-2 py-1 rounded font-mono text-ink">ollama run qwen2.5:3b</code>` },
+      settingsOllamaRiskBox: { en: `<strong class="text-warning-900">Why is this setting needed? And a risk warning</strong><br>Ollama blocks all web page access by default (a security protection). You need to add an "environment variable" named <code>OLLAMA_ORIGINS</code> set to <code>*</code> so Ollama allows this local MaskFirst page to connect.<br><br><strong class="text-danger-700">⚠️ Security risk notice:</strong><br>Setting the origin to <code>*</code> allows any web page to call your local model. This only affects your own user account and doesn't require administrator rights, but it does carry some risk of abuse by other malicious pages.<br><br><strong>We strongly recommend fully quitting Ollama from the system tray when you're not using this tool, or removing the environment variable afterward.</strong>`, zh: `<strong class="text-warning-900">為什麼需要這個設定？以及風險提醒</strong><br>Ollama 預設會封鎖所有網頁的存取（這是一項安全保護機制）。你需要新增一個名為 <code>OLLAMA_ORIGINS</code>、值設為 <code>*</code> 的「環境變數」，Ollama 才會允許這個本機的 MaskFirst 頁面連線。<br><br><strong class="text-danger-700">⚠️ 安全風險提醒：</strong><br>將 origin 設為 <code>*</code> 代表任何網頁都能呼叫你的本機模型。這僅影響你自己的使用者帳戶、不需要系統管理員權限，但仍存在被惡意網頁濫用的風險。<br><br><strong>強烈建議在不使用本工具時，於系統匣中完全關閉 Ollama，或事後移除該環境變數。</strong>` },
+      settingsOllamaStepsHeading: { en: 'Setup steps (one-time; persists across reboots after that)', zh: '設定步驟（只需設定一次，之後重開機也會保留）' },
+      settingsStep1Title: { en: 'Quit Ollama first', zh: '先關閉 Ollama' },
+      settingsStep1Body: { en: `Find the Ollama icon in your <strong>system tray</strong> (bottom-right, near the clock), <strong>right-click</strong> it, and choose "<strong>Quit Ollama</strong>" to fully close it.`, zh: `在<strong>系統匣</strong>（畫面右下角、時鐘附近）找到 Ollama 圖示，<strong>按右鍵</strong>後選擇「<strong>Quit Ollama</strong>」將它完全關閉。` },
+      settingsStep2Title: { en: `Open your OS's "Environment Variables" dialog`, zh: '開啟作業系統的「環境變數」設定視窗' },
+      settingsStep2BodyWin: { en: `<strong>Windows:</strong> click Start, search "<strong>Edit environment variables for your account</strong>", and open it. Or press <code class="bg-paper-hover px-1 rounded">Win + R</code>, type <code class="bg-paper-hover px-1 rounded">sysdm.cpl</code>, press Enter, then "Advanced" → "Environment Variables".`, zh: `<strong>Windows：</strong>點擊開始功能表，搜尋「<strong>編輯您帳戶的環境變數</strong>」並開啟。或是按下 <code class="bg-paper-hover px-1 rounded">Win + R</code>，輸入 <code class="bg-paper-hover px-1 rounded">sysdm.cpl</code> 後按 Enter，再點「進階」→「環境變數」。` },
+      settingsStep2BodyMac: { en: `<strong>macOS/Linux:</strong> set <code class="bg-paper-hover px-1 rounded">OLLAMA_ORIGINS=*</code> in your shell profile (e.g. <code class="bg-paper-hover px-1 rounded">~/.zshrc</code>) or launch Ollama with the variable set for the session.`, zh: `<strong>macOS／Linux：</strong>在你的 shell 設定檔（例如 <code class="bg-paper-hover px-1 rounded">~/.zshrc</code>）中設定 <code class="bg-paper-hover px-1 rounded">OLLAMA_ORIGINS=*</code>，或是在啟動 Ollama 的當次工作階段中設定該變數。` },
+      settingsStep3Title: { en: 'Add a new entry under "User variables"', zh: '在「使用者變數」下新增一筆項目' },
+      settingsStep3Body: { en: `Click "<strong>New...</strong>" under the <strong>upper half (your personal account variables)</strong> and enter:`, zh: `在<strong>上半部（你個人帳戶的變數）</strong>點擊「<strong>新增...</strong>」，並輸入以下內容：` },
+      settingsVarNameLabel: { en: 'Variable name', zh: '變數名稱' },
+      settingsVarValueLabel: { en: 'Variable value', zh: '變數值' },
+      settingsStep3Footer: { en: 'Click OK, then OK again to close the dialog.', zh: '點擊確定，再點一次確定以關閉視窗。' },
+      settingsStep4Title: { en: 'Restart Ollama', zh: '重新啟動 Ollama' },
+      settingsStep4Body: { en: `Reopen the Ollama app from the Start menu, wait for the tray icon to appear, then come back here and click "<strong>Test Connection</strong>" to confirm.`, zh: `從開始功能表重新開啟 Ollama 應用程式，等待系統匣圖示出現後，回到這裡點擊「<strong>測試連線</strong>」確認是否成功。` },
+      settingsUndoTitle: { en: 'How do I undo this later?', zh: '之後要怎麼還原這個設定？' },
+      settingsUndoBody: { en: `Repeat step 2, find the <code class="bg-paper-hover px-1 rounded font-mono">OLLAMA_ORIGINS</code> entry under "User variables", select it, click "<strong>Delete</strong>", and restart Ollama.`, zh: `重複步驟 2，在「使用者變數」中找到 <code class="bg-paper-hover px-1 rounded font-mono">OLLAMA_ORIGINS</code> 項目，選取後點擊「<strong>刪除</strong>」，再重新啟動 Ollama。` },
+      settingsAutostartTitle: { en: 'How do I stop Ollama from auto-starting?', zh: '要怎麼讓 Ollama 不要自動啟動？' },
+      settingsAutostartBody: { en: `On Windows: open Task Manager (right-click the taskbar) → "Startup apps" tab → find Ollama → set to "Disabled" so it won't launch in the background at boot.`, zh: `在 Windows：開啟工作管理員（在工作列按右鍵）→「啟動應用程式」分頁 → 找到 Ollama → 設為「已停用」，開機時就不會在背景自動啟動。` },
+      settingsConnModelHeading: { en: 'Connection & Model Settings', zh: '連線與模型設定' },
+      settingsApiUrlLabel: { en: 'API URL', zh: 'API 網址' },
+      settingsModelNameLabel: { en: 'Model Name', zh: '模型名稱' },
+      settingsModelDefault: { en: 'qwen2.5:3b (default)', zh: 'qwen2.5:3b（預設）' },
+      settingsModelCustom: { en: 'Custom (type your own)', zh: '自訂（手動輸入）' },
+      settingsModelInputPlaceholder: { en: 'Enter model name', zh: '輸入模型名稱' },
+      settingsModelHint: { en: `※ Make sure you've pulled this model via Ollama. Developers can edit these default options directly in the source (MaskFirst.html).`, zh: `※ 請確認你已經透過 Ollama pull 過這個模型。開發者可以直接在原始碼（MaskFirst.html）中編輯這些預設選項。` },
+      settingsBtnTestConnection: { en: 'Test Connection', zh: '測試連線' },
 
       // ---- PII Rule Guide modal ----
-      modalGuideTitle: { en: 'PII Rule Guide', zh: '個資規則說明', ja: 'PIIルールガイド' },
-      guideIntro: { en: `MaskFirst uses a two-layer system to detect sensitive personal and business data — this section explains how each layer works and where its limits are. The rules and keywords actually active for your current Region/Persona, and every add/edit/delete action, now live in Manage Custom Protection Rules — including the built-in ones, not just your own custom additions.`, zh: `MaskFirst 用雙層機制偵測敏感的個人與企業資料，這裡說明兩層各自的運作方式與限制。目前實際套用中的規則/關鍵字，以及所有新增/編輯/刪除操作，都在「管理自訂防護規則」進行──內建規則也可以直接修改，不限自訂項目。`, ja: `MaskFirstは、機微な個人・業務データを検出するために2層のシステムを使用しています──このセクションでは各層の仕組みと限界を説明します。現在のRegion／Personaで実際に有効なルールとキーワード、およびすべての追加/編集/削除操作は、現在「カスタム保護ルールを管理」に集約されています──カスタム項目だけでなく組み込みのものも含まれます。` },
-      guideHowToEditBtn: { en: 'How to edit these rules', zh: '如何編輯這些規則', ja: 'これらのルールを編集する方法' },
-      guideSafeAskAiTitle: { en: 'Not sure this file is actually safe? Ask an AI.', zh: '不確定這個檔案是否安全？問問 AI 吧。', ja: 'このファイルが本当に安全か不安ですか？AIに聞いてみましょう。' },
-      guideSafeAskAiBody: { en: `MaskFirst is a single HTML file with no server. Other than loading its stylesheet on first open (Tailwind CSS, tried from a CDN with a local fallback, never involving anything you type in), it makes no background network calls related to your document content. You don't need to read code yourself: paste the entire <code class="bg-white border border-line px-1 rounded">MaskFirst.html</code> source into any AI (ChatGPT, Claude, etc.) and ask it directly: "Does this page send any user input anywhere?" Let the AI verify it for you, instead of just taking the developer's word for it.`, zh: `MaskFirst 是單一 HTML 檔案，沒有伺服器。除了首次載入版面樣式（Tailwind CSS，會嘗試連線 CDN，失敗則自動改用本機備援，不含任何您輸入的資料）之外，沒有任何與您的文件內容相關的背景連線。你不需要自己看程式碼：把整份 <code class="bg-white border border-line px-1 rounded">MaskFirst.html</code> 原始碼貼給任何一個 AI（ChatGPT、Claude 等），直接問它：「這個頁面會把使用者輸入送到任何地方嗎？」讓 AI 幫你驗證，而不是只憑開發者的一面之詞。`, ja: `MaskFirstは単一のHTMLファイルであり、サーバーはありません。初回起動時にスタイルシート（Tailwind CSS。CDNからの取得を試み、失敗した場合はローカルにフォールバックします。入力内容は一切関係ありません）を読み込む以外、文書内容に関連するバックグラウンド通信は一切行いません。自分でコードを読む必要はありません──<code class="bg-white border border-line px-1 rounded">MaskFirst.html</code> のソース全体を任意のAI（ChatGPT、Claudeなど）に貼り付け、「このページはユーザーの入力をどこかに送信していますか？」と直接尋ねてみてください。開発者の言葉を鵜呑みにするのではなく、AIに検証してもらいましょう。` },
-      guideHowToAddTitle: { en: 'How do I add my own PII rules and Hard Block keywords?', zh: '要怎麼新增自己的個資規則與硬阻斷關鍵字？', ja: '独自のPIIルールやハードブロックキーワードを追加するには？' },
-      guideHowToAddIntro: { en: `You don't need to hand-edit the HTML source — use the "Manage Custom Protection Rules" button in the toolbar instead:`, zh: `你不需要手動編輯 HTML 原始碼──改用工具列上的「管理自訂防護規則」按鈕即可：`, ja: `HTMLソースを手動で編集する必要はありません──ツールバーの「カスタム保護ルールを管理」ボタンを使ってください：` },
-      guideStep1: { en: `Click <strong>"Manage Custom Protection Rules"</strong> in the toolbar, then switch to the "Hard Block Keywords" or "Regex Rules" tab.`, zh: `點擊工具列上的<strong>「管理自訂防護規則」</strong>，然後切換到「硬阻斷關鍵字」或「正則規則」分頁。`, ja: `ツールバーの<strong>「カスタム保護ルールを管理」</strong>をクリックし、「ハードブロックキーワード」または「正規表現ルール」タブに切り替えます。` },
-      guideStep2: { en: `Click "+ Add Row" to add a row directly in the table, or click any row's fields to edit them in place — including the built-in rows for your currently selected Persona/Region, not just your own custom ones (regex rules are validated for syntax and ReDoS risk on save). Edited or deleted built-in rows show a "Revert to Default" option, or you can re-add a deleted one from the "removed from defaults" list below the table. For bulk changes, you can instead download that tab's CSV template, fill it in, and import it, choosing "Merge with Existing" or "Replace All" (this only ever affects your custom layer).`, zh: `點擊「+ 手動新增一列」直接在表格新增，或點擊任一列的欄位直接修改──包含目前所選 Persona／Region 的內建列，不限自訂項目（正則規則儲存時會自動檢查格式與 ReDoS 風險）。已編輯或刪除的內建列會提供「還原預設」選項，或是從表格下方「已從預設清單移除」清單裡把刪除的項目加回來。若要批次異動，也可以下載該分頁的 CSV 範本填寫後匯入，選擇「與現有規則合併」或「取代全部」（此方式只會影響你的自訂層）。`, ja: `「+ 行を手動追加」をクリックして表に直接行を追加するか、任意の行のフィールドをクリックしてその場で編集できます──現在選択中のPersona／Regionの組み込み行も含まれ、カスタム項目に限りません（正規表現ルールは保存時に構文とReDoSリスクが自動検証されます）。編集または削除された組み込み行には「既定値に戻す」オプションが表示され、削除した項目は表の下にある「既定値から削除された」リストから再追加できます。一括変更したい場合は、そのタブのCSVテンプレートをダウンロードして記入し、「既存と統合」または「すべて置き換え」を選んでインポートすることもできます（この方法はカスタム層にのみ影響します）。` },
-      guideStep4: { en: `To share your customizations with a colleague or reuse them on another machine, expand "Advanced Settings" (desktop only) in the same panel and click "Export Config File" to download <code class="bg-white border border-line px-1 rounded">maskfirst.config.js</code>; to apply it later, click "Import Config File", pick that file, and confirm the summary. Note: this is a manual import — it does not apply automatically on refresh or the next time you open this file, so you'll need to re-import it each time.`, zh: `如果想把自訂規則分享給同事，或在其他裝置重複使用，展開同一面板中的「進階設定」（僅限桌面版），點擊「轉存為設定檔」下載 <code class="bg-white border border-line px-1 rounded">maskfirst.config.js</code>；之後要套用時，點擊「匯入設定檔」選取該檔案並確認摘要即可。注意：這是手動匯入，不會在重新整理或下次開啟頁面時自動套用，每次都需要重新匯入一次。`, ja: `カスタマイズを同僚と共有したり、別のマシンで再利用したりしたい場合は、同じパネル内の「詳細設定」（デスクトップ版のみ）を展開し、「設定ファイルとしてエクスポート」をクリックして <code class="bg-white border border-line px-1 rounded">maskfirst.config.js</code> をダウンロードしてください。あとで適用する際は「設定ファイルをインポート」をクリックしてそのファイルを選択し、概要を確認してください。注意：これは手動インポートであり、更新時や次回このファイルを開いたときに自動的には適用されません。毎回インポートし直す必要があります。` },
-      guideStep5: { en: `To discard manual edits or imported settings and restore the built-in defaults, open "Manage Custom Protection Rules", expand "Advanced Settings" (desktop only), and click "Reset to Defaults".`, zh: `如果想捨棄手動修改或已匯入的內容、回復內建預設值，開啟「管理自訂防護規則」，展開「進階設定」（僅限桌面版），點擊「重設為預設值」。`, ja: `手動での編集やインポート済みの設定を破棄して組み込みの既定値に戻したい場合は、「カスタム保護ルールを管理」を開き、「詳細設定」（デスクトップ版のみ）を展開して「既定値にリセット」をクリックします。` },
-      guideLayer1Title: { en: 'Layer 1: Static Rule Scan (Regex + Hard Block Keywords)', zh: '第一層：靜態規則掃描（正則表示式＋硬阻斷關鍵字）', ja: '第1層：静的ルールスキャン（正規表現＋ハードブロックキーワード）' },
-      guideLayer1Body: { en: `Runs the instant you paste text, using fixed-format rules (e.g. SSNs, IBANs, phone numbers) to catch personal data that follows a describable pattern. Fast and precise, but it can't catch free-form content — like names — that has no fixed format.`, zh: `貼上文字後立即執行，靠固定格式的規則（如身分證字號、IBAN、電話號碼）抓取「有固定寫法可以描述」的個資，準確、速度快，但抓不到姓名這類自由格式、沒有固定寫法的內容。`, ja: `テキストを貼り付けた瞬間に実行され、固定フォーマットのルール（SSN、IBAN、電話番号など）を使って、記述可能なパターンに従う個人データを検出します。高速かつ正確ですが、氏名のように決まった形式のない自由形式のコンテンツは検出できません。` },
-      guideLayer2Title: { en: 'Layer 2: Local AI Semantic Scan (optional, requires Ollama)', zh: '第二層：地端 AI 語意掃描（選用，需另外安裝 Ollama）', ja: '第2層：ローカルAIセマンティックスキャン（任意、Ollamaが必要）' },
-      guideLayer2Body: { en: `Runs a small language model on your own machine to catch free-form content regex can't describe (e.g. address variations). Name detection isn't reliable yet — add common names to your Custom Dictionary instead of relying on this layer alone.`, zh: `在你自己的電腦上執行小型語言模型，補抓正則規則寫不出來的自由格式內容（例如地址的各種寫法變化）。目前姓名判讀還不夠穩定，建議把常見姓名直接加進自訂詞庫，不要只依賴這一層。`, ja: `自分のマシン上で小型の言語モデルを実行し、正規表現では記述できない自由形式のコンテンツ（住所の表記ゆれなど）を検出します。氏名の検出はまだ信頼性が低いため、この層だけに頼らずカスタム辞書によく使う名前を追加してください。` },
-      guideHardBlockHeading: { en: 'Hard Block: why does some content lock copying instead of just being masked?', zh: '硬阻斷：為什麼有些內容不是「遮蔽」，而是直接鎖定複製？', ja: 'ハードブロック：一部のコンテンツがマスクではなくコピーをロックするのはなぜですか？' },
-      guideHardBlockIntro: { en: `Extremely sensitive terms (from your currently selected Persona) aren't safe to send even after masking — the surrounding context alone can be enough to identify who it's about. Content matching these terms locks the copy function entirely, instead of being replaced with a tag.`, zh: `極度敏感用語（來自目前選定的身分模式）就算遮蔽後也不適合送出——因為前後文本身就足以指認當事人。符合這些用語的內容會直接鎖定複製功能，而不是像一般個資只換成標籤。`, ja: `極めて機微な用語（現在選択中のペルソナに基づく）は、マスクした後でも送信するのは安全ではありません──前後の文脈だけで誰のことか特定できてしまう場合があるためです。これらの用語に一致するコンテンツは、タグに置き換えられるのではなく、コピー機能自体が完全にロックされます。` },
-      guideGoToManageIntro: { en: 'The regex rules and hard-block keywords actually active right now — including add/edit/delete and reverting a built-in row to its default — all live in Manage Custom Protection Rules.', zh: '目前實際套用中的正則規則與硬阻斷關鍵字，以及新增/編輯/刪除、還原內建預設值，都在「管理自訂防護規則」。', ja: '現在実際に有効な正規表現ルールとハードブロックキーワード──追加/編集/削除や組み込み行を既定値に戻す操作を含む──はすべて「カスタム保護ルールを管理」にあります。' },
-      guideGoToManageBtn: { en: 'Go to Manage Custom Protection Rules', zh: '前往管理自訂防護規則', ja: 'カスタム保護ルールの管理へ' },
+      modalGuideTitle: { en: 'PII Rule Guide', zh: '個資規則說明' },
+      guideIntro: { en: `MaskFirst uses a two-layer system to detect sensitive personal and business data — this section explains how each layer works and where its limits are. The rules and keywords actually active for your current Region/Persona, and every add/edit/delete action, now live in Manage Custom Protection Rules — including the built-in ones, not just your own custom additions.`, zh: `MaskFirst 用雙層機制偵測敏感的個人與企業資料，這裡說明兩層各自的運作方式與限制。目前實際套用中的規則/關鍵字，以及所有新增/編輯/刪除操作，都在「管理自訂防護規則」進行──內建規則也可以直接修改，不限自訂項目。` },
+      guideHowToEditBtn: { en: 'How to edit these rules', zh: '如何編輯這些規則' },
+      guideSafeAskAiTitle: { en: 'Not sure this file is actually safe? Ask an AI.', zh: '不確定這個檔案是否安全？問問 AI 吧。' },
+      guideSafeAskAiBody: { en: `MaskFirst is a single HTML file with no server. Other than loading its stylesheet on first open (Tailwind CSS, tried from a CDN with a local fallback, never involving anything you type in), it makes no background network calls related to your document content. You don't need to read code yourself: paste the entire <code class="bg-white border border-line px-1 rounded">MaskFirst.html</code> source into any AI (ChatGPT, Claude, etc.) and ask it directly: "Does this page send any user input anywhere?" Let the AI verify it for you, instead of just taking the developer's word for it.`, zh: `MaskFirst 是單一 HTML 檔案，沒有伺服器。除了首次載入版面樣式（Tailwind CSS，會嘗試連線 CDN，失敗則自動改用本機備援，不含任何您輸入的資料）之外，沒有任何與您的文件內容相關的背景連線。你不需要自己看程式碼：把整份 <code class="bg-white border border-line px-1 rounded">MaskFirst.html</code> 原始碼貼給任何一個 AI（ChatGPT、Claude 等），直接問它：「這個頁面會把使用者輸入送到任何地方嗎？」讓 AI 幫你驗證，而不是只憑開發者的一面之詞。` },
+      guideHowToAddTitle: { en: 'How do I add my own PII rules and Hard Block keywords?', zh: '要怎麼新增自己的個資規則與硬阻斷關鍵字？' },
+      guideHowToAddIntro: { en: `You don't need to hand-edit the HTML source — use the "Manage Custom Protection Rules" button in the toolbar instead:`, zh: `你不需要手動編輯 HTML 原始碼──改用工具列上的「管理自訂防護規則」按鈕即可：` },
+      guideStep1: { en: `Click <strong>"Manage Custom Protection Rules"</strong> in the toolbar, then switch to the "Hard Block Keywords" or "Regex Rules" tab.`, zh: `點擊工具列上的<strong>「管理自訂防護規則」</strong>，然後切換到「硬阻斷關鍵字」或「正則規則」分頁。` },
+      guideStep2: { en: `Click "+ Add Row" to add a row directly in the table, or click any row's fields to edit them in place — including the built-in rows for your currently selected Persona/Region, not just your own custom ones (regex rules are validated for syntax and ReDoS risk on save). Edited or deleted built-in rows show a "Revert to Default" option, or you can re-add a deleted one from the "removed from defaults" list below the table. For bulk changes, you can instead download that tab's CSV template, fill it in, and import it, choosing "Merge with Existing" or "Replace All" (this only ever affects your custom layer).`, zh: `點擊「+ 手動新增一列」直接在表格新增，或點擊任一列的欄位直接修改──包含目前所選 Persona／Region 的內建列，不限自訂項目（正則規則儲存時會自動檢查格式與 ReDoS 風險）。已編輯或刪除的內建列會提供「還原預設」選項，或是從表格下方「已從預設清單移除」清單裡把刪除的項目加回來。若要批次異動，也可以下載該分頁的 CSV 範本填寫後匯入，選擇「與現有規則合併」或「取代全部」（此方式只會影響你的自訂層）。` },
+      guideStep4: { en: `To share your customizations with a colleague or reuse them on another machine, expand "Advanced Settings" (desktop only) in the same panel and click "Export Config File" to download <code class="bg-white border border-line px-1 rounded">maskfirst.config.js</code>; to apply it later, click "Import Config File", pick that file, and confirm the summary. Note: this is a manual import — it does not apply automatically on refresh or the next time you open this file, so you'll need to re-import it each time.`, zh: `如果想把自訂規則分享給同事，或在其他裝置重複使用，展開同一面板中的「進階設定」（僅限桌面版），點擊「轉存為設定檔」下載 <code class="bg-white border border-line px-1 rounded">maskfirst.config.js</code>；之後要套用時，點擊「匯入設定檔」選取該檔案並確認摘要即可。注意：這是手動匯入，不會在重新整理或下次開啟頁面時自動套用，每次都需要重新匯入一次。` },
+      guideStep5: { en: `To discard manual edits or imported settings and restore the built-in defaults, open "Manage Custom Protection Rules", expand "Advanced Settings" (desktop only), and click "Reset to Defaults".`, zh: `如果想捨棄手動修改或已匯入的內容、回復內建預設值，開啟「管理自訂防護規則」，展開「進階設定」（僅限桌面版），點擊「重設為預設值」。` },
+      guideLayer1Title: { en: 'Layer 1: Static Rule Scan (Regex + Hard Block Keywords)', zh: '第一層：靜態規則掃描（正則表示式＋硬阻斷關鍵字）' },
+      guideLayer1Body: { en: `Runs the instant you paste text, using fixed-format rules (e.g. SSNs, IBANs, phone numbers) to catch personal data that follows a describable pattern. Fast and precise, but it can't catch free-form content — like names — that has no fixed format.`, zh: `貼上文字後立即執行，靠固定格式的規則（如身分證字號、IBAN、電話號碼）抓取「有固定寫法可以描述」的個資，準確、速度快，但抓不到姓名這類自由格式、沒有固定寫法的內容。` },
+      guideLayer2Title: { en: 'Layer 2: Local AI Semantic Scan (optional, requires Ollama)', zh: '第二層：地端 AI 語意掃描（選用，需另外安裝 Ollama）' },
+      guideLayer2Body: { en: `Runs a small language model on your own machine to catch free-form content regex can't describe (e.g. address variations). Name detection isn't reliable yet — add common names to your Custom Dictionary instead of relying on this layer alone.`, zh: `在你自己的電腦上執行小型語言模型，補抓正則規則寫不出來的自由格式內容（例如地址的各種寫法變化）。目前姓名判讀還不夠穩定，建議把常見姓名直接加進自訂詞庫，不要只依賴這一層。` },
+      guideHardBlockHeading: { en: 'Hard Block: why does some content lock copying instead of just being masked?', zh: '硬阻斷：為什麼有些內容不是「遮蔽」，而是直接鎖定複製？' },
+      guideHardBlockIntro: { en: `Extremely sensitive terms (from your currently selected Persona) aren't safe to send even after masking — the surrounding context alone can be enough to identify who it's about. Content matching these terms locks the copy function entirely, instead of being replaced with a tag.`, zh: `極度敏感用語（來自目前選定的身分模式）就算遮蔽後也不適合送出——因為前後文本身就足以指認當事人。符合這些用語的內容會直接鎖定複製功能，而不是像一般個資只換成標籤。` },
+      guideGoToManageIntro: { en: 'The regex rules and hard-block keywords actually active right now — including add/edit/delete and reverting a built-in row to its default — all live in Manage Custom Protection Rules.', zh: '目前實際套用中的正則規則與硬阻斷關鍵字，以及新增/編輯/刪除、還原內建預設值，都在「管理自訂防護規則」。' },
+      guideGoToManageBtn: { en: 'Go to Manage Custom Protection Rules', zh: '前往管理自訂防護規則' },
 
       // ---- Unlock confirmation modal ----
-      modalUnlockTitle: { en: 'Sensitive Information Block Warning', zh: '敏感資訊阻擋警告', ja: '機微情報ブロックの警告' },
-      unlockIntro: { en: 'MaskFirst detected text that may contain extremely sensitive information. To protect the people involved, copy/export has been temporarily locked.', zh: 'MaskFirst 偵測到文字中可能包含極度敏感的資訊。為保護當事人，複製／匯出功能已被暫時鎖定。', ja: 'MaskFirstは、極めて機微な情報を含む可能性のあるテキストを検出しました。関係者を保護するため、コピー／エクスポート機能を一時的にロックしています。' },
-      unlockReasonsHeading: { en: 'Block Reason(s)', zh: '阻擋原因', ja: 'ブロック理由' },
-      unlockFooterHint: { en: `If you've confirmed this information is safe to release, or believe this is a false positive, you can force-unlock it.`, zh: '如果你已確認這項資訊可以安全公開，或認為這是誤判，可以強制解鎖。', ja: 'この情報を公開しても安全だと確認できた場合、または誤検知だと思われる場合は、強制的にロックを解除できます。' },
-      unlockBtnKeepLocked: { en: 'Keep Locked (Safe)', zh: '維持鎖定（安全）', ja: 'ロックを維持する（安全）' },
-      unlockBtnConfirm: { en: 'I Confirm No Risk, Unlock', zh: '我確認沒有風險，解鎖', ja: 'リスクがないことを確認し、解除する' },
+      modalUnlockTitle: { en: 'Sensitive Information Block Warning', zh: '敏感資訊阻擋警告' },
+      unlockIntro: { en: 'MaskFirst detected text that may contain extremely sensitive information. To protect the people involved, copy/export has been temporarily locked.', zh: 'MaskFirst 偵測到文字中可能包含極度敏感的資訊。為保護當事人，複製／匯出功能已被暫時鎖定。' },
+      unlockReasonsHeading: { en: 'Block Reason(s)', zh: '阻擋原因' },
+      unlockFooterHint: { en: `If you've confirmed this information is safe to release, or believe this is a false positive, you can force-unlock it.`, zh: '如果你已確認這項資訊可以安全公開，或認為這是誤判，可以強制解鎖。' },
+      unlockBtnKeepLocked: { en: 'Keep Locked (Safe)', zh: '維持鎖定（安全）' },
+      unlockBtnConfirm: { en: 'I Confirm No Risk, Unlock', zh: '我確認沒有風險，解鎖' },
 
       // ---- Build Dictionary Online modal ----
-      modalEditCsvTitle: { en: 'Custom Dictionary Manager (View / Edit / Build)', zh: '自訂詞庫管理員（檢視／編輯／建立）', ja: 'カスタム辞書マネージャー（表示／編集／作成）' },
-      dictManagerBtnLabel: { en: 'Custom Dictionary Manager', zh: '自訂詞庫管理', ja: 'カスタム辞書マネージャー' },
-      editCsvIntro: { en: `Type directly into the table below, or <strong class="text-ink-hover">copy two columns from Excel and paste into any cell</strong> — the table expands automatically. Empty rows are ignored when you apply.`, zh: `直接在下方表格輸入，或<strong class="text-ink-hover">從 Excel 複製兩欄後貼到任一儲存格</strong>──表格會自動擴展。套用時會忽略空白列。`, ja: `下の表に直接入力するか、<strong class="text-ink-hover">Excelから2列をコピーして任意のセルに貼り付け</strong>てください──表は自動的に拡張されます。適用時、空の行は無視されます。` },
-      editCsvBtnAddRow: { en: '+ Add Row Manually', zh: '+ 手動新增一列', ja: '+ 行を手動で追加' },
-      editCsvFilterKwPlaceholder: { en: 'Filter by keyword...', zh: '依關鍵字篩選……', ja: 'キーワードで絞り込み…' },
-      editCsvFilterTypePlaceholder: { en: 'Filter by category...', zh: '依類別篩選……', ja: 'カテゴリで絞り込み…' },
-      editCsvColKeyword: { en: 'Keyword (required)', zh: '關鍵字（必填）', ja: 'キーワード（必須）' },
-      editCsvColCategory: { en: 'Category (optional, e.g. NAME)', zh: '類別（選填，例如 NAME）', ja: 'カテゴリ（任意、例：NAME）' },
-      commonDelete: { en: 'Delete', zh: '刪除', ja: '削除' },
-      editCsvBtnDownload: { en: 'Download as CSV', zh: '下載為 CSV', ja: 'CSVとしてダウンロード' },
-      editCsvBtnApply: { en: 'Apply to System', zh: '套用到系統', ja: 'システムに適用' },
+      modalEditCsvTitle: { en: 'Custom Dictionary Manager (View / Edit / Build)', zh: '自訂詞庫管理員（檢視／編輯／建立）' },
+      dictManagerBtnLabel: { en: 'Custom Dictionary Manager', zh: '自訂詞庫管理' },
+      editCsvIntro: { en: `Type directly into the table below, or <strong class="text-ink-hover">copy two columns from Excel and paste into any cell</strong> — the table expands automatically. Empty rows are ignored when you apply.`, zh: `直接在下方表格輸入，或<strong class="text-ink-hover">從 Excel 複製兩欄後貼到任一儲存格</strong>──表格會自動擴展。套用時會忽略空白列。` },
+      editCsvBtnAddRow: { en: '+ Add Row Manually', zh: '+ 手動新增一列' },
+      editCsvFilterKwPlaceholder: { en: 'Filter by keyword...', zh: '依關鍵字篩選……' },
+      editCsvFilterTypePlaceholder: { en: 'Filter by category...', zh: '依類別篩選……' },
+      editCsvColKeyword: { en: 'Keyword (required)', zh: '關鍵字（必填）' },
+      editCsvColCategory: { en: 'Category (optional, e.g. NAME)', zh: '類別（選填，例如 NAME）' },
+      commonDelete: { en: 'Delete', zh: '刪除' },
+      editCsvBtnDownload: { en: 'Download as CSV', zh: '下載為 CSV' },
+      editCsvBtnApply: { en: 'Apply to System', zh: '套用到系統' },
 
       // ---- Manage Custom Protection Rules modal ----
-      modalPmTitle: { en: 'Manage Custom Protection Rules', zh: '管理自訂防護規則', ja: 'カスタム保護ルールを管理' },
-      pmTabHardBlock: { en: 'Hard Block Keywords', zh: '硬阻斷關鍵字', ja: 'ハードブロックキーワード' },
-      pmTabRegex: { en: 'Regex Rules', zh: '正則規則', ja: '正規表現ルール' },
-      pmTabPrompts: { en: 'Local AI Prompts', zh: '本機 AI 提示詞', ja: 'ローカルAIプロンプト' },
-      pmHardBlockIntro: { en: `Each row below is one concept with its English/Chinese/Japanese equivalents side by side — all three stay active for detection at once, regardless of your display language, so edit or clear any single field, revert a row to its default, or delete it entirely. Shows the built-in Personal/Business list for the currently selected Persona plus your own custom terms (single value, added below or via CSV import) appended at the end.`, zh: `下方每一列是一個概念，英文／中文／日文對照並列——三者永遠同時生效參與偵測，跟目前顯示語言無關，你可以編輯或清空任一欄位、把整列還原成預設值，或整列刪除。顯示的是目前選定身分（個人／企業）的內建清單，加上你自己新增的自訂關鍵字（單一詞彙，可在下方新增或用 CSV 匯入）附加在最後。`, ja: `以下の各行は一つの概念を英語／中国語／日本語で並べたものです──表示言語に関係なく三つとも常に検出対象として有効なので、任意の項目を編集・空欄にする、行を既定値に戻す、行ごと削除するといった操作ができます。現在選択中のPersona（個人／ビジネス）の組み込みリストに加え、末尾にあなた自身のカスタム用語（単一の値、下のボタンまたはCSVインポートで追加）が表示されます。` },
-      pmBtnDownloadTemplate: { en: 'Download Template', zh: '下載範本', ja: 'テンプレートをダウンロード' },
-      pmBtnImportCsv: { en: 'Import CSV', zh: '匯入 CSV', ja: 'CSVをインポート' },
-      pmBtnAddRow: { en: '+ Add Row', zh: '+ 手動新增一列', ja: '+ 行を手動追加' },
-      pmRegexIntro: { en: `Add or edit rows directly in the table below, or batch-import a 4-column CSV (TypeTag,RuleName,Pattern,ExampleText). The Pattern column accepts a bare pattern or a full /pattern/flags literal; edits are validated for syntax and ReDoS risk on save. This only manages your custom layer — the built-in region-specific rules aren't editable here (see PII Rule Guide).`, zh: `可直接在下方表格新增/編輯列，或用 4 欄 CSV（TypeTag,RuleName,Pattern,ExampleText）批次匯入。Pattern 欄位可以是單純的規則字串，也可以是完整的 /pattern/flags 格式，儲存時會自動驗證格式與 ReDoS 風險。這裡只管理你的自訂層──內建的地區專屬規則無法在此編輯（請見個資規則說明）。`, ja: `下の表で直接行を追加／編集するか、4列構成のCSV（TypeTag,RuleName,Pattern,ExampleText）で一括インポートできます。Pattern列には素のパターン、または完全な /pattern/flags 形式のどちらでも指定でき、保存時に構文とReDoSリスクを自動検証します。ここで管理できるのはカスタム層のみです──組み込みの地域別ルールはここでは編集できません（PIIルールガイドを参照）。` },
-      pmColTag: { en: 'Tag', zh: '標籤', ja: 'タグ' },
-      pmColName: { en: 'Name', zh: '名稱', ja: '名前' },
-      pmColPattern: { en: 'Pattern', zh: '規則樣式', ja: 'パターン' },
-      pmColExample: { en: 'Example', zh: '說明範例', ja: '例' },
-      pmColActions: { en: 'Actions', zh: '操作', ja: '操作' },
-      pmWarnKeywordEmpty: { en: `Keyword can't be empty.`, zh: '關鍵字不能留空。', ja: 'キーワードは空にできません。' },
-      pmWarnTagEmpty: { en: `Tag can't be empty.`, zh: '標籤不能留空。', ja: 'タグは空にできません。' },
-      pmBtnRevertDefault: { en: 'Revert to Default', zh: '還原預設', ja: '既定値に戻す' },
-      pmRemovedDefaultsPrefix: { en: '{count} removed from the built-in defaults: ', zh: '已從預設清單移除 {count} 項：', ja: '既定値から{count}件削除されました：' },
-      pmChannel1Label: { en: 'Channel 1 — entity extraction prompt ({{TEXT}} is replaced with the actual text to scan)', zh: '通道 1──實體擷取提示詞（{{TEXT}} 會被替換為實際要掃描的文字）', ja: 'チャンネル1──エンティティ抽出プロンプト（{{TEXT}}は実際にスキャンするテキストに置き換えられます）' },
-      pmBtnResetDefault: { en: 'Reset to Default', zh: '重設為預設值', ja: '既定値にリセット' },
-      pmNoPlaceholderWarning: { en: `No {{TEXT}} placeholder found — the AI won't receive the actual document text.`, zh: `找不到 {{TEXT}} 佔位符──AI 將無法收到實際的文件內容。`, ja: `{{TEXT}} プレースホルダーが見つかりません──AIは実際の文書テキストを受け取れません。` },
-      pmChannel2PersonalLabel: { en: 'Channel 2 — risk assessment prompt (Personal persona)', zh: '通道 2──風險評估提示詞（個人身分模式）', ja: 'チャンネル2──リスク評価プロンプト（個人ペルソナ）' },
-      pmChannel2BusinessLabel: { en: 'Channel 2 — risk assessment prompt (Business persona)', zh: '通道 2──風險評估提示詞（企業身分模式）', ja: 'チャンネル2──リスク評価プロンプト（ビジネスペルソナ）' },
-      pmAdvancedSettingsHeading: { en: 'Advanced Settings: Import / Export Config File', zh: '進階設定：匯入／匯出設定檔', ja: '詳細設定：設定ファイルのインポート／エクスポート' },
-      pmExportBtnTitle: { en: 'Package the current in-memory custom rules and prompts into a shareable config file', zh: '將目前記憶體中的自訂規則與提示詞打包成可分享的設定檔', ja: '現在メモリ上にあるカスタムルールとプロンプトを共有可能な設定ファイルにまとめます' },
-      pmBtnExportAutoConfig: { en: 'Export Config File', zh: '轉存為設定檔', ja: '設定ファイルとしてエクスポート' },
-      pmImportBtnTitle: { en: "Select a colleague's shared config file (.js) to import", zh: '選取同事分享的設定檔（.js）並匯入', ja: '同僚が共有した設定ファイル（.js）を選択してインポート' },
-      pmBtnImportConfig: { en: 'Import Config File', zh: '匯入設定檔', ja: '設定ファイルをインポート' },
-      pmReloadBtnTitle: { en: 'Discard manual edits and imported settings, and reset to built-in defaults', zh: '清除手動編輯與已匯入內容，重設為內建預設值', ja: '手動での編集とインポート済みの設定を破棄し、組み込みの既定値にリセットします' },
-      pmBtnReloadConfig: { en: 'Reset to Defaults', zh: '重設為預設值', ja: '既定値にリセット' },
-      configImportNotice: { en: 'Import a config file (click to select)', zh: '可匯入設定檔（點擊選取檔案）', ja: '設定ファイルをインポートできます（クリックして選択）' },
-      confirmImportConfigModeMessage: { en: 'About to import: {roster} dictionary entries, {hardBlock} hard-block keywords, {regex} custom regex rules{prompts}. "Merge with Existing" keeps what you already have and only adds/overwrites matching entries. "Replace All" clears every dimension — including edits to built-in Persona/Region rules — and applies exactly what is in this file. If you edited or deleted a built-in rule and want that to actually take effect after a reload, choose Replace All.', zh: '即將匯入：詞庫 {roster} 筆、硬阻斷關鍵字 {hardBlock} 筆、自訂正則規則 {regex} 筆{prompts}。「與現有規則合併」會保留目前已有的內容，只新增/覆蓋同名項目；「完全取代」會清空每一項──包含對內建 Persona/Region 規則的編輯──改成套用這份檔案裡的版本。如果你編輯或刪除過內建規則、想讓它在重新整理後真的生效，請選「完全取代」。', ja: 'インポート内容：辞書 {roster} 件、ハードブロックキーワード {hardBlock} 件、カスタム正規表現ルール {regex} 件{prompts}。「既存と統合」は現在の内容を保持し、一致する項目のみ追加/上書きします。「すべて置き換え」は組み込みのPersona／Regionルールへの編集を含むすべての項目をクリアし、このファイルの内容をそのまま適用します。組み込みルールを編集または削除し、再読み込み後も実際に反映させたい場合は「すべて置き換え」を選んでください。' },
-      confirmImportConfigWithPrompts: { en: ', plus custom AI prompts', zh: '，並包含自訂 AI 提示詞', ja: '、カスタムAIプロンプトを含む' },
-      toastImportConfigFileReadFailed: { en: "Couldn't read the file: {message}", zh: '無法讀取檔案：{message}', ja: 'ファイルを読み取れませんでした：{message}' },
-      toastImportConfigParseFailed: { en: 'Failed to parse the config file: {message}', zh: '設定檔解析失敗：{message}', ja: '設定ファイルの解析に失敗しました：{message}' },
-      toastImportConfigApplied: { en: 'Config file imported and applied.', zh: '已匯入設定檔並套用。', ja: '設定ファイルをインポートして適用しました。' },
-      toastImportConfigAppliedWithErrors: { en: 'Config file imported, but {count} regex rule(s) had an invalid format and were skipped.', zh: '已匯入設定檔，但有 {count} 筆正則規則格式錯誤已略過套用。', ja: '設定ファイルをインポートしましたが、{count}件の正規表現ルールが無効な形式のためスキップされました。' },
-      toastImportComplete2: { en: 'Import complete, but {count} regex rule(s) had an invalid format and were skipped.', zh: '匯入完成，但有 {count} 筆正則規則格式錯誤已略過。', ja: 'インポートが完了しましたが、{count}件の正規表現ルールが無効な形式のためスキップされました。' },
-      commonClose: { en: 'Close', zh: '關閉', ja: '閉じる' },
+      modalPmTitle: { en: 'Manage Custom Protection Rules', zh: '管理自訂防護規則' },
+      pmTabHardBlock: { en: 'Hard Block Keywords', zh: '硬阻斷關鍵字' },
+      pmTabRegex: { en: 'Regex Rules', zh: '正則規則' },
+      pmTabPrompts: { en: 'Local AI Prompts', zh: '本機 AI 提示詞' },
+      pmHardBlockIntro: { en: `Each row below is one concept with its English/Chinese equivalents side by side — both stay active for detection at once, regardless of your display language, so edit or clear any single field, revert a row to its default, or delete it entirely. Shows the built-in Personal/Business list for the currently selected Persona plus your own custom terms (single value, added below or via CSV import) appended at the end.`, zh: `下方每一列是一個概念，英文／中文對照並列——兩者永遠同時生效參與偵測，跟目前顯示語言無關，你可以編輯或清空任一欄位、把整列還原成預設值，或整列刪除。顯示的是目前選定身分（個人／企業）的內建清單，加上你自己新增的自訂關鍵字（單一詞彙，可在下方新增或用 CSV 匯入）附加在最後。` },
+      pmBtnDownloadTemplate: { en: 'Download Template', zh: '下載範本' },
+      pmBtnImportCsv: { en: 'Import CSV', zh: '匯入 CSV' },
+      pmBtnAddRow: { en: '+ Add Row', zh: '+ 手動新增一列' },
+      pmRegexIntro: { en: `Add or edit rows directly in the table below, or batch-import a 4-column CSV (TypeTag,RuleName,Pattern,ExampleText). The Pattern column accepts a bare pattern or a full /pattern/flags literal; edits are validated for syntax and ReDoS risk on save. This only manages your custom layer — the built-in region-specific rules aren't editable here (see PII Rule Guide).`, zh: `可直接在下方表格新增/編輯列，或用 4 欄 CSV（TypeTag,RuleName,Pattern,ExampleText）批次匯入。Pattern 欄位可以是單純的規則字串，也可以是完整的 /pattern/flags 格式，儲存時會自動驗證格式與 ReDoS 風險。這裡只管理你的自訂層──內建的地區專屬規則無法在此編輯（請見個資規則說明）。` },
+      pmColTag: { en: 'Tag', zh: '標籤' },
+      pmColName: { en: 'Name', zh: '名稱' },
+      pmColPattern: { en: 'Pattern', zh: '規則樣式' },
+      pmColExample: { en: 'Example', zh: '說明範例' },
+      pmColActions: { en: 'Actions', zh: '操作' },
+      pmWarnKeywordEmpty: { en: `Keyword can't be empty.`, zh: '關鍵字不能留空。' },
+      pmWarnTagEmpty: { en: `Tag can't be empty.`, zh: '標籤不能留空。' },
+      pmBtnRevertDefault: { en: 'Revert to Default', zh: '還原預設' },
+      pmRemovedDefaultsPrefix: { en: '{count} removed from the built-in defaults: ', zh: '已從預設清單移除 {count} 項：' },
+      pmChannel1Label: { en: 'Channel 1 — entity extraction prompt ({{TEXT}} is replaced with the actual text to scan)', zh: '通道 1──實體擷取提示詞（{{TEXT}} 會被替換為實際要掃描的文字）' },
+      pmBtnResetDefault: { en: 'Reset to Default', zh: '重設為預設值' },
+      pmNoPlaceholderWarning: { en: `No {{TEXT}} placeholder found — the AI won't receive the actual document text.`, zh: `找不到 {{TEXT}} 佔位符──AI 將無法收到實際的文件內容。` },
+      pmChannel2PersonalLabel: { en: 'Channel 2 — risk assessment prompt (Personal persona)', zh: '通道 2──風險評估提示詞（個人身分模式）' },
+      pmChannel2BusinessLabel: { en: 'Channel 2 — risk assessment prompt (Business persona)', zh: '通道 2──風險評估提示詞（企業身分模式）' },
+      pmAdvancedSettingsHeading: { en: 'Advanced Settings: Import / Export Config File', zh: '進階設定：匯入／匯出設定檔' },
+      pmExportBtnTitle: { en: 'Package the current in-memory custom rules and prompts into a shareable config file', zh: '將目前記憶體中的自訂規則與提示詞打包成可分享的設定檔' },
+      pmBtnExportAutoConfig: { en: 'Export Config File', zh: '轉存為設定檔' },
+      pmImportBtnTitle: { en: "Select a colleague's shared config file (.js) to import", zh: '選取同事分享的設定檔（.js）並匯入' },
+      pmBtnImportConfig: { en: 'Import Config File', zh: '匯入設定檔' },
+      pmReloadBtnTitle: { en: 'Discard manual edits and imported settings, and reset to built-in defaults', zh: '清除手動編輯與已匯入內容，重設為內建預設值' },
+      pmBtnReloadConfig: { en: 'Reset to Defaults', zh: '重設為預設值' },
+      configImportNotice: { en: 'Import a config file (click to select)', zh: '可匯入設定檔（點擊選取檔案）' },
+      confirmImportConfigModeMessage: { en: 'About to import: {roster} dictionary entries, {hardBlock} hard-block keywords, {regex} custom regex rules{prompts}. "Merge with Existing" keeps what you already have and only adds/overwrites matching entries. "Replace All" clears every dimension — including edits to built-in Persona/Region rules — and applies exactly what is in this file. If you edited or deleted a built-in rule and want that to actually take effect after a reload, choose Replace All.', zh: '即將匯入：詞庫 {roster} 筆、硬阻斷關鍵字 {hardBlock} 筆、自訂正則規則 {regex} 筆{prompts}。「與現有規則合併」會保留目前已有的內容，只新增/覆蓋同名項目；「完全取代」會清空每一項──包含對內建 Persona/Region 規則的編輯──改成套用這份檔案裡的版本。如果你編輯或刪除過內建規則、想讓它在重新整理後真的生效，請選「完全取代」。' },
+      confirmImportConfigWithPrompts: { en: ', plus custom AI prompts', zh: '，並包含自訂 AI 提示詞' },
+      toastImportConfigFileReadFailed: { en: "Couldn't read the file: {message}", zh: '無法讀取檔案：{message}' },
+      toastImportConfigParseFailed: { en: 'Failed to parse the config file: {message}', zh: '設定檔解析失敗：{message}' },
+      toastImportConfigApplied: { en: 'Config file imported and applied.', zh: '已匯入設定檔並套用。' },
+      toastImportConfigAppliedWithErrors: { en: 'Config file imported, but {count} regex rule(s) had an invalid format and were skipped.', zh: '已匯入設定檔，但有 {count} 筆正則規則格式錯誤已略過套用。' },
+      toastImportComplete2: { en: 'Import complete, but {count} regex rule(s) had an invalid format and were skipped.', zh: '匯入完成，但有 {count} 筆正則規則格式錯誤已略過。' },
+      commonClose: { en: 'Close', zh: '關閉' },
 
       // ---- Import Merge/Replace modal ----
-      modalImportModeTitle: { en: 'Import Mode', zh: '匯入模式', ja: 'インポートモード' },
-      importModeBtnMerge: { en: 'Merge with Existing', zh: '與現有規則合併', ja: '既存と統合' },
-      importModeBtnReplace: { en: 'Replace All', zh: '取代全部', ja: 'すべて置き換え' },
+      modalImportModeTitle: { en: 'Import Mode', zh: '匯入模式' },
+      importModeBtnMerge: { en: 'Merge with Existing', zh: '與現有規則合併' },
+      importModeBtnReplace: { en: 'Replace All', zh: '取代全部' },
 
       // ---- Source badges & dynamic tables ----
-      badgeBuiltin: { en: 'Built-in', zh: '內建', ja: '組み込み' },
-      badgeAutoLoaded: { en: 'Config file import', zh: '設定檔匯入', ja: '設定ファイルインポート' },
-      badgeManual: { en: 'Manually imported', zh: '手動匯入', ja: '手動インポート' },
-      badgeOverridden: { en: 'Overridden', zh: '已覆寫', ja: '上書き済み' },
-      badgeAiSession: { en: 'AI-extracted (session)', zh: 'AI 擷取（本次工作階段）', ja: 'AI抽出（セッション内）' },
-      pmNoCustomHardBlock: { en: 'No hard-block keywords here yet', zh: '目前沒有硬阻斷關鍵字', ja: 'ハードブロックキーワードはまだありません' },
-      pmNoCustomRegex: { en: 'No regex rules here yet', zh: '目前沒有正則規則', ja: '正規表現ルールはまだありません' },
-      editCsvRowKeywordPlaceholder: { en: 'Enter a keyword', zh: '輸入關鍵字', ja: 'キーワードを入力' },
-      editCsvRowCategoryPlaceholder: { en: 'e.g. NAME', zh: '例如 NAME', ja: '例：NAME' },
-      editCsvRowDeleteTitle: { en: 'Delete this row', zh: '刪除此列', ja: 'この行を削除' },
+      badgeBuiltin: { en: 'Built-in', zh: '內建' },
+      badgeAutoLoaded: { en: 'Config file import', zh: '設定檔匯入' },
+      badgeManual: { en: 'Manually imported', zh: '手動匯入' },
+      badgeOverridden: { en: 'Overridden', zh: '已覆寫' },
+      badgeAiSession: { en: 'AI-extracted (session)', zh: 'AI 擷取（本次工作階段）' },
+      pmNoCustomHardBlock: { en: 'No hard-block keywords here yet', zh: '目前沒有硬阻斷關鍵字' },
+      pmNoCustomRegex: { en: 'No regex rules here yet', zh: '目前沒有正則規則' },
+      editCsvRowKeywordPlaceholder: { en: 'Enter a keyword', zh: '輸入關鍵字' },
+      editCsvRowCategoryPlaceholder: { en: 'e.g. NAME', zh: '例如 NAME' },
+      editCsvRowDeleteTitle: { en: 'Delete this row', zh: '刪除此列' },
 
       // ---- Toasts, confirms & dynamic scan/report strings ----
-      confirmDefaultTitle: { en: 'Please Confirm', zh: '請確認', ja: '確認してください' },
-      confirmDefaultOk: { en: 'OK', zh: '確定', ja: 'OK' },
-      confirmDefaultCancel: { en: 'Cancel', zh: '取消', ja: 'キャンセル' },
-      confirmClearInputMessage: { en: 'This will clear the pasted text and the results below — it cannot be undone. Continue?', zh: '這會清除已貼上的文字與下方的結果，且無法復原。確定要繼續嗎？', ja: '貼り付けたテキストと下の結果がクリアされます。元に戻すことはできません。続けますか？' },
-      confirmClearInputOk: { en: 'Clear', zh: '清除', ja: 'クリア' },
-      toastCopiedPromptTemplate: { en: 'Copied the {persona} local AI prompt template!', zh: '已複製「{persona}」本機 AI 提示詞範本！', ja: '「{persona}」ローカルAIプロンプトテンプレートをコピーしました！' },
-      confirmReloadConfigMessage: { en: 'This will discard any manually edited or imported custom rules and dictionary entries, then reset to the built-in defaults. Continue?', zh: '將清除您目前手動編輯過或已匯入的自訂規則與詞庫，並重設為內建預設值。確定要繼續嗎？', ja: '手動で編集またはインポートしたカスタムルールと辞書エントリはすべて破棄され、組み込みの既定値にリセットされます。続けますか？' },
-      confirmReloadConfigOk: { en: 'Reset', zh: '重設', ja: 'リセット' },
-      toastConfigReloaded: { en: 'Reset to built-in defaults.', zh: '已重設為內建預設值。', ja: '組み込みの既定値にリセットしました。' },
-      toastNoUsableRows: { en: 'The file has no usable rows.', zh: '檔案中沒有可用的資料列。', ja: 'ファイルに使用可能な行がありません。' },
-      importDimRoster: { en: 'dictionary entries', zh: '詞庫項目', ja: '辞書エントリ' },
-      importDimHardBlock: { en: 'hard-block keywords', zh: '硬阻斷關鍵字', ja: 'ハードブロックキーワード' },
-      importDimRegex: { en: 'regex rules', zh: '正則規則', ja: '正規表現ルール' },
-      importInvalidPatternIntro: { en: 'The following {count} row(s) have an invalid pattern and will be skipped:', zh: '以下 {count} 列的規則格式無效，將會被略過：', ja: '以下の{count}行は無効なパターンのためスキップされます：' },
-      importInvalidPatternRow: { en: 'Row {row} ({pattern}): {error}', zh: '第 {row} 列（{pattern}）：{error}', ja: '{row}行目（{pattern}）：{error}' },
-      errorRegexNestedQuantifierRisk: { en: 'Rejected: this pattern has nested unbounded quantifiers (e.g. (a+)+), which can freeze the browser during scanning. Avoid using an unbounded quantifier (*, +, {n,}) both inside and outside the same group.', zh: '已拒絕匯入：偵測到可能造成瀏覽器卡死的巢狀量詞寫法（如 (a+)+）。請避免群組內外同時使用不設上限的量詞（*／+／{n,}）。', ja: '拒否されました：ブラウザがフリーズする可能性がある入れ子の無制限量指定子（例：(a+)+）が検出されました。同じグループの内側と外側の両方で無制限の量指定子（*、+、{n,}）を使用しないでください。' },
-      importModeMessage: { en: 'You currently have {existingCount} {dimensionLabel}. This file has {rowCount} row(s). How should it be imported?', zh: '你目前有 {existingCount} 筆{dimensionLabel}。這個檔案有 {rowCount} 列資料。要如何匯入？', ja: '現在{existingCount}件の{dimensionLabel}があります。このファイルには{rowCount}行のデータがあります。どのようにインポートしますか？' },
-      toastImportComplete: { en: 'Import complete.', zh: '匯入完成。', ja: 'インポートが完了しました。' },
-      toastClipboardReadFailed: { en: "Couldn't read the clipboard. Please allow clipboard access in your browser, or paste manually with Ctrl+V.", zh: '無法讀取剪貼簿。請允許瀏覽器存取剪貼簿權限，或改用 Ctrl+V 手動貼上。', ja: 'クリップボードを読み取れませんでした。ブラウザでクリップボードへのアクセスを許可するか、Ctrl+Vで手動で貼り付けてください。' },
-      toastTableEmptyNoKeywords: { en: 'The table is empty — no keywords entered!', zh: '表格是空的──尚未輸入任何關鍵字！', ja: '表が空です──キーワードが入力されていません！' },
-      toastClearedCustomDict: { en: 'Custom dictionary cleared!', zh: '已清空自訂詞庫！', ja: 'カスタム辞書をクリアしました！' },
-      toastTableEmptyNoExport: { en: 'The table is empty — nothing to export!', zh: '表格是空的──沒有可匯出的內容！', ja: '表が空です──エクスポートする内容がありません！' },
-      tooltipCategory: { en: 'Category: {reason}', zh: '類別：{reason}', ja: '分類：{reason}' },
-      toastOllamaConnectFailed: { en: "Couldn't connect to local AI (Ollama). Please make sure Ollama is running; if you haven't finished setup yet, click \"Settings\" and follow the steps.", zh: '無法連線地端 AI（Ollama）。請確認 Ollama 已啟動；若尚未完成連線設定，請點擊「設定」依步驟操作。', ja: 'ローカルAI（Ollama）に接続できませんでした。Ollamaが起動していることを確認してください。まだ設定が完了していない場合は、「設定」をクリックして手順に従ってください。' },
-      scanChannel1Starting: { en: 'AI Scan (1/2 starting) - click to cancel', zh: 'AI 掃描（1/2 啟動中）── 點擊可取消', ja: 'AIスキャン（1/2 開始中）── クリックでキャンセル' },
-      confirmStillWaitingMessage: { en: 'The AI response has taken longer than 3 minutes.', zh: 'AI 回應時間已超過 3 分鐘。', ja: 'AIの応答が3分以上かかっています。' },
-      confirmStillWaitingTitle: { en: 'Still Waiting', zh: '仍在等待中', ja: 'まだ待機中' },
-      confirmStillWaitingAbort: { en: 'Abort', zh: '中止', ja: '中止' },
-      confirmStillWaitingKeepWaiting: { en: 'Keep Waiting', zh: '繼續等待', ja: '待機を続ける' },
-      scanChannel1Progress: { en: 'Scan (1/2) received {count} chars (click to cancel)', zh: '掃描（1/2）已接收 {count} 字元（點擊可取消）', ja: 'スキャン（1/2）{count}文字を受信（クリックでキャンセル）' },
-      reasonAiEntityExtraction: { en: 'AI entity extraction', zh: 'AI 實體擷取', ja: 'AIエンティティ抽出' },
-      reasonAutoLoadedConfig: { en: 'Imported from config file', zh: '設定檔匯入', ja: '設定ファイルからインポート' },
-      reasonBuiltOnline: { en: 'Built online', zh: '線上建立', ja: 'オンラインで作成' },
-      scanChannel2Progress: { en: 'Confirming semantic risk ({current}/{total})', zh: '語意風險確認中 (第 {current}/{total} 次)', ja: '意味リスク確認中 ({current}/{total})' },
-      reasonAiDeepScanFlagged: { en: 'AI deep scan flagged: {reason}', zh: 'AI 深度掃描標記：{reason}', ja: 'AI詳細スキャンでフラグ：{reason}' },
-      reasonStaticKeywordMatch: { en: 'Static keyword match: detected "{keywords}"', zh: '靜態關鍵字比對：偵測到「{keywords}」', ja: '静的キーワード照合：「{keywords}」を検出' },
-      reasonExtremelySensitiveTerm: { en: 'Extremely sensitive term', zh: '極度敏感詞彙', ja: '極めて機微な用語' },
-      reasonAiDeepScanFallback: { en: 'a potential sensitive-risk finding', zh: '潛在的敏感風險項目', ja: '機微リスクの可能性がある事項' },
-      toastScanCompleteBlocked: { en: 'Scan complete!\nAdded {count} new masked entities.\nA sensitive-risk finding was detected — copy has been force-locked!', zh: '掃描完成！\n新增了 {count} 個遮蔽項目。\n偵測到敏感風險項目──複製功能已被強制鎖定！', ja: 'スキャン完了！\n{count}件のマスク項目を追加しました。\n機微リスクが検出されたため、コピー機能を強制的にロックしました！' },
-      toastScanCompleteOk: { en: 'Scan complete! Added {count} new masked entities. No additional sensitive risks found.', zh: '掃描完成！新增了 {count} 個遮蔽項目，未發現其他敏感風險。', ja: 'スキャン完了！{count}件のマスク項目を追加しました。追加の機微リスクは見つかりませんでした。' },
-      toastAiScanCancelled: { en: 'AI scan was cancelled.', zh: 'AI 掃描已取消。', ja: 'AIスキャンはキャンセルされました。' },
-      toastAiScanFailed: { en: 'AI scan encountered an error. Please check that Ollama is running and try again.', zh: 'AI 掃描發生錯誤，請確認 Ollama 服務正常運作後再試一次。', ja: 'AIスキャンでエラーが発生しました。Ollamaが正常に動作しているか確認してから、もう一度お試しください。' },
-      toastPasteAiReplyFirst: { en: 'Please paste the external AI reply first.', zh: '請先貼上外部 AI 的回覆。', ja: '先に外部AIの返信を貼り付けてください。' },
-      toastNoMaskingRecordYet: { en: `No masking record yet — please run de-identification in the "De-identify" tab first.`, zh: '尚無遮蔽紀錄──請先在「去識別化」分頁執行去識別化。', ja: 'マスキング記録がまだありません──先に「匿名化」タブで匿名化を実行してください。' },
-      toastMaskedPromptCopied: { en: 'Masked prompt copied!', zh: '已複製遮蔽後的提示詞！', ja: 'マスク済みプロンプトをコピーしました！' },
-      toastRestoredTextCopied: { en: 'Restored text copied!', zh: '已複製還原後文字！', ja: '復元後のテキストをコピーしました！' },
-      ollamaTestTesting: { en: 'Testing connection...', zh: '測試連線中……', ja: '接続をテスト中…' },
-      ollamaTestSuccess: { en: '✅ Connected successfully!', zh: '✅ 連線成功！', ja: '✅ 接続に成功しました！' },
-      ollamaTestModelNotFound: { en: `⚠️ Connected, but model [{model}] wasn't found. Make sure you've run "ollama pull".`, zh: `⚠️ 已連線，但找不到模型 [{model}]。請確認你已執行過「ollama pull」。`, ja: `⚠️ 接続はできましたが、モデル [{model}] が見つかりません。「ollama pull」を実行済みか確認してください。` },
-      ollamaTestFailed: { en: 'Connection failed. Please follow the steps above to finish setup.', zh: '連線失敗。請依照上方步驟完成連線設定。', ja: '接続に失敗しました。上記の手順に従って設定を完了してください。' },
-      v1LongTextWarning: { en: 'Text is over 50,000 characters — scanning may be slower.', zh: '文字超過 50,000 字元──掃描速度可能會變慢。', ja: 'テキストが50,000文字を超えています──スキャンが遅くなる場合があります。' },
-      commonTableBadge: { en: 'Table', zh: '表格', ja: 'テーブル' },
-      reasonManualTableMask: { en: 'Manual table mask', zh: '手動表格遮蔽', ja: '手動テーブルマスク' },
-      reasonImportedFromCsv: { en: 'Imported from CSV', zh: '從 CSV 匯入', ja: 'CSVからインポート' },
-      reasonManuallySelected: { en: 'Manually selected', zh: '手動選取', ja: '手動で選択' },
-      commonDoneCheckmark: { en: '✓ Done', zh: '✓ 完成', ja: '✓ 完了' },
-      v1NoMaskedItems: { en: 'No masked items', zh: '尚無遮蔽項目', ja: 'マスクされた項目はありません' },
-      v2NoMaskingRecord: { en: 'No masking record', zh: '尚無遮蔽紀錄', ja: 'マスキング記録がありません' },
-      tooltipTag: { en: 'Tag: {token}', zh: '標籤：{token}', ja: 'タグ：{token}' },
-      tooltipTagToggle: { en: 'Tag: {token} (click to toggle masking)', zh: '標籤：{token}（點擊可切換遮蔽狀態）', ja: 'タグ：{token}（クリックでマスク状態を切り替え）' },
-      tooltipTagFix: { en: 'Tag: {token} (click to fix manually)', zh: '標籤：{token}（點擊手動修復）', ja: 'タグ：{token}（クリックで手動修復）' },
-      v2RestoreMissingItems: { en: '⚠ {count} item(s) missing — see the record on the left', zh: '⚠ 有 {count} 個項目缺失──請查看左側紀錄', ja: '⚠ {count}件の項目が見つかりません──左側の記録をご確認ください' },
-      v2RestoreFully: { en: '✓ Fully restored', zh: '✓ 已完整還原', ja: '✓ 完全に復元されました' },
-      fixMissingTokenTitle: { en: 'Fix Missing Tag', zh: '修復缺漏標籤', ja: '欠落タグの修復' },
-      fixMissingTokenDesc: { en: 'The tag "{token}" wasn\'t found in the AI reply. Paste the actual text that appears in its place and we\'ll use it to complete the restore.', zh: '系統在 AI 回覆中找不到「{token}」這個標籤。請貼上 AI 回覆裡實際出現在該位置的文字，系統會用它完成還原。', ja: 'AIの返信の中にタグ「{token}」が見つかりませんでした。その位置に実際に表示されているテキストを貼り付けてください。復元に使用します。' },
-      fixMissingTokenPlaceholder: { en: 'Paste the actual text from the AI reply…', zh: '貼上 AI 回覆裡的實際文字…', ja: 'AIの返信内の実際のテキストを貼り付け…' },
-      toastFixMissingTokenEmpty: { en: 'Please paste some text first', zh: '請先貼上文字', ja: 'まずテキストを貼り付けてください' },
-      toastFixMissingTokenNotFound: { en: "Couldn't find that text in the restored result — please check it matches the AI reply exactly", zh: '在還原結果中找不到這段文字，請確認貼上的內容跟 AI 回覆裡出現的完全一致', ja: '復元結果内にそのテキストが見つかりませんでした。AIの返信内容と完全に一致しているか確認してください' },
-      toastFixMissingTokenApplied: { en: 'Fix applied', zh: '已套用修復', ja: '修復を適用しました' },
-      fixMissingTokenApplyBtn: { en: 'Apply', zh: '套用', ja: '適用' },
-      ctxUnmaskWithReason: { en: `- Un-mask [{reason}] "{value}"`, zh: `- 取消遮蔽 [{reason}]「{value}」`, ja: `- マスク解除 [{reason}]「{value}」` },
-      ctxMarkSensitive: { en: `+ Mark "{value}" as sensitive`, zh: `+ 將「{value}」標記為敏感資訊`, ja: `+「{value}」を機微情報としてマーク` },
-      ctxTableUnmaskCell: { en: '[Table] Un-mask this cell', zh: '[表格] 取消遮蔽此儲存格', ja: '[テーブル] このセルのマスクを解除' },
-      ctxTableUnmaskCol: { en: '[Table] Un-mask this column', zh: '[表格] 取消遮蔽此欄', ja: '[テーブル] この列のマスクを解除' },
-      ctxTableUnmaskRow: { en: '[Table] Un-mask this row', zh: '[表格] 取消遮蔽此列', ja: '[テーブル] この行のマスクを解除' },
-      ctxTableMaskCell: { en: '[Table] Mask this cell', zh: '[表格] 遮蔽此儲存格', ja: '[テーブル] このセルをマスク' },
-      ctxTableMaskCol: { en: '[Table] Mask this column ({rows} rows)', zh: '[表格] 遮蔽此欄（{rows} 列）', ja: '[テーブル] この列をマスク（{rows}行）' },
-      ctxTableMaskRow: { en: '[Table] Mask this row ({cols} columns)', zh: '[表格] 遮蔽此列（{cols} 欄）', ja: '[テーブル] この行をマスク（{cols}列）' },
+      confirmDefaultTitle: { en: 'Please Confirm', zh: '請確認' },
+      confirmDefaultOk: { en: 'OK', zh: '確定' },
+      confirmDefaultCancel: { en: 'Cancel', zh: '取消' },
+      confirmClearInputMessage: { en: 'This will clear the pasted text and the results below — it cannot be undone. Continue?', zh: '這會清除已貼上的文字與下方的結果，且無法復原。確定要繼續嗎？' },
+      confirmClearInputOk: { en: 'Clear', zh: '清除' },
+      toastCopiedPromptTemplate: { en: 'Copied the {persona} local AI prompt template!', zh: '已複製「{persona}」本機 AI 提示詞範本！' },
+      confirmReloadConfigMessage: { en: 'This will discard any manually edited or imported custom rules and dictionary entries, then reset to the built-in defaults. Continue?', zh: '將清除您目前手動編輯過或已匯入的自訂規則與詞庫，並重設為內建預設值。確定要繼續嗎？' },
+      confirmReloadConfigOk: { en: 'Reset', zh: '重設' },
+      toastConfigReloaded: { en: 'Reset to built-in defaults.', zh: '已重設為內建預設值。' },
+      toastNoUsableRows: { en: 'The file has no usable rows.', zh: '檔案中沒有可用的資料列。' },
+      importDimRoster: { en: 'dictionary entries', zh: '詞庫項目' },
+      importDimHardBlock: { en: 'hard-block keywords', zh: '硬阻斷關鍵字' },
+      importDimRegex: { en: 'regex rules', zh: '正則規則' },
+      importInvalidPatternIntro: { en: 'The following {count} row(s) have an invalid pattern and will be skipped:', zh: '以下 {count} 列的規則格式無效，將會被略過：' },
+      importInvalidPatternRow: { en: 'Row {row} ({pattern}): {error}', zh: '第 {row} 列（{pattern}）：{error}' },
+      errorRegexNestedQuantifierRisk: { en: 'Rejected: this pattern has nested unbounded quantifiers (e.g. (a+)+), which can freeze the browser during scanning. Avoid using an unbounded quantifier (*, +, {n,}) both inside and outside the same group.', zh: '已拒絕匯入：偵測到可能造成瀏覽器卡死的巢狀量詞寫法（如 (a+)+）。請避免群組內外同時使用不設上限的量詞（*／+／{n,}）。' },
+      importModeMessage: { en: 'You currently have {existingCount} {dimensionLabel}. This file has {rowCount} row(s). How should it be imported?', zh: '你目前有 {existingCount} 筆{dimensionLabel}。這個檔案有 {rowCount} 列資料。要如何匯入？' },
+      toastImportComplete: { en: 'Import complete.', zh: '匯入完成。' },
+      toastClipboardReadFailed: { en: "Couldn't read the clipboard. Please allow clipboard access in your browser, or paste manually with Ctrl+V.", zh: '無法讀取剪貼簿。請允許瀏覽器存取剪貼簿權限，或改用 Ctrl+V 手動貼上。' },
+      toastTableEmptyNoKeywords: { en: 'The table is empty — no keywords entered!', zh: '表格是空的──尚未輸入任何關鍵字！' },
+      toastClearedCustomDict: { en: 'Custom dictionary cleared!', zh: '已清空自訂詞庫！' },
+      toastTableEmptyNoExport: { en: 'The table is empty — nothing to export!', zh: '表格是空的──沒有可匯出的內容！' },
+      tooltipCategory: { en: 'Category: {reason}', zh: '類別：{reason}' },
+      toastOllamaConnectFailed: { en: "Couldn't connect to local AI (Ollama). Please make sure Ollama is running; if you haven't finished setup yet, click \"Settings\" and follow the steps.", zh: '無法連線地端 AI（Ollama）。請確認 Ollama 已啟動；若尚未完成連線設定，請點擊「設定」依步驟操作。' },
+      scanChannel1Starting: { en: 'AI Scan (1/2 starting) - click to cancel', zh: 'AI 掃描（1/2 啟動中）── 點擊可取消' },
+      confirmStillWaitingMessage: { en: 'The AI response has taken longer than 3 minutes.', zh: 'AI 回應時間已超過 3 分鐘。' },
+      confirmStillWaitingTitle: { en: 'Still Waiting', zh: '仍在等待中' },
+      confirmStillWaitingAbort: { en: 'Abort', zh: '中止' },
+      confirmStillWaitingKeepWaiting: { en: 'Keep Waiting', zh: '繼續等待' },
+      scanChannel1Progress: { en: 'Scan (1/2) received {count} chars (click to cancel)', zh: '掃描（1/2）已接收 {count} 字元（點擊可取消）' },
+      reasonAiEntityExtraction: { en: 'AI entity extraction', zh: 'AI 實體擷取' },
+      reasonAutoLoadedConfig: { en: 'Imported from config file', zh: '設定檔匯入' },
+      reasonBuiltOnline: { en: 'Built online', zh: '線上建立' },
+      scanChannel2Progress: { en: 'Confirming semantic risk ({current}/{total})', zh: '語意風險確認中 (第 {current}/{total} 次)' },
+      reasonAiDeepScanFlagged: { en: 'AI deep scan flagged: {reason}', zh: 'AI 深度掃描標記：{reason}' },
+      reasonStaticKeywordMatch: { en: 'Static keyword match: detected "{keywords}"', zh: '靜態關鍵字比對：偵測到「{keywords}」' },
+      reasonExtremelySensitiveTerm: { en: 'Extremely sensitive term', zh: '極度敏感詞彙' },
+      reasonAiDeepScanFallback: { en: 'a potential sensitive-risk finding', zh: '潛在的敏感風險項目' },
+      toastScanCompleteBlocked: { en: 'Scan complete!\nAdded {count} new masked entities.\nA sensitive-risk finding was detected — copy has been force-locked!', zh: '掃描完成！\n新增了 {count} 個遮蔽項目。\n偵測到敏感風險項目──複製功能已被強制鎖定！' },
+      toastScanCompleteOk: { en: 'Scan complete! Added {count} new masked entities. No additional sensitive risks found.', zh: '掃描完成！新增了 {count} 個遮蔽項目，未發現其他敏感風險。' },
+      toastAiScanCancelled: { en: 'AI scan was cancelled.', zh: 'AI 掃描已取消。' },
+      toastAiScanFailed: { en: 'AI scan encountered an error. Please check that Ollama is running and try again.', zh: 'AI 掃描發生錯誤，請確認 Ollama 服務正常運作後再試一次。' },
+      toastPasteAiReplyFirst: { en: 'Please paste the external AI reply first.', zh: '請先貼上外部 AI 的回覆。' },
+      toastNoMaskingRecordYet: { en: `No masking record yet — please run de-identification in the "De-identify" tab first.`, zh: '尚無遮蔽紀錄──請先在「去識別化」分頁執行去識別化。' },
+      toastMaskedPromptCopied: { en: 'Masked prompt copied!', zh: '已複製遮蔽後的提示詞！' },
+      toastRestoredTextCopied: { en: 'Restored text copied!', zh: '已複製還原後文字！' },
+      ollamaTestTesting: { en: 'Testing connection...', zh: '測試連線中……' },
+      ollamaTestSuccess: { en: '✅ Connected successfully!', zh: '✅ 連線成功！' },
+      ollamaTestModelNotFound: { en: `⚠️ Connected, but model [{model}] wasn't found. Make sure you've run "ollama pull".`, zh: `⚠️ 已連線，但找不到模型 [{model}]。請確認你已執行過「ollama pull」。` },
+      ollamaTestFailed: { en: 'Connection failed. Please follow the steps above to finish setup.', zh: '連線失敗。請依照上方步驟完成連線設定。' },
+      v1LongTextWarning: { en: 'Text is over 50,000 characters — scanning may be slower.', zh: '文字超過 50,000 字元──掃描速度可能會變慢。' },
+      commonTableBadge: { en: 'Table', zh: '表格' },
+      reasonManualTableMask: { en: 'Manual table mask', zh: '手動表格遮蔽' },
+      reasonImportedFromCsv: { en: 'Imported from CSV', zh: '從 CSV 匯入' },
+      reasonManuallySelected: { en: 'Manually selected', zh: '手動選取' },
+      commonDoneCheckmark: { en: '✓ Done', zh: '✓ 完成' },
+      v1NoMaskedItems: { en: 'No masked items', zh: '尚無遮蔽項目' },
+      v2NoMaskingRecord: { en: 'No masking record', zh: '尚無遮蔽紀錄' },
+      tooltipTag: { en: 'Tag: {token}', zh: '標籤：{token}' },
+      tooltipTagToggle: { en: 'Tag: {token} (click to toggle masking)', zh: '標籤：{token}（點擊可切換遮蔽狀態）' },
+      tooltipTagFix: { en: 'Tag: {token} (click to fix manually)', zh: '標籤：{token}（點擊手動修復）' },
+      v2RestoreMissingItems: { en: '⚠ {count} item(s) missing — see the record on the left', zh: '⚠ 有 {count} 個項目缺失──請查看左側紀錄' },
+      v2RestoreFully: { en: '✓ Fully restored', zh: '✓ 已完整還原' },
+      fixMissingTokenTitle: { en: 'Fix Missing Tag', zh: '修復缺漏標籤' },
+      fixMissingTokenDesc: { en: 'The tag "{token}" wasn\'t found in the AI reply. Paste the actual text that appears in its place and we\'ll use it to complete the restore.', zh: '系統在 AI 回覆中找不到「{token}」這個標籤。請貼上 AI 回覆裡實際出現在該位置的文字，系統會用它完成還原。' },
+      fixMissingTokenPlaceholder: { en: 'Paste the actual text from the AI reply…', zh: '貼上 AI 回覆裡的實際文字…' },
+      toastFixMissingTokenEmpty: { en: 'Please paste some text first', zh: '請先貼上文字' },
+      toastFixMissingTokenNotFound: { en: "Couldn't find that text in the restored result — please check it matches the AI reply exactly", zh: '在還原結果中找不到這段文字，請確認貼上的內容跟 AI 回覆裡出現的完全一致' },
+      toastFixMissingTokenApplied: { en: 'Fix applied', zh: '已套用修復' },
+      fixMissingTokenApplyBtn: { en: 'Apply', zh: '套用' },
+      ctxUnmaskWithReason: { en: `- Un-mask [{reason}] "{value}"`, zh: `- 取消遮蔽 [{reason}]「{value}」` },
+      ctxMarkSensitive: { en: `+ Mark "{value}" as sensitive`, zh: `+ 將「{value}」標記為敏感資訊` },
+      ctxTableUnmaskCell: { en: '[Table] Un-mask this cell', zh: '[表格] 取消遮蔽此儲存格' },
+      ctxTableUnmaskCol: { en: '[Table] Un-mask this column', zh: '[表格] 取消遮蔽此欄' },
+      ctxTableUnmaskRow: { en: '[Table] Un-mask this row', zh: '[表格] 取消遮蔽此列' },
+      ctxTableMaskCell: { en: '[Table] Mask this cell', zh: '[表格] 遮蔽此儲存格' },
+      ctxTableMaskCol: { en: '[Table] Mask this column ({rows} rows)', zh: '[表格] 遮蔽此欄（{rows} 列）' },
+      ctxTableMaskRow: { en: '[Table] Mask this row ({cols} columns)', zh: '[表格] 遮蔽此列（{cols} 欄）' },
       // ---- Persistent Mapping Vault modal ----
-      vaultBtnLabel: { en: 'Tag Reference', zh: '標籤對照表', ja: 'タグ対照表' },
-      vaultModalTitle: { en: 'Tag Reference', zh: '標籤對照表', ja: 'タグ対照表' },
-      vaultModalDesc: { en: 'Save which tag was used for each original value, then import it later so the same value gets the same tag across different batches — useful for cross-batch restore checks. Table-grid masking tags (starting with TAB_C) are not included in this reference.', zh: '把「原始資料」對應到「哪個標籤」的紀錄存成檔案，下次處理同一批資料時匯入回來，就能讓同一筆資料維持同樣的標籤，方便跨次核對還原結果。表格模式的欄位遮蔽（TAB_C 開頭）不會被記錄在這份對照表裡。', ja: 'どの元データにどのタグを使ったかを記録として保存し、後で読み込むことで、同じデータには次回も同じタグが使われるようにできます。バッチをまたいだ復元結果の照合に便利です。テーブル形式のマスキングタグ（TAB_C で始まるもの）はこの対照表には記録されません。' },
-      vaultEntryCountLabel: { en: 'Currently has {count} record(s)', zh: '目前已收錄 {count} 筆對照記錄', ja: '現在 {count} 件を記録中' },
-      vaultExportSectionLabel: { en: 'Export', zh: '匯出', ja: 'エクスポート' },
-      vaultExportEncryptedBtn: { en: 'Export (Encrypted, JSON)', zh: '匯出（加密，JSON）', ja: 'エクスポート（暗号化、JSON）' },
-      vaultExportUnencryptedBtn: { en: 'Export (Unencrypted, CSV)', zh: '匯出（未加密，CSV）', ja: 'エクスポート（非暗号化、CSV）' },
-      vaultImportSectionLabel: { en: 'Import', zh: '匯入', ja: 'インポート' },
-      vaultImportFilePickerBtn: { en: 'Choose a reference file (.csv / .json)', zh: '選擇對照表檔案（.csv / .json）', ja: '対照表ファイルを選択（.csv / .json）' },
-      vaultPasswordModalTitleExport: { en: 'Set an Export Password', zh: '設定匯出密碼', ja: 'エクスポート用パスワードを設定' },
-      vaultPasswordModalTitleImport: { en: 'Enter the Import Password', zh: '輸入匯入密碼', ja: 'インポート用パスワードを入力' },
-      vaultPasswordLabel: { en: 'Password', zh: '密碼', ja: 'パスワード' },
-      vaultPasswordConfirmLabel: { en: 'Confirm Password', zh: '確認密碼', ja: 'パスワード（確認）' },
-      vaultPasswordForgetWarning: { en: 'If you forget the password, the file cannot be recovered — there is no backdoor. Please keep it safe.', zh: '忘記密碼將無法復原，沒有備用解密方式，請自行妥善保管。', ja: 'パスワードを忘れるとファイルは復元できません。バックドアはありませんので、大切に保管してください。' },
-      vaultPasswordConfirmBtn: { en: 'Confirm', zh: '確定', ja: '確定' },
-      vaultImportModeMessage: { en: 'Currently has {existing} record(s); this import contains {incoming}. Choose how to proceed:', zh: '偵測到目前已有 {existing} 筆對照記錄，本次匯入 {incoming} 筆。請選擇如何處理：', ja: '現在 {existing} 件の記録があります。今回のインポートは {incoming} 件です。処理方法を選択してください：' },
-      vaultRiskTitle: { en: 'Unencrypted Export — Risk Notice', zh: '未加密匯出風險提醒', ja: '非暗号化エクスポートに関するリスクの注意' },
-      vaultRiskMessage: { en: `This file stores all original personal data and their tags in plain text, with no encryption. If it later gets synced to a cloud drive (OneDrive, Google Drive, iCloud, etc.) or sent via email/chat, that is equivalent to leaking the personal data inside it in the clear. Please make sure you understand this risk and keep the file somewhere safe (e.g. a local folder that isn't auto-synced) before continuing.`, zh: '這個檔案會以明文儲存所有原始個資與對應的遮蔽標籤，不會加密。若這個檔案之後被同步到 OneDrive、Google Drive、iCloud 等雲端硬碟，或透過 Email／即時通訊軟體傳送，等同於把裡面的個資明文外流。請確認您了解這個風險，並妥善保管此檔案（例如只存放在不會自動同步的本機資料夾），再繼續匯出。', ja: 'このファイルは、すべての元の個人情報とそれに対応するタグを平文（暗号化なし）で保存します。このファイルが後で OneDrive、Google Drive、iCloud などのクラウドドライブに同期されたり、メールやチャットで送信されたりすると、中の個人情報がそのまま漏えいすることになります。このリスクを理解した上で、自動同期されないローカルフォルダに保管するなど、ファイルの取り扱いに十分ご注意ください。' },
-      vaultRiskOkBtn: { en: 'Export Unencrypted Anyway', zh: '仍要匯出明文檔案', ja: '未暗号化のままエクスポートする' },
-      toastVaultNothingToExport: { en: 'There is no reference data to export yet.', zh: '目前沒有累積的對照資料可以匯出。', ja: 'エクスポートできる対照データがまだありません。' },
-      toastVaultExportedUnencrypted: { en: 'Unencrypted tag reference exported (CSV).', zh: '已匯出未加密的標籤對照表（CSV）。', ja: '非暗号化のタグ対照表（CSV）をエクスポートしました。' },
-      toastVaultExportedEncrypted: { en: 'Encrypted tag reference exported (JSON).', zh: '已匯出加密的標籤對照表（JSON）。', ja: '暗号化されたタグ対照表（JSON）をエクスポートしました。' },
-      toastVaultImportSuccess: { en: 'Import complete.', zh: '匯入完成。', ja: 'インポートが完了しました。' },
-      toastVaultInvalidFile: { en: `Couldn't parse this file — please confirm it's a valid tag reference file.`, zh: '無法解析這個檔案，請確認是有效的對照表檔案。', ja: 'このファイルを解析できません。有効な対照表ファイルかご確認ください。' },
-      toastVaultNoRows: { en: 'No usable reference rows found in this file.', zh: '檔案中沒有可用的對照資料列。', ja: 'ファイル内に利用可能な対照データ行が見つかりませんでした。' },
-      toastVaultBadFileShape: { en: 'Invalid file format — no importable reference data found.', zh: '檔案格式不正確，找不到可匯入的對照資料。', ja: 'ファイル形式が正しくないため、インポート可能な対照データが見つかりません。' },
-      errorVaultPasswordRequired: { en: 'Please enter a password.', zh: '請輸入密碼。', ja: 'パスワードを入力してください。' },
-      errorVaultPasswordMismatch: { en: `The two passwords don't match.`, zh: '兩次輸入的密碼不一致。', ja: '入力されたパスワードが一致しません。' },
-      errorVaultWrongPassword: { en: 'Wrong password, or the file is corrupted.', zh: '密碼錯誤或檔案已損毀，請重新輸入或確認檔案內容。', ja: 'パスワードが正しくないか、ファイルが破損しています。' },
+      vaultBtnLabel: { en: 'Tag Reference', zh: '標籤對照表' },
+      vaultModalTitle: { en: 'Tag Reference', zh: '標籤對照表' },
+      vaultModalDesc: { en: 'Save which tag was used for each original value, then import it later so the same value gets the same tag across different batches — useful for cross-batch restore checks. Table-grid masking tags (starting with TAB_C) are not included in this reference.', zh: '把「原始資料」對應到「哪個標籤」的紀錄存成檔案，下次處理同一批資料時匯入回來，就能讓同一筆資料維持同樣的標籤，方便跨次核對還原結果。表格模式的欄位遮蔽（TAB_C 開頭）不會被記錄在這份對照表裡。' },
+      vaultEntryCountLabel: { en: 'Currently has {count} record(s)', zh: '目前已收錄 {count} 筆對照記錄' },
+      vaultExportSectionLabel: { en: 'Export', zh: '匯出' },
+      vaultExportEncryptedBtn: { en: 'Export (Encrypted, JSON)', zh: '匯出（加密，JSON）' },
+      vaultExportUnencryptedBtn: { en: 'Export (Unencrypted, CSV)', zh: '匯出（未加密，CSV）' },
+      vaultImportSectionLabel: { en: 'Import', zh: '匯入' },
+      vaultImportFilePickerBtn: { en: 'Choose a reference file (.csv / .json)', zh: '選擇對照表檔案（.csv / .json）' },
+      vaultPasswordModalTitleExport: { en: 'Set an Export Password', zh: '設定匯出密碼' },
+      vaultPasswordModalTitleImport: { en: 'Enter the Import Password', zh: '輸入匯入密碼' },
+      vaultPasswordLabel: { en: 'Password', zh: '密碼' },
+      vaultPasswordConfirmLabel: { en: 'Confirm Password', zh: '確認密碼' },
+      vaultPasswordForgetWarning: { en: 'If you forget the password, the file cannot be recovered — there is no backdoor. Please keep it safe.', zh: '忘記密碼將無法復原，沒有備用解密方式，請自行妥善保管。' },
+      vaultPasswordConfirmBtn: { en: 'Confirm', zh: '確定' },
+      vaultImportModeMessage: { en: 'Currently has {existing} record(s); this import contains {incoming}. Choose how to proceed:', zh: '偵測到目前已有 {existing} 筆對照記錄，本次匯入 {incoming} 筆。請選擇如何處理：' },
+      vaultRiskTitle: { en: 'Unencrypted Export — Risk Notice', zh: '未加密匯出風險提醒' },
+      vaultRiskMessage: { en: `This file stores all original personal data and their tags in plain text, with no encryption. If it later gets synced to a cloud drive (OneDrive, Google Drive, iCloud, etc.) or sent via email/chat, that is equivalent to leaking the personal data inside it in the clear. Please make sure you understand this risk and keep the file somewhere safe (e.g. a local folder that isn't auto-synced) before continuing.`, zh: '這個檔案會以明文儲存所有原始個資與對應的遮蔽標籤，不會加密。若這個檔案之後被同步到 OneDrive、Google Drive、iCloud 等雲端硬碟，或透過 Email／即時通訊軟體傳送，等同於把裡面的個資明文外流。請確認您了解這個風險，並妥善保管此檔案（例如只存放在不會自動同步的本機資料夾），再繼續匯出。' },
+      vaultRiskOkBtn: { en: 'Export Unencrypted Anyway', zh: '仍要匯出明文檔案' },
+      toastVaultNothingToExport: { en: 'There is no reference data to export yet.', zh: '目前沒有累積的對照資料可以匯出。' },
+      toastVaultExportedUnencrypted: { en: 'Unencrypted tag reference exported (CSV).', zh: '已匯出未加密的標籤對照表（CSV）。' },
+      toastVaultExportedEncrypted: { en: 'Encrypted tag reference exported (JSON).', zh: '已匯出加密的標籤對照表（JSON）。' },
+      toastVaultImportSuccess: { en: 'Import complete.', zh: '匯入完成。' },
+      toastVaultInvalidFile: { en: `Couldn't parse this file — please confirm it's a valid tag reference file.`, zh: '無法解析這個檔案，請確認是有效的對照表檔案。' },
+      toastVaultNoRows: { en: 'No usable reference rows found in this file.', zh: '檔案中沒有可用的對照資料列。' },
+      toastVaultBadFileShape: { en: 'Invalid file format — no importable reference data found.', zh: '檔案格式不正確，找不到可匯入的對照資料。' },
+      errorVaultPasswordRequired: { en: 'Please enter a password.', zh: '請輸入密碼。' },
+      errorVaultPasswordMismatch: { en: `The two passwords don't match.`, zh: '兩次輸入的密碼不一致。' },
+      errorVaultWrongPassword: { en: 'Wrong password, or the file is corrupted.', zh: '密碼錯誤或檔案已損毀，請重新輸入或確認檔案內容。' },
 
-      tabQuickMask: { en: 'Quick Mask', zh: '快速遮蔽', ja: 'クイックマスク' },
-      v3OriginalInputLabel: { en: 'Original Text (select text or a table cell to mark it sensitive)', zh: '原始文字（選取文字或表格儲存格可手動設為機密）', ja: '原文（テキストやテーブルセルを選択して機微情報としてマーク可能）' },
-      v3InputPlaceholder: { en: `Paste text you want to publish or share, e.g. an announcement list or contact directory...\nThis mode never contacts an external AI and builds no reference table — nothing survives a refresh.`, zh: '貼上要公告/分享的文字，例如錄取名單、聯絡資訊清單...\n此模式不送外部 AI、不建立任何對照表，離開或重新整理就不留痕跡。', ja: '公開・共有したい文章を貼り付けてください（合格者名簿や連絡先一覧など）。\nこのモードは外部 AI に送信せず、対照表も作成しません。更新すると内容は残りません。' },
-      v3BtnDetect: { en: 'Detect', zh: '偵測', ja: '検出' },
-      v3ResultLabel: { en: 'Detection Result (drag to select multiple, click one to cycle its state)', zh: '偵測結果（拖曳滑鼠可框選多筆，單點可循環切換單筆）', ja: '検出結果（ドラッグで複数選択、クリックで単体の状態を切り替え）' },
-      v3NotRunYet: { en: 'Not run yet', zh: '尚未偵測', ja: '未検出' },
-      v3NoEntitiesFound: { en: 'No PII detected', zh: '未偵測到個資項目', ja: '個人情報は検出されませんでした' },
-      v3SelectedPrefix: { en: 'Selected', zh: '已選取', ja: '選択中' },
-      v3MaskPartial: { en: 'Partial-mask selected', zh: '半遮蔽已選取', ja: '選択項目を部分マスク' },
-      v3MaskFull: { en: 'Full-mask selected', zh: '全遮蔽已選取', ja: '選択項目を全マスク' },
-      v3ClearSelection: { en: 'Clear selection', zh: '取消選取', ja: '選択解除' },
-      v3SelectAll: { en: 'Select All', zh: '全選', ja: '全選択' },
-      v3BtnClearResult: { en: 'Clear Result', zh: '清除結果', ja: '結果をクリア' },
-      v3BtnCopy: { en: 'Copy Masked Text', zh: '複製遮蔽後文字', ja: 'マスク後のテキストをコピー' },
-      toastQuickMaskEmptyWarning: { en: 'Please paste some text first', zh: '請先貼上文字', ja: 'まず文章を貼り付けてください' },
-      toastQuickMaskCopied: { en: 'Masked text copied!', zh: '已複製遮蔽後文字！', ja: 'マスク後のテキストをコピーしました！' },
-      v3MaskUnmask: { en: 'Un-mask selected', zh: '取消遮蔽已選取', ja: '選択項目のマスクを解除' },
-      altDragHint: { en: 'Tip: hold Alt while dragging to select multiple items for batch masking; a plain drag still selects/edits text normally.', zh: '提示：按住 Alt 拖曳可框選多筆項目批次遮蔽；一般拖曳仍可正常選取文字/編輯內容。', ja: 'ヒント：Alt を押しながらドラッグすると複数項目を選択して一括マスクできます。通常のドラッグはテキスト選択・編集のままご利用いただけます。' },
-      v2SelectedPrefix: { en: 'Selected', zh: '已選取', ja: '選択中' },
-      v2MaskPartial: { en: 'Partial-mask selected', zh: '半遮蔽已選取', ja: '選択項目を部分マスク' },
-      v2MaskFull: { en: 'Full-mask selected', zh: '全遮蔽已選取', ja: '選択項目を全マスク' },
-      v2MaskUnmask: { en: 'Un-mask selected', zh: '取消遮蔽已選取', ja: '選択項目のマスクを解除' },
-      v2ClearSelection: { en: 'Clear selection', zh: '取消選取', ja: '選択解除' },
-      v2SelectAll: { en: 'Select All', zh: '全選', ja: '全選択' },
+      tabQuickMask: { en: 'Quick Mask', zh: '快速遮蔽' },
+      v3OriginalInputLabel: { en: 'Original Text (select text or a table cell to mark it sensitive)', zh: '原始文字（選取文字或表格儲存格可手動設為機密）' },
+      v3InputPlaceholder: { en: `Paste text you want to publish or share, e.g. an announcement list or contact directory...\nThis mode never contacts an external AI and builds no reference table — nothing survives a refresh.`, zh: '貼上要公告/分享的文字，例如錄取名單、聯絡資訊清單...\n此模式不送外部 AI、不建立任何對照表，離開或重新整理就不留痕跡。' },
+      v3BtnDetect: { en: 'Detect', zh: '偵測' },
+      v3ResultLabel: { en: 'Detection Result (drag to select multiple, click one to cycle its state)', zh: '偵測結果（拖曳滑鼠可框選多筆，單點可循環切換單筆）' },
+      v3NotRunYet: { en: 'Not run yet', zh: '尚未偵測' },
+      v3NoEntitiesFound: { en: 'No PII detected', zh: '未偵測到個資項目' },
+      v3SelectedPrefix: { en: 'Selected', zh: '已選取' },
+      v3MaskPartial: { en: 'Partial-mask selected', zh: '半遮蔽已選取' },
+      v3MaskFull: { en: 'Full-mask selected', zh: '全遮蔽已選取' },
+      v3ClearSelection: { en: 'Clear selection', zh: '取消選取' },
+      v3SelectAll: { en: 'Select All', zh: '全選' },
+      v3BtnClearResult: { en: 'Clear Result', zh: '清除結果' },
+      v3BtnCopy: { en: 'Copy Masked Text', zh: '複製遮蔽後文字' },
+      toastQuickMaskEmptyWarning: { en: 'Please paste some text first', zh: '請先貼上文字' },
+      toastQuickMaskCopied: { en: 'Masked text copied!', zh: '已複製遮蔽後文字！' },
+      v3MaskUnmask: { en: 'Un-mask selected', zh: '取消遮蔽已選取' },
+      altDragHint: { en: 'Tip: hold Alt while dragging to select multiple items for batch masking; a plain drag still selects/edits text normally.', zh: '提示：按住 Alt 拖曳可框選多筆項目批次遮蔽；一般拖曳仍可正常選取文字/編輯內容。' },
+      v2SelectedPrefix: { en: 'Selected', zh: '已選取' },
+      v2MaskPartial: { en: 'Partial-mask selected', zh: '半遮蔽已選取' },
+      v2MaskFull: { en: 'Full-mask selected', zh: '全遮蔽已選取' },
+      v2MaskUnmask: { en: 'Un-mask selected', zh: '取消遮蔽已選取' },
+      v2ClearSelection: { en: 'Clear selection', zh: '取消選取' },
+      v2SelectAll: { en: 'Select All', zh: '全選' },
 
       // __I18N_END__
     };
@@ -1660,7 +1650,7 @@
       if (typeof syncRegexNamesToLanguage === 'function') syncRegexNamesToLanguage(prevLang, lang);
       if (typeof maybeStartRegionFromLanguage === 'function') maybeStartRegionFromLanguage(lang);
       localStorage.setItem(LANG_STORAGE_KEY, lang);
-      document.documentElement.lang = lang === 'zh' ? 'zh-Hant' : (lang === 'ja' ? 'ja' : 'en');
+      document.documentElement.lang = lang === 'zh' ? 'zh-Hant' : 'en';
       document.querySelectorAll('[data-i18n]').forEach(el => {
         const key = el.getAttribute('data-i18n');
         if (!I18N[key]) return;
@@ -1783,7 +1773,7 @@
     // localStorage write with no DOM/live-preview side effects, because at this point in the script
     // (top-level, before `textarea` at :3649 and friends are declared) calling switchRegion() would hit
     // module state that doesn't exist yet.
-    const LANG_TO_STARTER_REGION = { zh: 'tw', ja: 'jp' };
+    const LANG_TO_STARTER_REGION = { zh: 'tw' };
     if (localStorage.getItem(REGION_STORAGE_KEY) === null) {
       const startingLang = localStorage.getItem(LANG_STORAGE_KEY) || 'en';
       const starterRegion = LANG_TO_STARTER_REGION[startingLang];
@@ -1805,7 +1795,7 @@
 
     // Covers a language switch that happens later in the same session (after the page has fully
     // loaded, so switchRegion()'s DOM/live-preview side effects are safe to run here) — e.g. a
-    // returning user whose display language was already 'zh'/'ja' from before this feature shipped,
+    // returning user whose display language was already 'zh' from before this feature shipped,
     // but who never touched Region, so the block above (which only runs once at script load) never
     // got a chance to seed it for them. Same "never fires if Region already has a value" guard as
     // above, so a user who's ever picked any region — including one seeded by that block — is safe
@@ -1827,72 +1817,74 @@
 
     // Built-in defaults, frozen — never mutated. "Reset to Defaults" and merge/replace imports
     // restore to this baseline. To add your own terms, use the "Manage Custom Protection Rules" UI instead.
-    // Each bucket entry is one concept with its EN/ZH(Traditional)/JA equivalents grouped together —
-    // shown as one row with three fields in the management panel (someone reading zh/ja usually also
-    // reads en, so seeing the three side by side beats scrolling three separate copies of the same
-    // 20-odd concepts). Matching (getHardBlockKeywords()) flattens every non-empty field from every
-    // concept into one substring-scan list, always active regardless of display language — clearing a
-    // field opts that language out of matching without deleting the row; deleting the row removes all
-    // three. What determines a hit is the pasted content's own script, not currentLang/currentRegion.
+    // Each bucket entry is one concept with its EN/ZH(Traditional) equivalents grouped together — shown
+    // as one row with two fields in the management panel (someone reading zh usually also reads en, so
+    // seeing both side by side beats scrolling two separate copies of the same 20-odd concepts). Matching
+    // (getHardBlockKeywords()) flattens every non-empty field from every concept into one substring-scan
+    // list, always active regardless of display language — clearing a field opts that language out of
+    // matching without deleting the row; deleting the row removes both. What determines a hit is the
+    // pasted content's own script, not currentLang/currentRegion. (Japanese support — a `ja` field on
+    // every concept plus a matching management-panel column — was removed 2026-08-27 along with the rest
+    // of the `ja` display language; see git history before that date to resurrect it if `ja` ever comes back.)
     const HARD_BLOCK_PRESETS_DEFAULT = Object.freeze({
       personal: [
-        { en: "sexual assault", zh: "性侵害", ja: "性的暴行" },
-        { en: "sexual abuse", zh: "性虐待", ja: "性的虐待" },
-        { en: "domestic violence", zh: "家庭暴力", ja: "家庭内暴力" },
-        { en: "child abuse", zh: "兒童虐待", ja: "児童虐待" },
-        { en: "self-harm", zh: "自我傷害", ja: "自傷行為" },
-        { en: "suicidal ideation", zh: "自殺意念", ja: "自殺念慮" },
-        { en: "suicide attempt", zh: "自殺未遂", ja: "自殺未遂" },
-        { en: "substance abuse treatment", zh: "藥物濫用治療", ja: "薬物乱用治療" },
-        { en: "mental health diagnosis", zh: "精神疾病診斷", ja: "精神疾患の診断" },
-        { en: "psychiatric treatment", zh: "精神科治療", ja: "精神科治療" },
-        { en: "HIV status", zh: "HIV感染狀態", ja: "HIV感染状況" },
-        { en: "sexually transmitted infection", zh: "性傳染病", ja: "性感染症" },
-        { en: "sexual orientation", zh: "性傾向", ja: "性的指向" },
-        { en: "gender transition", zh: "性別轉換", ja: "性別移行" },
-        { en: "immigration status", zh: "移民身分", ja: "在留資格" },
-        { en: "asylum status", zh: "庇護身分", ja: "難民認定状況" },
-        { en: "undocumented status", zh: "無證移民身分", ja: "非正規滞在状況" },
-        { en: "child custody dispute", zh: "子女監護權糾紛", ja: "親権争い" },
-        { en: "protective order", zh: "保護令", ja: "保護命令" },
-        { en: "eviction notice", zh: "驅離通知", ja: "立ち退き通知" },
-        { en: "bankruptcy filing", zh: "破產申請", ja: "破産申立て" }
+        { en: "sexual assault", zh: "性侵害" },
+        { en: "sexual abuse", zh: "性虐待" },
+        { en: "domestic violence", zh: "家庭暴力" },
+        { en: "child abuse", zh: "兒童虐待" },
+        { en: "self-harm", zh: "自我傷害" },
+        { en: "suicidal ideation", zh: "自殺意念" },
+        { en: "suicide attempt", zh: "自殺未遂" },
+        { en: "substance abuse treatment", zh: "藥物濫用治療" },
+        { en: "mental health diagnosis", zh: "精神疾病診斷" },
+        { en: "psychiatric treatment", zh: "精神科治療" },
+        { en: "HIV status", zh: "HIV感染狀態" },
+        { en: "sexually transmitted infection", zh: "性傳染病" },
+        { en: "sexual orientation", zh: "性傾向" },
+        { en: "gender transition", zh: "性別轉換" },
+        { en: "immigration status", zh: "移民身分" },
+        { en: "asylum status", zh: "庇護身分" },
+        { en: "undocumented status", zh: "無證移民身分" },
+        { en: "child custody dispute", zh: "子女監護權糾紛" },
+        { en: "protective order", zh: "保護令" },
+        { en: "eviction notice", zh: "驅離通知" },
+        { en: "bankruptcy filing", zh: "破產申請" }
       ],
       business: [
-        { en: "insider information", zh: "內線消息", ja: "インサイダー情報" },
-        { en: "material non-public information", zh: "重大非公開資訊", ja: "重要未公開情報" },
-        { en: "trade secret", zh: "營業秘密", ja: "営業秘密" },
-        { en: "merger and acquisition", zh: "併購案", ja: "合併買収" },
-        { en: "acquisition target", zh: "收購目標", ja: "買収対象企業" },
-        { en: "reduction in force", zh: "組織精簡裁員", ja: "人員削減計画" },
-        { en: "layoff plan", zh: "裁員計畫", ja: "解雇計画" },
-        { en: "unreleased earnings", zh: "未公布財報", ja: "未公表決算" },
-        { en: "pending patent application", zh: "待審專利申請", ja: "出願中の特許" },
-        { en: "data breach", zh: "資料外洩", ja: "データ漏えい" },
-        { en: "security incident", zh: "資安事件", ja: "セキュリティインシデント" },
-        { en: "whistleblower report", zh: "吹哨者檢舉", ja: "内部告発" },
-        { en: "internal investigation", zh: "內部調查", ja: "内部調査" },
-        { en: "attorney-client privileged", zh: "律師與當事人保密特權", ja: "弁護士秘匿特権" },
-        { en: "pending litigation", zh: "待審訴訟", ja: "係属中の訴訟" },
-        { en: "regulatory investigation", zh: "主管機關調查", ja: "規制当局の調査" },
-        { en: "non-disclosure breach", zh: "保密協議違反", ja: "秘密保持契約違反" },
-        { en: "confidential settlement", zh: "保密和解", ja: "秘密和解" },
-        { en: "bribery allegation", zh: "賄賂指控", ja: "贈収賄疑惑" },
-        { en: "antitrust investigation", zh: "反壟斷調查", ja: "独占禁止法調査" }
+        { en: "insider information", zh: "內線消息" },
+        { en: "material non-public information", zh: "重大非公開資訊" },
+        { en: "trade secret", zh: "營業秘密" },
+        { en: "merger and acquisition", zh: "併購案" },
+        { en: "acquisition target", zh: "收購目標" },
+        { en: "reduction in force", zh: "組織精簡裁員" },
+        { en: "layoff plan", zh: "裁員計畫" },
+        { en: "unreleased earnings", zh: "未公布財報" },
+        { en: "pending patent application", zh: "待審專利申請" },
+        { en: "data breach", zh: "資料外洩" },
+        { en: "security incident", zh: "資安事件" },
+        { en: "whistleblower report", zh: "吹哨者檢舉" },
+        { en: "internal investigation", zh: "內部調查" },
+        { en: "attorney-client privileged", zh: "律師與當事人保密特權" },
+        { en: "pending litigation", zh: "待審訴訟" },
+        { en: "regulatory investigation", zh: "主管機關調查" },
+        { en: "non-disclosure breach", zh: "保密協議違反" },
+        { en: "confidential settlement", zh: "保密和解" },
+        { en: "bribery allegation", zh: "賄賂指控" },
+        { en: "antitrust investigation", zh: "反壟斷調查" }
       ]
     });
 
     // Live working state — this is what the rest of the app actually reads from.
     // hardBlockPresets.custom stays single-value ({value, source}) and is always merged in regardless
-    // of persona — a custom entry is one arbitrary term the user typed, not a translated triplet, so it
-    // doesn't get the three-language row treatment the builtin personal/business buckets get.
-    // hardBlockPresets.personal/business hold concept rows: { en, zh, ja, source, default: {en,zh,ja} }.
+    // of persona — a custom entry is one arbitrary term the user typed, not a translated pair, so it
+    // doesn't get the two-language row treatment the builtin personal/business buckets get.
+    // hardBlockPresets.personal/business hold concept rows: { en, zh, source, default: {en,zh} }.
     let hardBlockPresets = { personal: [], business: [], custom: [] };
 
     function getHardBlockKeywords() {
       const customValues = hardBlockPresets.custom.map(e => e.value).filter(v => v && v.trim());
       const personaBucket = hardBlockPresets[currentPersona] || hardBlockPresets.personal;
-      const personaValues = personaBucket.flatMap(e => [e.en, e.zh, e.ja]).filter(v => v && v.trim());
+      const personaValues = personaBucket.flatMap(e => [e.en, e.zh]).filter(v => v && v.trim());
       return [...customValues, ...personaValues];
     }
 
@@ -1978,55 +1970,56 @@
     // Format: { type: "TAG_NAME", regex: /your-regex/g, name: "Display Name", example: "Match Example", validate: optionalFn }
     // Built-in defaults, frozen — never mutated. To add your own rules, use the
     // "Manage Custom Protection Rules" UI instead of editing this literal.
-    // name is {en, zh, ja} — a display label the entity-chip preview shows verbatim as the match reason
-    // (see getActiveRegexRules() consumers), so it needs the same three-language treatment as everything
+    // name is {en, zh} — a display label the entity-chip preview shows verbatim as the match reason
+    // (see getActiveRegexRules() consumers), so it needs the same two-language treatment as everything
     // else a user reads. `type` stays a plain string in every rule: it's a stable technical tag consumed
     // by token generation ({{TYPE_N}}) and CSV/config import matching, not something a person reads.
     // `example` also stays plain: match samples are format demonstrations (digits, punctuation), not
     // language content — except TW_ADDRESS, whose example is itself a literal Taiwan address, already
-    // in the language the pattern is meant to match.
-    const N = (en, zh, ja) => ({ en, zh, ja });
+    // in the language the pattern is meant to match. (Japanese support — a `ja` field here plus a matching
+    // display-language option — was removed 2026-08-27; see git history before that date to bring it back.)
+    const N = (en, zh) => ({ en, zh });
     const REGEX_PRESETS_DEFAULT = Object.freeze({
       // Always merged in, regardless of selected region.
       global: [
-        { type: "EMAIL", regex: /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g, name: N("Email Address", "電子郵件地址", "メールアドレス"), example: "user@example.com" },
-        { type: "IPV4", regex: /\b(?:(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)\.){3}(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)\b/g, name: N("IPv4 Address", "IPv4 位址", "IPv4アドレス"), example: "192.168.1.1" },
-        { type: "IPV6", regex: /\b(?:[A-Fa-f0-9]{1,4}:){7}[A-Fa-f0-9]{1,4}\b/g, name: N("IPv6 Address", "IPv6 位址", "IPv6アドレス"), example: "2001:0db8:85a3:0000:0000:8a2e:0370:7334" },
-        { type: "CREDIT_CARD", regex: /\b(?:4[0-9]{3}|5[1-5][0-9]{2}|3[47][0-9]{2}|6(?:011|5[0-9]{2}))[- ]?[0-9]{4}[- ]?[0-9]{4}[- ]?[0-9]{1,4}\b/g, name: N("Credit Card Number", "信用卡號", "クレジットカード番号"), example: "4111 1111 1111 1111", validate: (m) => luhnCheck(m) },
-        { type: "INTL_PHONE", regex: /\+\d{1,3}[-.\s]?\(?\d{1,4}\)?(?:[-.\s]?\d{2,4}){2,4}\b/g, name: N("International Phone", "國際電話號碼", "国際電話番号"), example: "+1 415 555 2671" },
-        { type: "DATE", regex: /\b(19\d{2}|20\d{2})[-/.](0?[1-9]|1[0-2])[-/.](0?[1-9]|[12]\d|3[01])\b/g, name: N("Gregorian Date", "西元日期", "西暦の日付"), example: "2026-08-19" }
+        { type: "EMAIL", regex: /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g, name: N("Email Address", "電子郵件地址"), example: "user@example.com" },
+        { type: "IPV4", regex: /\b(?:(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)\.){3}(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)\b/g, name: N("IPv4 Address", "IPv4 位址"), example: "192.168.1.1" },
+        { type: "IPV6", regex: /\b(?:[A-Fa-f0-9]{1,4}:){7}[A-Fa-f0-9]{1,4}\b/g, name: N("IPv6 Address", "IPv6 位址"), example: "2001:0db8:85a3:0000:0000:8a2e:0370:7334" },
+        { type: "CREDIT_CARD", regex: /\b(?:4[0-9]{3}|5[1-5][0-9]{2}|3[47][0-9]{2}|6(?:011|5[0-9]{2}))[- ]?[0-9]{4}[- ]?[0-9]{4}[- ]?[0-9]{1,4}\b/g, name: N("Credit Card Number", "信用卡號"), example: "4111 1111 1111 1111", validate: (m) => luhnCheck(m) },
+        { type: "INTL_PHONE", regex: /\+\d{1,3}[-.\s]?\(?\d{1,4}\)?(?:[-.\s]?\d{2,4}){2,4}\b/g, name: N("International Phone", "國際電話號碼"), example: "+1 415 555 2671" },
+        { type: "DATE", regex: /\b(19\d{2}|20\d{2})[-/.](0?[1-9]|1[0-2])[-/.](0?[1-9]|[12]\d|3[01])\b/g, name: N("Gregorian Date", "西元日期"), example: "2026-08-19" }
       ],
       us: [
-        { type: "US_SSN", regex: /\b\d{3}-\d{2}-\d{4}\b/g, name: N("US Social Security Number", "美國社會安全號碼", "米国社会保障番号（SSN）"), example: "123-45-6789" },
-        { type: "US_EIN", regex: /\b\d{2}-\d{7}\b/g, name: N("US Employer ID Number (EIN)", "美國雇主識別號（EIN）", "米国雇用主識別番号（EIN）"), example: "12-3456789" },
-        { type: "US_PHONE", regex: /\b(?:\+?1[-.\s]?)?\(?[2-9]\d{2}\)?[-.\s]?\d{3}[-.\s]?\d{4}\b/g, name: N("US Phone Number", "美國電話號碼", "米国電話番号"), example: "(415) 555-2671" },
-        { type: "US_ZIP", regex: /\b\d{5}(?:-\d{4})?\b/g, name: N("US ZIP Code", "美國郵遞區號", "米国郵便番号（ZIPコード）"), example: "94105-1234" }
+        { type: "US_SSN", regex: /\b\d{3}-\d{2}-\d{4}\b/g, name: N("US Social Security Number", "美國社會安全號碼"), example: "123-45-6789" },
+        { type: "US_EIN", regex: /\b\d{2}-\d{7}\b/g, name: N("US Employer ID Number (EIN)", "美國雇主識別號（EIN）"), example: "12-3456789" },
+        { type: "US_PHONE", regex: /\b(?:\+?1[-.\s]?)?\(?[2-9]\d{2}\)?[-.\s]?\d{3}[-.\s]?\d{4}\b/g, name: N("US Phone Number", "美國電話號碼"), example: "(415) 555-2671" },
+        { type: "US_ZIP", regex: /\b\d{5}(?:-\d{4})?\b/g, name: N("US ZIP Code", "美國郵遞區號"), example: "94105-1234" }
       ],
       eu: [
-        { type: "IBAN", regex: /\b[A-Z]{2}\d{2}[A-Z0-9]{10,30}\b/g, name: N("IBAN (Bank Account)", "IBAN（銀行帳號）", "IBAN（銀行口座番号）"), example: "DE89370400440532013000" },
-        { type: "EU_PASSPORT", regex: /\b[A-Z]{2}\d{7}\b/g, name: N("EU-style Passport Number (approximate)", "歐盟式護照號碼（概略格式）", "EU式パスポート番号（概算）"), example: "PA1234567" },
-        { type: "EU_VAT", regex: /\b[A-Z]{2}\d{8,12}\b/g, name: N("EU VAT Number (approximate)", "歐盟加值稅編號（概略格式）", "EU付加価値税番号（概算）"), example: "DE123456789" }
+        { type: "IBAN", regex: /\b[A-Z]{2}\d{2}[A-Z0-9]{10,30}\b/g, name: N("IBAN (Bank Account)", "IBAN（銀行帳號）"), example: "DE89370400440532013000" },
+        { type: "EU_PASSPORT", regex: /\b[A-Z]{2}\d{7}\b/g, name: N("EU-style Passport Number (approximate)", "歐盟式護照號碼（概略格式）"), example: "PA1234567" },
+        { type: "EU_VAT", regex: /\b[A-Z]{2}\d{8,12}\b/g, name: N("EU VAT Number (approximate)", "歐盟加值稅編號（概略格式）"), example: "DE123456789" }
       ],
       uk: [
-        { type: "UK_NI", regex: /\b[A-CEGHJ-PR-TW-Z]{1}[A-CEGHJ-NPR-TW-Z]{1}\d{6}[A-D]\b/gi, name: N("UK National Insurance Number", "英國國民保險號碼", "英国国民保険番号"), example: "AB123456C" },
-        { type: "UK_POSTCODE", regex: /\b[A-Z]{1,2}\d[A-Z\d]?\s?\d[A-Z]{2}\b/gi, name: N("UK Postcode", "英國郵遞區號", "英国郵便番号"), example: "SW1A 1AA" },
-        { type: "UK_PHONE", regex: /\b(?:\+44\s?|0)(?:\d{2,4}[-.\s]?){2,3}\d{3,4}\b/g, name: N("UK Phone Number", "英國電話號碼", "英国電話番号"), example: "+44 7911 123456" }
+        { type: "UK_NI", regex: /\b[A-CEGHJ-PR-TW-Z]{1}[A-CEGHJ-NPR-TW-Z]{1}\d{6}[A-D]\b/gi, name: N("UK National Insurance Number", "英國國民保險號碼"), example: "AB123456C" },
+        { type: "UK_POSTCODE", regex: /\b[A-Z]{1,2}\d[A-Z\d]?\s?\d[A-Z]{2}\b/gi, name: N("UK Postcode", "英國郵遞區號"), example: "SW1A 1AA" },
+        { type: "UK_PHONE", regex: /\b(?:\+44\s?|0)(?:\d{2,4}[-.\s]?){2,3}\d{3,4}\b/g, name: N("UK Phone Number", "英國電話號碼"), example: "+44 7911 123456" }
       ],
       tw: [
-        { type: "TW_ID", regex: /\b[A-Z][12]\d{8}\b/g, name: N("Taiwan National ID", "台灣身分證字號", "台湾国民身分証番号"), example: "A123456789", validate: (m) => twIdChecksum(m) },
-        { type: "TW_ARC", regex: /\b[A-Z][A-D89]\d{8}\b/g, name: N("Taiwan Resident Certificate / Uniform ID", "台灣居留證／統一證號", "台湾居留証／統一証番号"), example: "A800000014" },
-        { type: "TW_MOBILE", regex: /\b09\d{2}-?\d{3}-?\d{3}\b/g, name: N("Taiwan Mobile Number", "台灣手機號碼", "台湾携帯電話番号"), example: "0912-345-678" },
-        { type: "TW_TEL", regex: /\b0(?!9)\d{1,2}-?\d{7,8}(?:\s*(?:#|分機|ext\.?)\s*\d{1,5})?\b/gi, name: N("Taiwan Landline / Extension", "台灣市話／分機號碼", "台湾固定電話／内線番号"), example: "02-23456789#123" },
-        { type: "TW_UBN", regex: /\b\d{8}\b/g, name: N("Taiwan Business Unified Number", "台灣統一編號", "台湾統一番号（法人番号）"), example: "04595257", validate: (m) => twUbnChecksum(m) },
-        { type: "TW_ADDRESS", regex: /(?:\d{3,6}\s*)?(?:(?:[臺台][北中南東]|新北|桃園|新竹|苗栗|彰化|南投|雲林|嘉義|屏東|宜蘭|花蓮|[臺台]東|澎湖|金門|連江)[縣市])(?:[一-龥]{2,4}[區市鎮鄉])(?:[一-龥]{1,10}[路街道段區里村])(?:\d+巷)?(?:\d+弄)?(?:\d+號)(?:之\d+)?(?:\d+樓)?/g, name: N("Taiwan Household/Mailing Address", "台灣戶籍／通訊地址", "台湾の住所"), example: "406 台中市北屯區崇德路三段100號" }
+        { type: "TW_ID", regex: /\b[A-Z][12]\d{8}\b/g, name: N("Taiwan National ID", "台灣身分證字號"), example: "A123456789", validate: (m) => twIdChecksum(m) },
+        { type: "TW_ARC", regex: /\b[A-Z][A-D89]\d{8}\b/g, name: N("Taiwan Resident Certificate / Uniform ID", "台灣居留證／統一證號"), example: "A800000014" },
+        { type: "TW_MOBILE", regex: /\b09\d{2}-?\d{3}-?\d{3}\b/g, name: N("Taiwan Mobile Number", "台灣手機號碼"), example: "0912-345-678" },
+        { type: "TW_TEL", regex: /\b0(?!9)\d{1,2}-?\d{7,8}(?:\s*(?:#|分機|ext\.?)\s*\d{1,5})?\b/gi, name: N("Taiwan Landline / Extension", "台灣市話／分機號碼"), example: "02-23456789#123" },
+        { type: "TW_UBN", regex: /\b\d{8}\b/g, name: N("Taiwan Business Unified Number", "台灣統一編號"), example: "04595257", validate: (m) => twUbnChecksum(m) },
+        { type: "TW_ADDRESS", regex: /(?:\d{3,6}\s*)?(?:(?:[臺台][北中南東]|新北|桃園|新竹|苗栗|彰化|南投|雲林|嘉義|屏東|宜蘭|花蓮|[臺台]東|澎湖|金門|連江)[縣市])(?:[一-龥]{2,4}[區市鎮鄉])(?:[一-龥]{1,10}[路街道段區里村])(?:\d+巷)?(?:\d+弄)?(?:\d+號)(?:之\d+)?(?:\d+樓)?/g, name: N("Taiwan Household/Mailing Address", "台灣戶籍／通訊地址"), example: "406 台中市北屯區崇德路三段100號" }
       ],
       jp: [
-        { type: "JP_MYNUMBER", regex: /\b\d{4}-?\d{4}-?\d{4}\b/g, name: N("Japan My Number (個人番号)", "日本個人番號（My Number）", "マイナンバー（個人番号）"), example: "1234-5678-9018", validate: (m) => jpMyNumberChecksum(m) },
-        { type: "JP_CORP_NUMBER", regex: /\b\d{13}\b/g, name: N("Japan Corporate Number (法人番号)", "日本法人番號", "法人番号"), example: "8700110005901", validate: (m) => jpCorpNumberChecksum(m) },
-        { type: "JP_MOBILE", regex: /\b0[789]0-?\d{4}-?\d{4}\b/g, name: N("Japan Mobile Number", "日本手機號碼", "日本の携帯電話番号"), example: "090-1234-5678" },
-        { type: "JP_TEL", regex: /\b0\d{1,4}-?\d{1,4}-?\d{4}\b/g, name: N("Japan Landline Number", "日本市話號碼", "日本の固定電話番号"), example: "03-1234-5678" },
-        { type: "JP_POSTAL", regex: /\b\d{3}-?\d{4}\b/g, name: N("Japan Postal Code", "日本郵遞區號", "日本の郵便番号"), example: "123-4567" },
-        { type: "JP_PASSPORT", regex: /\b[A-Z]{2}\d{7}\b/g, name: N("Japan Passport Number (approximate)", "日本護照號碼（概略格式）", "日本のパスポート番号（概算）"), example: "TH1234567" }
+        { type: "JP_MYNUMBER", regex: /\b\d{4}-?\d{4}-?\d{4}\b/g, name: N("Japan My Number (個人番号)", "日本個人番號（My Number）"), example: "1234-5678-9018", validate: (m) => jpMyNumberChecksum(m) },
+        { type: "JP_CORP_NUMBER", regex: /\b\d{13}\b/g, name: N("Japan Corporate Number (法人番号)", "日本法人番號"), example: "8700110005901", validate: (m) => jpCorpNumberChecksum(m) },
+        { type: "JP_MOBILE", regex: /\b0[789]0-?\d{4}-?\d{4}\b/g, name: N("Japan Mobile Number", "日本手機號碼"), example: "090-1234-5678" },
+        { type: "JP_TEL", regex: /\b0\d{1,4}-?\d{1,4}-?\d{4}\b/g, name: N("Japan Landline Number", "日本市話號碼"), example: "03-1234-5678" },
+        { type: "JP_POSTAL", regex: /\b\d{3}-?\d{4}\b/g, name: N("Japan Postal Code", "日本郵遞區號"), example: "123-4567" },
+        { type: "JP_PASSPORT", regex: /\b[A-Z]{2}\d{7}\b/g, name: N("Japan Passport Number (approximate)", "日本護照號碼（概略格式）"), example: "TH1234567" }
       ]
     });
     function regexNameFor(def) {
@@ -2057,10 +2050,6 @@
       zh: {
         personal: `你是一個注重隱私、在本機完全離線執行的助理。以下文字已經過去識別化處理：姓名、聯絡方式及其他個人識別資訊已被替換成如 {{PERSON_1}} 的佔位符記號。請不要嘗試猜測、推論或還原原始身分。請在你的回覆中，將每一個 {{TAG_N}} 記號原封不動保留在原本的位置。請勿在此次本機工作階段之外摘要、記錄或引用這些內容。`,
         business: `你是一個注重隱私、在本機完全離線執行的助理。以下文字是已經過去識別化處理的機密商業資訊：姓名、帳號及其他識別資訊已被替換成如 {{VENDOR_1}} 的佔位符記號。請將其中內容視為營業秘密處理。請在你的回覆中，將每一個 {{TAG_N}} 記號原封不動保留在原本的位置。請勿在此次本機工作階段之外摘要、記錄或引用這些內容。`
-      },
-      ja: {
-        personal: `あなたはこの端末上でローカルかつ完全にオフラインで動作する、プライバシーに配慮したアシスタントです。以下のテキストはすでに匿名化されており、氏名・連絡先などの個人識別情報は {{PERSON_1}} のようなプレースホルダートークンに置き換えられています。元の身元を推測・推論・復元しようとしないでください。回答中のすべての {{TAG_N}} トークンは、変更せずそのままの位置で保持してください。この内容をローカルセッション外で要約・記録・言及しないでください。`,
-        business: `あなたはこの端末上でローカルかつ完全にオフラインで動作する、プライバシーに配慮したアシスタントです。以下のテキストはすでに匿名化された機密の業務情報であり、氏名・口座番号などの識別情報は {{VENDOR_1}} のようなプレースホルダートークンに置き換えられています。この内容は営業秘密として扱ってください。回答中のすべての {{TAG_N}} トークンは、変更せずそのままの位置で保持してください。この内容をローカルセッション外で要約・記録・言及しないでください。`
       }
     };
     function copyLocalPrompt(which) {
@@ -2089,11 +2078,6 @@
         channel1: `請找出所有尚未遮蔽的「人名（PERSON）」（包含頭銜在前的形式，如「英文老師 John Carter」；頭銜在後的形式，如「Mary Smith，老師」；冒號分隔形式，如「學生：Jane Doe」；以及一般姓名或暱稱，如「Robert Johnson」或「Bob」。只擷取姓名本身列入 PERSON 類別，不含頭銜）、「廠商／機構（VENDOR）」（包含沒有正式公司字尾的非正式店家，例如「Sunny Diner」）、「地址（ADDRESS）」、「專案／活動名稱（PROJECT）」，以及「銀行／付款帳號（BANK_ACCT）」。\n只回傳一個 JSON 陣列，格式如 [{"type":"PERSON","value":"Jane Doe","reason":"..."}]。若沒有找到任何項目請回傳 []。文字內容：\n{{TEXT}}`,
         channel2Personal: `請判斷以下文字是否包含「極度敏感的資訊」。極度敏感的資訊包括：自我傷害、自殺、性侵害或性虐待、家庭暴力、保護令、身心障礙或特殊需求狀態（包含心理／教育評估）、或心理諮商／治療紀錄。\n若包含上述任一項，請回傳這個精確的 JSON：{"critical": true, "reason": "描述具體風險"}\n若沒有，請回傳：{"critical": false, "reason": ""}\n\n文字內容：\n{{TEXT}}`,
         channel2Business: `請判斷以下文字是否包含「極度敏感的資訊」。極度敏感的資訊包括：內線交易或重大非公開資訊、進行中的併購案、裁員或組織精簡計畫、尚未公布的財務結果、資料外洩或資安事件、吹哨者檢舉、進行中的訴訟，或主管機關調查。\n若包含上述任一項，請回傳這個精確的 JSON：{"critical": true, "reason": "描述具體風險"}\n若沒有，請回傳：{"critical": false, "reason": ""}\n\n文字內容：\n{{TEXT}}`
-      },
-      ja: {
-        channel1: `以下のうち、まだマスクされていない「人名（PERSON）」（「英語教師の John Carter」のような肩書き前置き形式、「Mary Smith、教師」のような肩書き後置き形式、「学生：Jane Doe」のようなコロン区切り形式、および「Robert Johnson」や「Bob」のような通常の氏名・愛称を含む。肩書きを除き、氏名部分のみを PERSON カテゴリとして抽出）、「取引先／組織（VENDOR）」（正式な会社名の接尾辞がない非公式な店舗、例：「Sunny Diner」を含む）、「住所（ADDRESS）」、「プロジェクト／イベント名（PROJECT）」、「銀行・支払口座番号（BANK_ACCT）」をすべて見つけてください。\nJSON配列のみを返してください。例：[{"type":"PERSON","value":"Jane Doe","reason":"..."}]。何も見つからない場合は [] を返してください。テキスト：\n{{TEXT}}`,
-        channel2Personal: `以下のテキストに「極めて機微な情報」が含まれているかを判定してください。極めて機微な情報には、自傷行為、自殺、性的暴行や性的虐待、家庭内暴力、保護命令、障害や特別な支援を要する状態（心理・教育評価を含む）、心理カウンセリングや治療の記録が含まれます。\n上記のいずれかが含まれる場合は、次の正確なJSONを返してください：{"critical": true, "reason": "具体的なリスクを記述"}\n含まれない場合は次を返してください：{"critical": false, "reason": ""}\n\nテキスト：\n{{TEXT}}`,
-        channel2Business: `以下のテキストに「極めて機微な情報」が含まれているかを判定してください。極めて機微な情報には、インサイダー取引や重要未公開情報、進行中の合併・買収、解雇や人員削減計画、未公表の決算情報、データ漏えいやセキュリティインシデント、内部告発、係属中の訴訟、規制当局の調査が含まれます。\n上記のいずれかが含まれる場合は、次の正確なJSONを返してください：{"critical": true, "reason": "具体的なリスクを記述"}\n含まれない場合は次を返してください：{"critical": false, "reason": ""}\n\nテキスト：\n{{TEXT}}`
       }
     });
 
@@ -2225,7 +2209,7 @@
     // its three fields changed or the row was deleted. Keyed by `en` elsewhere (renderHardBlockRemovedDefaults(),
     // restoreRemovedHardBlockDefault()) since `en` is always present and unique within each bucket.
     function mapHardBlockConceptToRow(concept) {
-      return { en: concept.en, zh: concept.zh, ja: concept.ja, source: 'builtin', default: { en: concept.en, zh: concept.zh, ja: concept.ja } };
+      return { en: concept.en, zh: concept.zh, source: 'builtin', default: { en: concept.en, zh: concept.zh } };
     }
     function buildDefaultHardBlockPresetsState() {
       return {
@@ -2235,7 +2219,7 @@
       };
     }
     function buildDefaultRegexPresetsState() {
-      // defaultNameByLang keeps the whole {en,zh,ja} triplet alongside the live, already-resolved
+      // defaultNameByLang keeps the whole {en,zh} pair alongside the live, already-resolved
       // `name` string — syncRegexNamesToLanguage() needs it to tell "still exactly the old language's
       // default" (safe to swap) apart from "user edited this" (leave alone) on a display-language switch.
       const mapRule = r => ({ type: r.type, pattern: r.regex.source, flags: r.regex.flags, name: regexNameFor(r), defaultNameByLang: r.name, example: r.example, validate: r.validate, source: 'builtin', defaultPattern: r.regex.source });
@@ -2371,19 +2355,19 @@
           const rows = cfg.hardBlockOverrides[persona];
           if (!defaults || !Array.isArray(rows)) return;
           // Rows are matched back to a default concept by its `en` field (always present, unique within
-          // a bucket) — an untouched concept round-trips as pristine 'builtin'; anything where zh/ja no
+          // a bucket) — an untouched concept round-trips as pristine 'builtin'; anything where zh no
           // longer matches that concept's default (edited, or `en` itself no longer matches any default)
           // comes back as 'auto-loaded' with the edit intact but no "Revert to Default" link of its own,
-          // same known limitation already documented for regexOverrides below.
+          // same known limitation already documented for regexOverrides below. A stray `ja` field on a
+          // row from a config file exported before 2026-08-27 (when `ja` was removed) is simply ignored.
           const defaultByEn = new Map(defaults.map(c => [c.en, c]));
           const incoming = rows.filter(r => r && typeof r === 'object').map(r => {
             const en = typeof r.en === 'string' ? r.en.trim() : '';
             const zh = typeof r.zh === 'string' ? r.zh.trim() : '';
-            const ja = typeof r.ja === 'string' ? r.ja.trim() : '';
             const def = defaultByEn.get(en);
-            return (def && def.zh === zh && def.ja === ja)
-              ? { en, zh, ja, source: 'builtin', default: { en: def.en, zh: def.zh, ja: def.ja } }
-              : { en, zh, ja, source: 'auto-loaded' };
+            return (def && def.zh === zh)
+              ? { en, zh, source: 'builtin', default: { en: def.en, zh: def.zh } }
+              : { en, zh, source: 'auto-loaded' };
           });
           if (mode === 'replace') {
             hardBlockPresets[persona] = incoming;
@@ -2404,11 +2388,11 @@
             if (!check.ok) { errors.push(check); return; }
             // Match by type (a stable identifier like "TW_ID") rather than pattern text, so the checksum
             // validator survives even if the pattern/name/example were edited. typeMatch.name is now an
-            // {en,zh,ja} object (the row was exported with whatever single language was active at export
-            // time — see regexNameFor()) — check.entry.name matching ANY of the three still counts as
+            // {en,zh} object (the row was exported with whatever single language was active at export
+            // time — see regexNameFor()) — check.entry.name matching EITHER still counts as
             // "this name wasn't touched", not just the one active when this particular file was written.
             const typeMatch = defaults.find(d => d.type === check.entry.type);
-            const nameMatchesAnyLang = !!typeMatch && !!typeMatch.name && [typeMatch.name.en, typeMatch.name.zh, typeMatch.name.ja].includes(check.entry.name);
+            const nameMatchesAnyLang = !!typeMatch && !!typeMatch.name && [typeMatch.name.en, typeMatch.name.zh].includes(check.entry.name);
             const isExactDefault = !!typeMatch && typeMatch.regex.source === check.entry.pattern && nameMatchesAnyLang && typeMatch.example === check.entry.example;
             incoming.push({
               ...check.entry,
@@ -2667,9 +2651,9 @@
       const tbody = document.getElementById('hardBlockMgmtTbody');
       if (!tbody) return;
       const personaBucket = currentPersona === 'business' ? 'business' : 'personal';
-      // Builtin/persona rows first (the "main" content, one row per concept with EN/ZH/JA side by
-      // side), custom single-value rows appended after — addHardBlockRow() always pushes to the end
-      // of hardBlockPresets.custom, so a freshly-added row stays the tbody's true last child and the
+      // Builtin/persona rows first (the "main" content, one row per concept with EN/ZH side by side),
+      // custom single-value rows appended after — addHardBlockRow() always pushes to the end of
+      // hardBlockPresets.custom, so a freshly-added row stays the tbody's true last child and the
       // focus() in addHardBlockRow() keeps landing on it.
       const personaRowsHtml = hardBlockPresets[personaBucket].map((entry, i) => `
         <tr>
@@ -2677,10 +2661,7 @@
             <input type="text" value="${escapeHtml(entry.en)}" onchange="updateHardBlockField('${personaBucket}', ${i}, 'en', this.value)" placeholder="EN" class="w-full text-sm bg-transparent border border-transparent hover:border-line-strong focus:border-brand-500 focus:outline-none rounded px-1.5 py-1">
           </td>
           <td class="px-3 py-2">
-            <input type="text" value="${escapeHtml(entry.zh)}" onchange="updateHardBlockField('${personaBucket}', ${i}, 'zh', this.value)" placeholder="中文" class="w-full text-sm bg-transparent border border-transparent hover:border-line-strong focus:border-brand-500 focus:outline-none rounded px-1.5 py-1">
-          </td>
-          <td class="px-3 py-2">
-            <input type="text" value="${escapeHtml(entry.ja)}" onchange="updateHardBlockField('${personaBucket}', ${i}, 'ja', this.value)" placeholder="日本語" class="w-full text-sm bg-transparent border border-transparent hover:border-line-strong focus:border-brand-500 focus:outline-none rounded px-1.5 py-1">${sourceBadgeHtml(entry.source)}${bucketTagHtml(personaBucket)}
+            <input type="text" value="${escapeHtml(entry.zh)}" onchange="updateHardBlockField('${personaBucket}', ${i}, 'zh', this.value)" placeholder="中文" class="w-full text-sm bg-transparent border border-transparent hover:border-line-strong focus:border-brand-500 focus:outline-none rounded px-1.5 py-1">${sourceBadgeHtml(entry.source)}${bucketTagHtml(personaBucket)}
           </td>
           <td class="px-3 py-2 text-center whitespace-nowrap">
             ${entry.default ? `<button onclick="revertHardBlockEntryAt('${personaBucket}', ${i})" class="text-ink-muted hover:text-ink-hover text-xs mr-2">${t('pmBtnRevertDefault')}</button>` : ''}
@@ -2690,7 +2671,7 @@
       `).join('');
       const customRowsHtml = hardBlockPresets.custom.map((entry, i) => `
         <tr>
-          <td class="px-3 py-2" colspan="3">
+          <td class="px-3 py-2" colspan="2">
             <input type="text" value="${escapeHtml(entry.value)}" data-bucket="custom" data-idx="${i}" onchange="updateHardBlockValue(this)" placeholder="${escapeHtml(t('editCsvRowKeywordPlaceholder'))}" class="w-full text-sm bg-transparent border border-transparent hover:border-line-strong focus:border-brand-500 focus:outline-none rounded px-1.5 py-1">${sourceBadgeHtml(entry.source)}${bucketTagHtml('custom')}
           </td>
           <td class="px-3 py-2 text-center whitespace-nowrap">
@@ -2698,7 +2679,7 @@
           </td>
         </tr>
       `).join('');
-      tbody.innerHTML = (personaRowsHtml + customRowsHtml) || `<tr><td colspan="4" class="px-3 py-4 text-center text-ink-faint text-xs">${t('pmNoCustomHardBlock')}</td></tr>`;
+      tbody.innerHTML = (personaRowsHtml + customRowsHtml) || `<tr><td colspan="3" class="px-3 py-4 text-center text-ink-faint text-xs">${t('pmNoCustomHardBlock')}</td></tr>`;
       renderHardBlockRemovedDefaults();
     }
 
@@ -2706,13 +2687,13 @@
       const container = document.getElementById('hardBlockRemovedDefaults');
       if (!container) return;
       const personaBucket = currentPersona === 'business' ? 'business' : 'personal';
-      // Keyed by `en` (see mapHardBlockConceptToRow()'s comment) since a concept row is a triplet object,
+      // Keyed by `en` (see mapHardBlockConceptToRow()'s comment) since a concept row is a pair object,
       // not a single comparable string.
       const present = new Set(hardBlockPresets[personaBucket].filter(e => e.default).map(e => e.default.en));
       const removed = HARD_BLOCK_PRESETS_DEFAULT[personaBucket].filter(c => !present.has(c.en));
       container.innerHTML = removed.length
         ? t('pmRemovedDefaultsPrefix', { count: removed.length }) + removed.map(c =>
-            `<button onclick="restoreRemovedHardBlockDefault('${personaBucket}', '${escapeHtml(escapeForInlineJs(c.en))}')" class="inline-block mt-1 mr-1 px-2 py-0.5 bg-white border border-line-strong rounded hover:bg-paper-sunken text-ink-hover">+ ${escapeHtml(c.en)} / ${escapeHtml(c.zh)} / ${escapeHtml(c.ja)}</button>`
+            `<button onclick="restoreRemovedHardBlockDefault('${personaBucket}', '${escapeHtml(escapeForInlineJs(c.en))}')" class="inline-block mt-1 mr-1 px-2 py-0.5 bg-white border border-line-strong rounded hover:bg-paper-sunken text-ink-hover">+ ${escapeHtml(c.en)} / ${escapeHtml(c.zh)}</button>`
           ).join('')
         : '';
     }
@@ -2793,7 +2774,7 @@
       triggerPreview();
     }
 
-    // Persona-bucket concept rows (personal/business) — a triplet of EN/ZH/JA fields edited independently.
+    // Persona-bucket concept rows (personal/business) — a pair of EN/ZH fields edited independently.
     // Clearing a field just opts that language out of matching (see getHardBlockKeywords()); it does not
     // delete the row. Custom rows stay on updateHardBlockValue() above, which keeps its own single value.
     function updateHardBlockField(bucket, idx, field, rawValue) {
@@ -2810,7 +2791,7 @@
       const arr = hardBlockPresets[bucket];
       const entry = arr && arr[idx];
       if (!entry || !entry.default) return;
-      arr[idx] = { en: entry.default.en, zh: entry.default.zh, ja: entry.default.ja, source: 'builtin', default: entry.default };
+      arr[idx] = { en: entry.default.en, zh: entry.default.zh, source: 'builtin', default: entry.default };
       renderHardBlockMgmtTable();
       triggerPreview();
     }
@@ -3042,7 +3023,7 @@
       // even for users who never touched a builtin row. See hardBlockBucketIsDefault()/regexBucketIsDefault().
       const hardBlockOverrides = {};
       Object.keys(HARD_BLOCK_PRESETS_DEFAULT).forEach(persona => {
-        if (!hardBlockBucketIsDefault(persona)) hardBlockOverrides[persona] = hardBlockPresets[persona].map(e => ({ en: e.en, zh: e.zh, ja: e.ja }));
+        if (!hardBlockBucketIsDefault(persona)) hardBlockOverrides[persona] = hardBlockPresets[persona].map(e => ({ en: e.en, zh: e.zh }));
       });
       const regexOverrides = {};
       Object.keys(REGEX_PRESETS_DEFAULT).forEach(region => {
