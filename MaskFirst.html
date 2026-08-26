@@ -1,10 +1,10 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>TokenShield — Zero-Trust PII De-identification</title>
-  <meta name="description" content="TokenShield is a zero-trust, single-file, offline-first PII de-identification tool for individuals and businesses. Mask sensitive data before sending it to AI, then restore it in one click." />
+  <title>MaskFirst — Zero-Trust PII De-identification</title>
+  <meta name="description" content="MaskFirst is a zero-trust, single-file, offline-first PII de-identification tool for individuals and businesses. Mask sensitive data before sending it to AI, then restore it in one click." />
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><defs><linearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'><stop offset='0%25' stop-color='%23047857'/><stop offset='100%25' stop-color='%2310b981'/></linearGradient></defs><path d='M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z' fill='url(%23g)'/></svg>" />
   <!-- Design tokens: always loaded regardless of which Tailwind tier below activates (CDN or
        local style.css), so both can resolve the same var(--...) semantic color references.
@@ -63,7 +63,7 @@
       --ai-finding-700: #7E22CE;
       --ai-finding-500-rgb: 168, 85, 247;
 
-      /* Brand (TokenShield = emerald) */
+      /* Brand (MaskFirst = emerald) */
       --brand-50: #ECFDF5;
       --brand-100: #D1FAE5;
       --brand-200: #A7F3D0;
@@ -150,14 +150,14 @@
 
       cdnScript.onerror = function () {
         // CDN failed (offline) -> Tier 2: try the local style.css
-        console.warn('[TokenShield] Tailwind CDN failed to load, trying local style.css …');
+        console.warn('[MaskFirst] Tailwind CDN failed to load, trying local style.css …');
         var localLink = document.createElement('link');
         localLink.rel = 'stylesheet';
         localLink.href = 'style.css';
 
         localLink.onerror = function () {
           // Local file also missing -> Tier 3: fail-safe guidance screen
-          console.error('[TokenShield] Local style.css not found either. Showing fail-safe screen.');
+          console.error('[MaskFirst] Local style.css not found either. Showing fail-safe screen.');
 
           // Hide the main UI
           var showOverlay = function () {
@@ -173,7 +173,7 @@
             // picks a display language independently: saved preference first, then browser language.
             var failSafeLang = (function () {
               try {
-                var stored = localStorage.getItem('tokenshield_display_lang');
+                var stored = localStorage.getItem('maskfirst_display_lang');
                 if (stored === 'zh' || stored === 'ja' || stored === 'en') return stored;
               } catch (e) {}
               var nav = (navigator.language || '').toLowerCase();
@@ -186,7 +186,7 @@
                 title: 'Startup Failed (No Network Connection)',
                 body: 'This device appears to be <strong>offline</strong>, and the local stylesheet <code style="background:#f5f5f4;border-radius:4px;padding:2px 6px;font-size:.85em;">style.css</code> could not be found.',
                 step1: 'Go to the project release page and download <code style="background:#f5f5f4;border-radius:4px;padding:2px 4px;font-size:.85em;">style.css</code>.',
-                step2: 'Place <code style="background:#f5f5f4;border-radius:4px;padding:2px 4px;font-size:.85em;">style.css</code> in the <strong>same folder</strong> as <code style="background:#f5f5f4;border-radius:4px;padding:2px 4px;font-size:.85em;">TokenShield.html</code>.',
+                step2: 'Place <code style="background:#f5f5f4;border-radius:4px;padding:2px 4px;font-size:.85em;">style.css</code> in the <strong>same folder</strong> as <code style="background:#f5f5f4;border-radius:4px;padding:2px 4px;font-size:.85em;">MaskFirst.html</code>.',
                 step3: 'Reload this page (<kbd style="border:1px solid #d4d4d4;border-radius:4px;padding:1px 6px;background:#fafaf9;">F5</kbd>).',
                 reload: 'Reload'
               },
@@ -194,7 +194,7 @@
                 title: '啟動失敗（沒有網路連線）',
                 body: '這台裝置目前似乎<strong>離線</strong>，且找不到本機樣式表 <code style="background:#f5f5f4;border-radius:4px;padding:2px 6px;font-size:.85em;">style.css</code>。',
                 step1: '前往專案的發布頁面下載 <code style="background:#f5f5f4;border-radius:4px;padding:2px 4px;font-size:.85em;">style.css</code>。',
-                step2: '把 <code style="background:#f5f5f4;border-radius:4px;padding:2px 4px;font-size:.85em;">style.css</code> 放在與 <code style="background:#f5f5f4;border-radius:4px;padding:2px 4px;font-size:.85em;">TokenShield.html</code> <strong>相同的資料夾</strong>中。',
+                step2: '把 <code style="background:#f5f5f4;border-radius:4px;padding:2px 4px;font-size:.85em;">style.css</code> 放在與 <code style="background:#f5f5f4;border-radius:4px;padding:2px 4px;font-size:.85em;">MaskFirst.html</code> <strong>相同的資料夾</strong>中。',
                 step3: '重新整理此頁面（<kbd style="border:1px solid #d4d4d4;border-radius:4px;padding:1px 6px;background:#fafaf9;">F5</kbd>）。',
                 reload: '重新整理'
               },
@@ -202,7 +202,7 @@
                 title: '起動に失敗しました（ネットワーク接続なし）',
                 body: 'この端末は<strong>オフライン</strong>のようで、ローカルのスタイルシート <code style="background:#f5f5f4;border-radius:4px;padding:2px 6px;font-size:.85em;">style.css</code> も見つかりませんでした。',
                 step1: 'プロジェクトのリリースページから <code style="background:#f5f5f4;border-radius:4px;padding:2px 4px;font-size:.85em;">style.css</code> をダウンロードしてください。',
-                step2: '<code style="background:#f5f5f4;border-radius:4px;padding:2px 4px;font-size:.85em;">style.css</code> を <code style="background:#f5f5f4;border-radius:4px;padding:2px 4px;font-size:.85em;">TokenShield.html</code> と<strong>同じフォルダ</strong>に置いてください。',
+                step2: '<code style="background:#f5f5f4;border-radius:4px;padding:2px 4px;font-size:.85em;">style.css</code> を <code style="background:#f5f5f4;border-radius:4px;padding:2px 4px;font-size:.85em;">MaskFirst.html</code> と<strong>同じフォルダ</strong>に置いてください。',
                 step3: 'このページを再読み込みしてください（<kbd style="border:1px solid #d4d4d4;border-radius:4px;padding:1px 6px;background:#fafaf9;">F5</kbd>）。',
                 reload: '再読み込み'
               }
@@ -354,7 +354,7 @@
               <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
             </svg>
           </div>
-          <h1 class="font-bold text-lg tracking-tight whitespace-nowrap">TokenShield <span class="font-normal text-ink-muted text-sm ml-1 hidden sm:inline" data-i18n="headerTagline">Privacy Shield for AI</span></h1>
+          <h1 class="font-bold text-lg tracking-tight whitespace-nowrap">MaskFirst <span class="font-normal text-ink-muted text-sm ml-1 hidden sm:inline" data-i18n="headerTagline">Privacy Shield for AI</span></h1>
         </div>
         <!-- Tab switcher: always sits immediately right of the logo, never toggling position
              by breakpoint (avoids the tabs jumping left/right on resize). Dictionary icon and
@@ -725,9 +725,9 @@
         <div class="flex justify-end items-center gap-3 text-xs text-ink-muted pb-2 border-b border-line-soft/60">
           <div data-i18n="settingsAuthorLine">Author: <strong>OA (oas114)</strong></div>
           <span class="text-line-strong">|</span>
-          <a href="https://github.com/oas114/TokenShield" target="_blank" rel="noopener noreferrer" class="hover:text-ink transition-colors flex items-center gap-1.5 group">
+          <a href="https://github.com/oas114/MaskFirst" target="_blank" rel="noopener noreferrer" class="hover:text-ink transition-colors flex items-center gap-1.5 group">
             <svg class="w-3.5 h-3.5 fill-current opacity-70 group-hover:opacity-100 transition-opacity" viewBox="0 0 24 24"><path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.477 2 2 6.477 2 12c0 4.42 2.865 8.166 6.839 9.489.5.092.682-.217.682-.482 0-.237-.008-.866-.013-1.7-2.782.603-3.369-1.34-3.369-1.34-.454-1.156-1.11-1.462-1.11-1.462-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.831.092-.646.35-1.086.636-1.336-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.578 9.578 0 0112 6.836c.85.004 1.705.114 2.504.336 1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.203 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48C19.138 20.161 22 16.418 22 12c0-5.523-4.477-10-10-10z"/></svg>
-            oas114/TokenShield
+            oas114/MaskFirst
           </a>
           <span class="text-line-strong">|</span>
           <a href="https://ko-fi.com/oasgrow" target="_blank" rel="noopener noreferrer" class="hover:text-danger-600 transition-colors flex items-center gap-1 text-ink-muted font-medium group">
@@ -743,7 +743,7 @@
             The <strong>Persona</strong> selector swaps the Hard Block keyword set between <strong>Personal</strong> privacy terms and <strong>Business</strong> confidentiality terms.
           </p>
           <p class="text-xs text-warning-700 bg-warning-50 border border-warning-200 rounded-lg p-3 leading-relaxed" data-i18n="settingsRegionPersonaWarning">
-            <strong>Nothing here is saved.</strong> TokenShield destroys all state on reload by design, so your Region/Persona choice resets every time you open the file. If you always work in one region or persona, open <code class="bg-white border border-warning-200 px-1 rounded">TokenShield.html</code> in a text editor, search for <code class="bg-white border border-warning-200 px-1 rounded">DEFAULT_REGION</code> and <code class="bg-white border border-warning-200 px-1 rounded">DEFAULT_PERSONA</code> near the top of the <code class="bg-white border border-warning-200 px-1 rounded">&lt;script&gt;</code> block, and change the value — that becomes your new startup default.
+            <strong>Nothing here is saved.</strong> MaskFirst destroys all state on reload by design, so your Region/Persona choice resets every time you open the file. If you always work in one region or persona, open <code class="bg-white border border-warning-200 px-1 rounded">MaskFirst.html</code> in a text editor, search for <code class="bg-white border border-warning-200 px-1 rounded">DEFAULT_REGION</code> and <code class="bg-white border border-warning-200 px-1 rounded">DEFAULT_PERSONA</code> near the top of the <code class="bg-white border border-warning-200 px-1 rounded">&lt;script&gt;</code> block, and change the value — that becomes your new startup default.
           </p>
         </div>
 
@@ -804,7 +804,7 @@
           <!-- Explanation and risk warning -->
           <div class="bg-warning-50 border border-warning-200 rounded-lg p-3 text-xs text-warning-800 leading-relaxed" data-i18n="settingsOllamaRiskBox">
             <strong class="text-warning-900">Why is this setting needed? And a risk warning</strong><br>
-            Ollama blocks all web page access by default (a security protection). You need to add an "environment variable" named <code>OLLAMA_ORIGINS</code> set to <code>*</code> so Ollama allows this local TokenShield page to connect.<br><br>
+            Ollama blocks all web page access by default (a security protection). You need to add an "environment variable" named <code>OLLAMA_ORIGINS</code> set to <code>*</code> so Ollama allows this local MaskFirst page to connect.<br><br>
             <strong class="text-danger-700">⚠️ Security risk notice:</strong><br>
             Setting the origin to <code>*</code> allows any web page to call your local model. This only affects your own user account and doesn't require administrator rights, but it does carry some risk of abuse by other malicious pages.<br><br>
             <strong>We strongly recommend fully quitting Ollama from the system tray when you're not using this tool, or removing the environment variable afterward.</strong>
@@ -897,7 +897,7 @@
                 <option value="custom" data-i18n="settingsModelCustom">Custom (type your own)</option>
               </select>
               <input type="text" id="ollamaModel" value="qwen2.5:3b" class="hidden mt-2 w-full text-sm p-2 bg-white border border-line-strong rounded-md focus:ring-1 focus:ring-brand-500 outline-none" placeholder="Enter model name" data-i18n-placeholder="settingsModelInputPlaceholder">
-              <p class="text-[10px] text-ink-faint mt-1" data-i18n="settingsModelHint">※ Make sure you've pulled this model via Ollama. Developers can edit these default options directly in the source (TokenShield.html).</p>
+              <p class="text-[10px] text-ink-faint mt-1" data-i18n="settingsModelHint">※ Make sure you've pulled this model via Ollama. Developers can edit these default options directly in the source (MaskFirst.html).</p>
             </div>
             <button onclick="testOllamaConnection()" class="text-xs bg-brand-50 hover:bg-brand-100 text-brand-800 px-4 py-2 rounded-md font-medium transition-colors border border-brand-200" data-i18n="settingsBtnTestConnection">
               Test Connection
@@ -920,7 +920,7 @@
       <div class="p-6 overflow-y-auto">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
           <p class="text-sm text-ink-secondary" data-i18n="guideIntro">
-            TokenShield uses a two-layer system to detect sensitive personal and business data — this section explains how each layer works and where its limits are. The rules and keywords actually active for your current Region/Persona, and every add/edit/delete action, now live in Manage Custom Protection Rules — including the built-in ones, not just your own custom additions.
+            MaskFirst uses a two-layer system to detect sensitive personal and business data — this section explains how each layer works and where its limits are. The rules and keywords actually active for your current Region/Persona, and every add/edit/delete action, now live in Manage Custom Protection Rules — including the built-in ones, not just your own custom additions.
           </p>
           <button onclick="toggleGuideInstructions()" class="bg-brand-50 text-brand-800 border border-brand-200 hover:bg-brand-100 px-3 py-1.5 rounded text-xs font-semibold transition-colors whitespace-nowrap" data-i18n="guideHowToEditBtn">
             How to edit these rules
@@ -929,7 +929,7 @@
 
         <div class="bg-brand-50 border border-brand-200 rounded-lg p-4 mb-4 text-xs text-ink-hover leading-relaxed">
           <p class="font-bold text-ink text-sm mb-1" data-i18n="guideSafeAskAiTitle">Not sure this file is actually safe? Ask an AI.</p>
-          <p data-i18n="guideSafeAskAiBody">TokenShield is a single HTML file — no server, no background network calls. You don't need to read code yourself: paste the entire <code class="bg-white border border-line px-1 rounded">TokenShield.html</code> source into any AI (ChatGPT, Claude, etc.) and ask it directly: "Does this page send any user input anywhere?" Let the AI verify it for you, instead of just taking the developer's word for it.</p>
+          <p data-i18n="guideSafeAskAiBody">MaskFirst is a single HTML file — no server, no background network calls. You don't need to read code yourself: paste the entire <code class="bg-white border border-line px-1 rounded">MaskFirst.html</code> source into any AI (ChatGPT, Claude, etc.) and ask it directly: "Does this page send any user input anywhere?" Let the AI verify it for you, instead of just taking the developer's word for it.</p>
         </div>
 
         <div id="guideInstructions" class="hidden bg-paper-sunken border border-line rounded-lg p-4 mb-4 text-xs text-ink-hover leading-relaxed space-y-2">
@@ -938,7 +938,7 @@
           <ol class="list-decimal list-inside space-y-1 ml-1 text-ink-secondary">
             <li data-i18n="guideStep1">Click <strong>"Manage Custom Protection Rules"</strong> in the toolbar, then switch to the "Hard Block Keywords" or "Regex Rules" tab.</li>
             <li data-i18n="guideStep2">Click "+ Add Row" to add a row directly in the table, or click any row's fields to edit them in place — including the built-in rows for your currently selected Persona/Region, not just your own custom ones (regex rules are validated for syntax and ReDoS risk on save). Edited or deleted built-in rows show a "Revert to Default" option, or you can re-add a deleted one from the "removed from defaults" list below the table. For bulk changes, you can instead download that tab's CSV template, fill it in, and import it, choosing "Merge with Existing" or "Replace All" (this only ever affects your custom layer).</li>
-            <li data-i18n="guideStep4">To share your customizations with a colleague or reuse them on another machine, expand "Advanced Settings" (desktop only) in the same panel and click "Export Config File" to download <code class="bg-white border border-line px-1 rounded">tokenshield.config.js</code>; to apply it later, click "Import Config File", pick that file, and confirm the summary. Note: this is a manual import — it does not apply automatically on refresh or the next time you open this file, so you'll need to re-import it each time.</li>
+            <li data-i18n="guideStep4">To share your customizations with a colleague or reuse them on another machine, expand "Advanced Settings" (desktop only) in the same panel and click "Export Config File" to download <code class="bg-white border border-line px-1 rounded">maskfirst.config.js</code>; to apply it later, click "Import Config File", pick that file, and confirm the summary. Note: this is a manual import — it does not apply automatically on refresh or the next time you open this file, so you'll need to re-import it each time.</li>
             <li data-i18n="guideStep5">To discard manual edits or imported settings and restore the built-in defaults, open "Manage Custom Protection Rules", expand "Advanced Settings" (desktop only), and click "Reset to Defaults".</li>
           </ol>
         </div>
@@ -978,7 +978,7 @@
       </div>
 
       <div class="p-6 overflow-y-auto space-y-4">
-        <p class="text-sm text-ink-hover" data-i18n="unlockIntro">TokenShield detected text that may contain extremely sensitive information. To protect the people involved, copy/export has been temporarily locked.</p>
+        <p class="text-sm text-ink-hover" data-i18n="unlockIntro">MaskFirst detected text that may contain extremely sensitive information. To protect the people involved, copy/export has been temporarily locked.</p>
 
         <div class="bg-paper-sunken p-4 rounded-lg border border-line">
           <h3 class="text-xs font-bold text-ink-muted mb-2 uppercase tracking-wider" data-i18n="unlockReasonsHeading">Block Reason(s)</h3>
@@ -1277,7 +1277,7 @@
     // Internationalization (i18n) — independent from Region/Persona.
     // Region/Persona select which rule data is active; this only controls display language.
     // ==========================================
-    const LANG_STORAGE_KEY = 'tokenshield_display_lang';
+    const LANG_STORAGE_KEY = 'maskfirst_display_lang';
     let currentLang = localStorage.getItem(LANG_STORAGE_KEY) || 'en';
 
     const I18N = {
@@ -1344,7 +1344,7 @@
       settingsKofiLink: { en: 'Support on Ko-fi', zh: '在 Ko-fi 贊助', ja: 'Ko-fiで支援する' },
       settingsRegionPersonaHeading: { en: 'Region & Persona Presets', zh: '地區與身分模式預設', ja: '地域とペルソナのプリセット' },
       settingsRegionPersonaBody: { en: `The <strong>Region</strong> selector (top toolbar) swaps which country/region regex ruleset is layered on top of the always-on <strong>Global</strong> baseline (email, IP addresses, credit card numbers, generic dates). Only one region is active at a time to avoid cross-country format collisions (e.g. a bare 9-digit number shouldn't simultaneously be treated as a US SSN and something else). The <strong>Persona</strong> selector swaps the Hard Block keyword set between <strong>Personal</strong> privacy terms and <strong>Business</strong> confidentiality terms.`, zh: `<strong>地區</strong>選單（頂部工具列）用來切換要疊加在永遠啟用的<strong>全球</strong>基準規則（電子郵件、IP 位址、信用卡卡號、常見日期格式）之上的是哪個國家／地區的正則規則庫。同時間只會啟用一個地區，避免跨國格式互相衝突（例如一組純 9 位數字，不該同時被當成美國社會安全碼又被當成別的東西）。<strong>身分模式</strong>選單則用來切換硬阻斷關鍵字集，在<strong>個人</strong>隱私用語與<strong>企業</strong>機密用語之間切換。`, ja: `<strong>地域</strong>セレクター（上部ツールバー）は、常時有効な<strong>グローバル</strong>基準ルール（メールアドレス、IPアドレス、クレジットカード番号、一般的な日付形式）の上に、どの国・地域の正規表現ルールセットを重ねるかを切り替えます。国ごとの形式が衝突しないよう、一度に有効になる地域は1つだけです（例：9桁の数字だけでは、米国のSSNと他の何かを同時に表すことはできません）。<strong>ペルソナ</strong>セレクターは、ハードブロックのキーワードセットを<strong>個人</strong>のプライバシー用語と<strong>ビジネス</strong>の機密用語との間で切り替えます。` },
-      settingsRegionPersonaWarning: { en: `<strong>Nothing here is saved.</strong> TokenShield destroys all state on reload by design, so your Region/Persona choice resets every time you open the file. If you always work in one region or persona, open <code class="bg-white border border-warning-200 px-1 rounded">TokenShield.html</code> in a text editor, search for <code class="bg-white border border-warning-200 px-1 rounded">DEFAULT_REGION</code> and <code class="bg-white border border-warning-200 px-1 rounded">DEFAULT_PERSONA</code> near the top of the <code class="bg-white border border-warning-200 px-1 rounded">&lt;script&gt;</code> block, and change the value — that becomes your new startup default.`, zh: `<strong>這裡的設定不會被儲存。</strong>TokenShield 的設計就是每次重新整理都會清空所有狀態，所以每次開啟檔案時 Region／Persona 都會重設。如果你固定只用某個地區或身分模式，可以用文字編輯器打開 <code class="bg-white border border-warning-200 px-1 rounded">TokenShield.html</code>，在 <code class="bg-white border border-warning-200 px-1 rounded">&lt;script&gt;</code> 區塊開頭附近搜尋 <code class="bg-white border border-warning-200 px-1 rounded">DEFAULT_REGION</code> 與 <code class="bg-white border border-warning-200 px-1 rounded">DEFAULT_PERSONA</code>，把值改掉──那就會成為你新的預設啟動值。`, ja: `<strong>ここでの設定は保存されません。</strong>TokenShieldは仕様上、再読み込みのたびにすべての状態を破棄するため、Region／Personaの選択も開くたびにリセットされます。いつも同じ地域やペルソナで作業する場合は、テキストエディタで <code class="bg-white border border-warning-200 px-1 rounded">TokenShield.html</code> を開き、<code class="bg-white border border-warning-200 px-1 rounded">&lt;script&gt;</code> ブロックの冒頭付近にある <code class="bg-white border border-warning-200 px-1 rounded">DEFAULT_REGION</code> と <code class="bg-white border border-warning-200 px-1 rounded">DEFAULT_PERSONA</code> を検索して値を変更してください──それが新しい起動時の既定値になります。` },
+      settingsRegionPersonaWarning: { en: `<strong>Nothing here is saved.</strong> MaskFirst destroys all state on reload by design, so your Region/Persona choice resets every time you open the file. If you always work in one region or persona, open <code class="bg-white border border-warning-200 px-1 rounded">MaskFirst.html</code> in a text editor, search for <code class="bg-white border border-warning-200 px-1 rounded">DEFAULT_REGION</code> and <code class="bg-white border border-warning-200 px-1 rounded">DEFAULT_PERSONA</code> near the top of the <code class="bg-white border border-warning-200 px-1 rounded">&lt;script&gt;</code> block, and change the value — that becomes your new startup default.`, zh: `<strong>這裡的設定不會被儲存。</strong>MaskFirst 的設計就是每次重新整理都會清空所有狀態，所以每次開啟檔案時 Region／Persona 都會重設。如果你固定只用某個地區或身分模式，可以用文字編輯器打開 <code class="bg-white border border-warning-200 px-1 rounded">MaskFirst.html</code>，在 <code class="bg-white border border-warning-200 px-1 rounded">&lt;script&gt;</code> 區塊開頭附近搜尋 <code class="bg-white border border-warning-200 px-1 rounded">DEFAULT_REGION</code> 與 <code class="bg-white border border-warning-200 px-1 rounded">DEFAULT_PERSONA</code>，把值改掉──那就會成為你新的預設啟動值。`, ja: `<strong>ここでの設定は保存されません。</strong>MaskFirstは仕様上、再読み込みのたびにすべての状態を破棄するため、Region／Personaの選択も開くたびにリセットされます。いつも同じ地域やペルソナで作業する場合は、テキストエディタで <code class="bg-white border border-warning-200 px-1 rounded">MaskFirst.html</code> を開き、<code class="bg-white border border-warning-200 px-1 rounded">&lt;script&gt;</code> ブロックの冒頭付近にある <code class="bg-white border border-warning-200 px-1 rounded">DEFAULT_REGION</code> と <code class="bg-white border border-warning-200 px-1 rounded">DEFAULT_PERSONA</code> を検索して値を変更してください──それが新しい起動時の既定値になります。` },
       settingsCustomDictHeading: { en: 'Custom Dictionary (CSV)', zh: '自訂詞庫（CSV）', ja: 'カスタム辞書（CSV）' },
       settingsCustomDictBody: { en: `Batch-import your own keywords, names, or project codenames. Download the template and fill it out using the "Keyword,Category" format. <strong>Category is optional</strong> — it defaults to CUSTOM if left blank. The system generates matching tags automatically (e.g. NAME_1, CUSTOM_1).<br><span class="text-warning-700 font-medium">Note: keyword values cannot contain commas — this will break CSV parsing. If a term itself contains a comma, use "Build Dictionary Online" instead.</span>`, zh: `批次匯入你自己的關鍵字、姓名或專案代號。下載範本後依「Keyword,Category」格式填寫，<strong>Category 欄位可留空</strong>──留空時預設歸類為 CUSTOM，系統會自動產生對應標籤（例如 NAME_1、CUSTOM_1）。<br><span class="text-warning-700 font-medium">注意：關鍵字內容不能包含逗號，否則會破壞 CSV 解析。如果詞彙本身就含有逗號，請改用「線上建立詞庫」功能。</span>`, ja: `キーワード、氏名、プロジェクトのコードネームなどを一括インポートできます。テンプレートをダウンロードし、「Keyword,Category」形式で入力してください。<strong>Category列は省略可</strong>──空欄の場合はCUSTOMとして扱われ、システムが自動でタグ（NAME_1、CUSTOM_1など）を生成します。<br><span class="text-warning-700 font-medium">注意：キーワードにカンマを含めることはできません（CSVの解析が壊れます）。カンマを含む語句を登録したい場合は、「オンラインで辞書を作成」を使用してください。</span>` },
       commonDownloadCsvTemplate: { en: 'Download CSV Template', zh: '下載 CSV 範本', ja: 'CSVテンプレートをダウンロード' },
@@ -1356,7 +1356,7 @@
       settingsPromptBusinessDesc: { en: 'For business documents — frames the content as confidential/trade-secret material.', zh: '適用於企業文件──將內容定調為機密／營業秘密等級的資料。', ja: 'ビジネス向け文書用──内容を機密情報・営業秘密として扱うよう位置づけます。' },
       settingsOllamaHeading: { en: 'Local AI (Ollama) Connection Setup', zh: '本機 AI（Ollama）連線設定', ja: 'ローカルAI（Ollama）接続設定' },
       settingsOllamaInstallBox: { en: `<strong>Don't have Ollama installed yet?</strong><br>Download it from the <a href="https://ollama.com/download" target="_blank" class="underline font-bold text-brand-700 hover:text-brand-900">official Ollama website</a> and install it. Then open a terminal (Command Prompt / PowerShell / Terminal) and run the following command to install the default model:<br><code class="block mt-1 bg-white border border-brand-200 px-2 py-1 rounded font-mono text-ink">ollama run qwen2.5:3b</code>`, zh: `<strong>還沒安裝 Ollama？</strong><br>請前往<a href="https://ollama.com/download" target="_blank" class="underline font-bold text-brand-700 hover:text-brand-900">Ollama 官方網站</a>下載並安裝。安裝完成後開啟終端機（命令提示字元／PowerShell／Terminal），執行以下指令安裝預設模型：<br><code class="block mt-1 bg-white border border-brand-200 px-2 py-1 rounded font-mono text-ink">ollama run qwen2.5:3b</code>`, ja: `<strong>まだOllamaをインストールしていませんか？</strong><br><a href="https://ollama.com/download" target="_blank" class="underline font-bold text-brand-700 hover:text-brand-900">Ollama公式サイト</a>からダウンロードしてインストールしてください。インストール後、ターミナル（コマンドプロンプト／PowerShell／Terminal）を開き、以下のコマンドを実行して既定のモデルをインストールします：<br><code class="block mt-1 bg-white border border-brand-200 px-2 py-1 rounded font-mono text-ink">ollama run qwen2.5:3b</code>` },
-      settingsOllamaRiskBox: { en: `<strong class="text-warning-900">Why is this setting needed? And a risk warning</strong><br>Ollama blocks all web page access by default (a security protection). You need to add an "environment variable" named <code>OLLAMA_ORIGINS</code> set to <code>*</code> so Ollama allows this local TokenShield page to connect.<br><br><strong class="text-danger-700">⚠️ Security risk notice:</strong><br>Setting the origin to <code>*</code> allows any web page to call your local model. This only affects your own user account and doesn't require administrator rights, but it does carry some risk of abuse by other malicious pages.<br><br><strong>We strongly recommend fully quitting Ollama from the system tray when you're not using this tool, or removing the environment variable afterward.</strong>`, zh: `<strong class="text-warning-900">為什麼需要這個設定？以及風險提醒</strong><br>Ollama 預設會封鎖所有網頁的存取（這是一項安全保護機制）。你需要新增一個名為 <code>OLLAMA_ORIGINS</code>、值設為 <code>*</code> 的「環境變數」，Ollama 才會允許這個本機的 TokenShield 頁面連線。<br><br><strong class="text-danger-700">⚠️ 安全風險提醒：</strong><br>將 origin 設為 <code>*</code> 代表任何網頁都能呼叫你的本機模型。這僅影響你自己的使用者帳戶、不需要系統管理員權限，但仍存在被惡意網頁濫用的風險。<br><br><strong>強烈建議在不使用本工具時，於系統匣中完全關閉 Ollama，或事後移除該環境變數。</strong>`, ja: `<strong class="text-warning-900">なぜこの設定が必要か、そしてリスクについての注意</strong><br>Ollamaは既定ですべてのWebページからのアクセスをブロックします（セキュリティ保護のためです）。ローカルのTokenShieldページからの接続を許可するには、<code>OLLAMA_ORIGINS</code>という名前の「環境変数」を追加し、値を<code>*</code>に設定する必要があります。<br><br><strong class="text-danger-700">⚠️ セキュリティリスクに関する注意：</strong><br>originを<code>*</code>に設定すると、どのWebページからでもローカルモデルを呼び出せるようになります。これは自分のユーザーアカウントにのみ影響し、管理者権限は不要ですが、悪意あるページに悪用されるリスクが多少あります。<br><br><strong>本ツールを使用しないときはシステムトレイからOllamaを完全に終了するか、使用後にこの環境変数を削除することを強くお勧めします。</strong>` },
+      settingsOllamaRiskBox: { en: `<strong class="text-warning-900">Why is this setting needed? And a risk warning</strong><br>Ollama blocks all web page access by default (a security protection). You need to add an "environment variable" named <code>OLLAMA_ORIGINS</code> set to <code>*</code> so Ollama allows this local MaskFirst page to connect.<br><br><strong class="text-danger-700">⚠️ Security risk notice:</strong><br>Setting the origin to <code>*</code> allows any web page to call your local model. This only affects your own user account and doesn't require administrator rights, but it does carry some risk of abuse by other malicious pages.<br><br><strong>We strongly recommend fully quitting Ollama from the system tray when you're not using this tool, or removing the environment variable afterward.</strong>`, zh: `<strong class="text-warning-900">為什麼需要這個設定？以及風險提醒</strong><br>Ollama 預設會封鎖所有網頁的存取（這是一項安全保護機制）。你需要新增一個名為 <code>OLLAMA_ORIGINS</code>、值設為 <code>*</code> 的「環境變數」，Ollama 才會允許這個本機的 MaskFirst 頁面連線。<br><br><strong class="text-danger-700">⚠️ 安全風險提醒：</strong><br>將 origin 設為 <code>*</code> 代表任何網頁都能呼叫你的本機模型。這僅影響你自己的使用者帳戶、不需要系統管理員權限，但仍存在被惡意網頁濫用的風險。<br><br><strong>強烈建議在不使用本工具時，於系統匣中完全關閉 Ollama，或事後移除該環境變數。</strong>`, ja: `<strong class="text-warning-900">なぜこの設定が必要か、そしてリスクについての注意</strong><br>Ollamaは既定ですべてのWebページからのアクセスをブロックします（セキュリティ保護のためです）。ローカルのMaskFirstページからの接続を許可するには、<code>OLLAMA_ORIGINS</code>という名前の「環境変数」を追加し、値を<code>*</code>に設定する必要があります。<br><br><strong class="text-danger-700">⚠️ セキュリティリスクに関する注意：</strong><br>originを<code>*</code>に設定すると、どのWebページからでもローカルモデルを呼び出せるようになります。これは自分のユーザーアカウントにのみ影響し、管理者権限は不要ですが、悪意あるページに悪用されるリスクが多少あります。<br><br><strong>本ツールを使用しないときはシステムトレイからOllamaを完全に終了するか、使用後にこの環境変数を削除することを強くお勧めします。</strong>` },
       settingsOllamaStepsHeading: { en: 'Setup steps (one-time; persists across reboots after that)', zh: '設定步驟（只需設定一次，之後重開機也會保留）', ja: 'セットアップ手順（一度設定すれば、再起動後も保持されます）' },
       settingsStep1Title: { en: 'Quit Ollama first', zh: '先關閉 Ollama', ja: 'まずOllamaを終了する' },
       settingsStep1Body: { en: `Find the Ollama icon in your <strong>system tray</strong> (bottom-right, near the clock), <strong>right-click</strong> it, and choose "<strong>Quit Ollama</strong>" to fully close it.`, zh: `在<strong>系統匣</strong>（畫面右下角、時鐘附近）找到 Ollama 圖示，<strong>按右鍵</strong>後選擇「<strong>Quit Ollama</strong>」將它完全關閉。`, ja: `<strong>システムトレイ</strong>（右下、時計の近く）でOllamaのアイコンを見つけて<strong>右クリック</strong>し、「<strong>Quit Ollama</strong>」を選んで完全に終了してください。` },
@@ -1380,20 +1380,20 @@
       settingsModelDefault: { en: 'qwen2.5:3b (default)', zh: 'qwen2.5:3b（預設）', ja: 'qwen2.5:3b（既定）' },
       settingsModelCustom: { en: 'Custom (type your own)', zh: '自訂（手動輸入）', ja: 'カスタム（自分で入力）' },
       settingsModelInputPlaceholder: { en: 'Enter model name', zh: '輸入模型名稱', ja: 'モデル名を入力' },
-      settingsModelHint: { en: `※ Make sure you've pulled this model via Ollama. Developers can edit these default options directly in the source (TokenShield.html).`, zh: `※ 請確認你已經透過 Ollama pull 過這個模型。開發者可以直接在原始碼（TokenShield.html）中編輯這些預設選項。`, ja: `※ このモデルをOllamaで事前にpullしていることを確認してください。開発者はソースコード（TokenShield.html）内でこれらの既定オプションを直接編集できます。` },
+      settingsModelHint: { en: `※ Make sure you've pulled this model via Ollama. Developers can edit these default options directly in the source (MaskFirst.html).`, zh: `※ 請確認你已經透過 Ollama pull 過這個模型。開發者可以直接在原始碼（MaskFirst.html）中編輯這些預設選項。`, ja: `※ このモデルをOllamaで事前にpullしていることを確認してください。開発者はソースコード（MaskFirst.html）内でこれらの既定オプションを直接編集できます。` },
       settingsBtnTestConnection: { en: 'Test Connection', zh: '測試連線', ja: '接続テスト' },
 
       // ---- PII Rule Guide modal ----
       modalGuideTitle: { en: 'PII Rule Guide', zh: '個資規則說明', ja: 'PIIルールガイド' },
-      guideIntro: { en: `TokenShield uses a two-layer system to detect sensitive personal and business data — this section explains how each layer works and where its limits are. The rules and keywords actually active for your current Region/Persona, and every add/edit/delete action, now live in Manage Custom Protection Rules — including the built-in ones, not just your own custom additions.`, zh: `TokenShield 用雙層機制偵測敏感的個人與企業資料，這裡說明兩層各自的運作方式與限制。目前實際套用中的規則/關鍵字，以及所有新增/編輯/刪除操作，都在「管理自訂防護規則」進行──內建規則也可以直接修改，不限自訂項目。`, ja: `TokenShieldは、機微な個人・業務データを検出するために2層のシステムを使用しています──このセクションでは各層の仕組みと限界を説明します。現在のRegion／Personaで実際に有効なルールとキーワード、およびすべての追加/編集/削除操作は、現在「カスタム保護ルールを管理」に集約されています──カスタム項目だけでなく組み込みのものも含まれます。` },
+      guideIntro: { en: `MaskFirst uses a two-layer system to detect sensitive personal and business data — this section explains how each layer works and where its limits are. The rules and keywords actually active for your current Region/Persona, and every add/edit/delete action, now live in Manage Custom Protection Rules — including the built-in ones, not just your own custom additions.`, zh: `MaskFirst 用雙層機制偵測敏感的個人與企業資料，這裡說明兩層各自的運作方式與限制。目前實際套用中的規則/關鍵字，以及所有新增/編輯/刪除操作，都在「管理自訂防護規則」進行──內建規則也可以直接修改，不限自訂項目。`, ja: `MaskFirstは、機微な個人・業務データを検出するために2層のシステムを使用しています──このセクションでは各層の仕組みと限界を説明します。現在のRegion／Personaで実際に有効なルールとキーワード、およびすべての追加/編集/削除操作は、現在「カスタム保護ルールを管理」に集約されています──カスタム項目だけでなく組み込みのものも含まれます。` },
       guideHowToEditBtn: { en: 'How to edit these rules', zh: '如何編輯這些規則', ja: 'これらのルールを編集する方法' },
       guideSafeAskAiTitle: { en: 'Not sure this file is actually safe? Ask an AI.', zh: '不確定這個檔案是否安全？問問 AI 吧。', ja: 'このファイルが本当に安全か不安ですか？AIに聞いてみましょう。' },
-      guideSafeAskAiBody: { en: `TokenShield is a single HTML file with no server. Other than loading its stylesheet on first open (Tailwind CSS, tried from a CDN with a local fallback, never involving anything you type in), it makes no background network calls related to your document content. You don't need to read code yourself: paste the entire <code class="bg-white border border-line px-1 rounded">TokenShield.html</code> source into any AI (ChatGPT, Claude, etc.) and ask it directly: "Does this page send any user input anywhere?" Let the AI verify it for you, instead of just taking the developer's word for it.`, zh: `TokenShield 是單一 HTML 檔案，沒有伺服器。除了首次載入版面樣式（Tailwind CSS，會嘗試連線 CDN，失敗則自動改用本機備援，不含任何您輸入的資料）之外，沒有任何與您的文件內容相關的背景連線。你不需要自己看程式碼：把整份 <code class="bg-white border border-line px-1 rounded">TokenShield.html</code> 原始碼貼給任何一個 AI（ChatGPT、Claude 等），直接問它：「這個頁面會把使用者輸入送到任何地方嗎？」讓 AI 幫你驗證，而不是只憑開發者的一面之詞。`, ja: `TokenShieldは単一のHTMLファイルであり、サーバーはありません。初回起動時にスタイルシート（Tailwind CSS。CDNからの取得を試み、失敗した場合はローカルにフォールバックします。入力内容は一切関係ありません）を読み込む以外、文書内容に関連するバックグラウンド通信は一切行いません。自分でコードを読む必要はありません──<code class="bg-white border border-line px-1 rounded">TokenShield.html</code> のソース全体を任意のAI（ChatGPT、Claudeなど）に貼り付け、「このページはユーザーの入力をどこかに送信していますか？」と直接尋ねてみてください。開発者の言葉を鵜呑みにするのではなく、AIに検証してもらいましょう。` },
+      guideSafeAskAiBody: { en: `MaskFirst is a single HTML file with no server. Other than loading its stylesheet on first open (Tailwind CSS, tried from a CDN with a local fallback, never involving anything you type in), it makes no background network calls related to your document content. You don't need to read code yourself: paste the entire <code class="bg-white border border-line px-1 rounded">MaskFirst.html</code> source into any AI (ChatGPT, Claude, etc.) and ask it directly: "Does this page send any user input anywhere?" Let the AI verify it for you, instead of just taking the developer's word for it.`, zh: `MaskFirst 是單一 HTML 檔案，沒有伺服器。除了首次載入版面樣式（Tailwind CSS，會嘗試連線 CDN，失敗則自動改用本機備援，不含任何您輸入的資料）之外，沒有任何與您的文件內容相關的背景連線。你不需要自己看程式碼：把整份 <code class="bg-white border border-line px-1 rounded">MaskFirst.html</code> 原始碼貼給任何一個 AI（ChatGPT、Claude 等），直接問它：「這個頁面會把使用者輸入送到任何地方嗎？」讓 AI 幫你驗證，而不是只憑開發者的一面之詞。`, ja: `MaskFirstは単一のHTMLファイルであり、サーバーはありません。初回起動時にスタイルシート（Tailwind CSS。CDNからの取得を試み、失敗した場合はローカルにフォールバックします。入力内容は一切関係ありません）を読み込む以外、文書内容に関連するバックグラウンド通信は一切行いません。自分でコードを読む必要はありません──<code class="bg-white border border-line px-1 rounded">MaskFirst.html</code> のソース全体を任意のAI（ChatGPT、Claudeなど）に貼り付け、「このページはユーザーの入力をどこかに送信していますか？」と直接尋ねてみてください。開発者の言葉を鵜呑みにするのではなく、AIに検証してもらいましょう。` },
       guideHowToAddTitle: { en: 'How do I add my own PII rules and Hard Block keywords?', zh: '要怎麼新增自己的個資規則與硬阻斷關鍵字？', ja: '独自のPIIルールやハードブロックキーワードを追加するには？' },
       guideHowToAddIntro: { en: `You don't need to hand-edit the HTML source — use the "Manage Custom Protection Rules" button in the toolbar instead:`, zh: `你不需要手動編輯 HTML 原始碼──改用工具列上的「管理自訂防護規則」按鈕即可：`, ja: `HTMLソースを手動で編集する必要はありません──ツールバーの「カスタム保護ルールを管理」ボタンを使ってください：` },
       guideStep1: { en: `Click <strong>"Manage Custom Protection Rules"</strong> in the toolbar, then switch to the "Hard Block Keywords" or "Regex Rules" tab.`, zh: `點擊工具列上的<strong>「管理自訂防護規則」</strong>，然後切換到「硬阻斷關鍵字」或「正則規則」分頁。`, ja: `ツールバーの<strong>「カスタム保護ルールを管理」</strong>をクリックし、「ハードブロックキーワード」または「正規表現ルール」タブに切り替えます。` },
       guideStep2: { en: `Click "+ Add Row" to add a row directly in the table, or click any row's fields to edit them in place — including the built-in rows for your currently selected Persona/Region, not just your own custom ones (regex rules are validated for syntax and ReDoS risk on save). Edited or deleted built-in rows show a "Revert to Default" option, or you can re-add a deleted one from the "removed from defaults" list below the table. For bulk changes, you can instead download that tab's CSV template, fill it in, and import it, choosing "Merge with Existing" or "Replace All" (this only ever affects your custom layer).`, zh: `點擊「+ 手動新增一列」直接在表格新增，或點擊任一列的欄位直接修改──包含目前所選 Persona／Region 的內建列，不限自訂項目（正則規則儲存時會自動檢查格式與 ReDoS 風險）。已編輯或刪除的內建列會提供「還原預設」選項，或是從表格下方「已從預設清單移除」清單裡把刪除的項目加回來。若要批次異動，也可以下載該分頁的 CSV 範本填寫後匯入，選擇「與現有規則合併」或「取代全部」（此方式只會影響你的自訂層）。`, ja: `「+ 行を手動追加」をクリックして表に直接行を追加するか、任意の行のフィールドをクリックしてその場で編集できます──現在選択中のPersona／Regionの組み込み行も含まれ、カスタム項目に限りません（正規表現ルールは保存時に構文とReDoSリスクが自動検証されます）。編集または削除された組み込み行には「既定値に戻す」オプションが表示され、削除した項目は表の下にある「既定値から削除された」リストから再追加できます。一括変更したい場合は、そのタブのCSVテンプレートをダウンロードして記入し、「既存と統合」または「すべて置き換え」を選んでインポートすることもできます（この方法はカスタム層にのみ影響します）。` },
-      guideStep4: { en: `To share your customizations with a colleague or reuse them on another machine, expand "Advanced Settings" (desktop only) in the same panel and click "Export Config File" to download <code class="bg-white border border-line px-1 rounded">tokenshield.config.js</code>; to apply it later, click "Import Config File", pick that file, and confirm the summary. Note: this is a manual import — it does not apply automatically on refresh or the next time you open this file, so you'll need to re-import it each time.`, zh: `如果想把自訂規則分享給同事，或在其他裝置重複使用，展開同一面板中的「進階設定」（僅限桌面版），點擊「轉存為設定檔」下載 <code class="bg-white border border-line px-1 rounded">tokenshield.config.js</code>；之後要套用時，點擊「匯入設定檔」選取該檔案並確認摘要即可。注意：這是手動匯入，不會在重新整理或下次開啟頁面時自動套用，每次都需要重新匯入一次。`, ja: `カスタマイズを同僚と共有したり、別のマシンで再利用したりしたい場合は、同じパネル内の「詳細設定」（デスクトップ版のみ）を展開し、「設定ファイルとしてエクスポート」をクリックして <code class="bg-white border border-line px-1 rounded">tokenshield.config.js</code> をダウンロードしてください。あとで適用する際は「設定ファイルをインポート」をクリックしてそのファイルを選択し、概要を確認してください。注意：これは手動インポートであり、更新時や次回このファイルを開いたときに自動的には適用されません。毎回インポートし直す必要があります。` },
+      guideStep4: { en: `To share your customizations with a colleague or reuse them on another machine, expand "Advanced Settings" (desktop only) in the same panel and click "Export Config File" to download <code class="bg-white border border-line px-1 rounded">maskfirst.config.js</code>; to apply it later, click "Import Config File", pick that file, and confirm the summary. Note: this is a manual import — it does not apply automatically on refresh or the next time you open this file, so you'll need to re-import it each time.`, zh: `如果想把自訂規則分享給同事，或在其他裝置重複使用，展開同一面板中的「進階設定」（僅限桌面版），點擊「轉存為設定檔」下載 <code class="bg-white border border-line px-1 rounded">maskfirst.config.js</code>；之後要套用時，點擊「匯入設定檔」選取該檔案並確認摘要即可。注意：這是手動匯入，不會在重新整理或下次開啟頁面時自動套用，每次都需要重新匯入一次。`, ja: `カスタマイズを同僚と共有したり、別のマシンで再利用したりしたい場合は、同じパネル内の「詳細設定」（デスクトップ版のみ）を展開し、「設定ファイルとしてエクスポート」をクリックして <code class="bg-white border border-line px-1 rounded">maskfirst.config.js</code> をダウンロードしてください。あとで適用する際は「設定ファイルをインポート」をクリックしてそのファイルを選択し、概要を確認してください。注意：これは手動インポートであり、更新時や次回このファイルを開いたときに自動的には適用されません。毎回インポートし直す必要があります。` },
       guideStep5: { en: `To discard manual edits or imported settings and restore the built-in defaults, open "Manage Custom Protection Rules", expand "Advanced Settings" (desktop only), and click "Reset to Defaults".`, zh: `如果想捨棄手動修改或已匯入的內容、回復內建預設值，開啟「管理自訂防護規則」，展開「進階設定」（僅限桌面版），點擊「重設為預設值」。`, ja: `手動での編集やインポート済みの設定を破棄して組み込みの既定値に戻したい場合は、「カスタム保護ルールを管理」を開き、「詳細設定」（デスクトップ版のみ）を展開して「既定値にリセット」をクリックします。` },
       guideLayer1Title: { en: 'Layer 1: Static Rule Scan (Regex + Hard Block Keywords)', zh: '第一層：靜態規則掃描（正則表示式＋硬阻斷關鍵字）', ja: '第1層：静的ルールスキャン（正規表現＋ハードブロックキーワード）' },
       guideLayer1Body: { en: `Runs the instant you paste text, using fixed-format rules (e.g. SSNs, IBANs, phone numbers) to catch personal data that follows a describable pattern. Fast and precise, but it can't catch free-form content — like names — that has no fixed format.`, zh: `貼上文字後立即執行，靠固定格式的規則（如身分證字號、IBAN、電話號碼）抓取「有固定寫法可以描述」的個資，準確、速度快，但抓不到姓名這類自由格式、沒有固定寫法的內容。`, ja: `テキストを貼り付けた瞬間に実行され、固定フォーマットのルール（SSN、IBAN、電話番号など）を使って、記述可能なパターンに従う個人データを検出します。高速かつ正確ですが、氏名のように決まった形式のない自由形式のコンテンツは検出できません。` },
@@ -1406,7 +1406,7 @@
 
       // ---- Unlock confirmation modal ----
       modalUnlockTitle: { en: 'Sensitive Information Block Warning', zh: '敏感資訊阻擋警告', ja: '機微情報ブロックの警告' },
-      unlockIntro: { en: 'TokenShield detected text that may contain extremely sensitive information. To protect the people involved, copy/export has been temporarily locked.', zh: 'TokenShield 偵測到文字中可能包含極度敏感的資訊。為保護當事人，複製／匯出功能已被暫時鎖定。', ja: 'TokenShieldは、極めて機微な情報を含む可能性のあるテキストを検出しました。関係者を保護するため、コピー／エクスポート機能を一時的にロックしています。' },
+      unlockIntro: { en: 'MaskFirst detected text that may contain extremely sensitive information. To protect the people involved, copy/export has been temporarily locked.', zh: 'MaskFirst 偵測到文字中可能包含極度敏感的資訊。為保護當事人，複製／匯出功能已被暫時鎖定。', ja: 'MaskFirstは、極めて機微な情報を含む可能性のあるテキストを検出しました。関係者を保護するため、コピー／エクスポート機能を一時的にロックしています。' },
       unlockReasonsHeading: { en: 'Block Reason(s)', zh: '阻擋原因', ja: 'ブロック理由' },
       unlockFooterHint: { en: `If you've confirmed this information is safe to release, or believe this is a false positive, you can force-unlock it.`, zh: '如果你已確認這項資訊可以安全公開，或認為這是誤判，可以強制解鎖。', ja: 'この情報を公開しても安全だと確認できた場合、または誤検知だと思われる場合は、強制的にロックを解除できます。' },
       unlockBtnKeepLocked: { en: 'Keep Locked (Safe)', zh: '維持鎖定（安全）', ja: 'ロックを維持する（安全）' },
@@ -1742,11 +1742,11 @@
     // Region & Persona presets
     // ==========================================
 
-    // Edit this line to change the region TokenShield starts in every time it's opened.
+    // Edit this line to change the region MaskFirst starts in every time it's opened.
     const DEFAULT_REGION = "us"; // "us" | "eu" | "uk" | "tw" | "jp"
     let currentRegion = DEFAULT_REGION;
 
-    // Edit this line to change the persona TokenShield starts in every time it's opened.
+    // Edit this line to change the persona MaskFirst starts in every time it's opened.
     const DEFAULT_PERSONA = "personal"; // "personal" | "business"
     let currentPersona = DEFAULT_PERSONA;
 
@@ -2669,13 +2669,13 @@
 
     function downloadHardBlockCsvTemplate() {
       const csvContent = "Keyword\nCustom hard-block term A\nCustom hard-block term B\n";
-      downloadTextAsFile(csvContent, 'TokenShield_HardBlock_Template.csv', 'text/csv;charset=utf-8;');
+      downloadTextAsFile(csvContent, 'MaskFirst_HardBlock_Template.csv', 'text/csv;charset=utf-8;');
     }
     function downloadRegexCsvTemplate() {
       const csvContent = "TypeTag,RuleName,Pattern,ExampleText\n" +
         'CUSTOM_CODE,Custom code,"CODE-\\d{4}",CODE-1234\n' +
         'CUSTOM_TEL2,Sample phone,"/0\\d{1,2}-?\\d{7,8}/gi",02-23456789\n';
-      downloadTextAsFile(csvContent, 'TokenShield_Regex_Template.csv', 'text/csv;charset=utf-8;');
+      downloadTextAsFile(csvContent, 'MaskFirst_Regex_Template.csv', 'text/csv;charset=utf-8;');
     }
 
     let pendingImport = null; // { dimension: 'roster'|'hardBlock'|'regex', rows: [...] } or { dimension: 'config', cfg: {...} }
@@ -2831,9 +2831,9 @@
       };
       if (Object.keys(hardBlockOverrides).length) cfg.hardBlockOverrides = hardBlockOverrides;
       if (Object.keys(regexOverrides).length) cfg.regexOverrides = regexOverrides;
-      const content = `// TokenShield config file — use the "Import Config File" button in Manage Custom Protection Rules to select this file\n` +
+      const content = `// MaskFirst config file — use the "Import Config File" button in Manage Custom Protection Rules to select this file\n` +
         `window.TOKENSHIELD_AUTO_CONFIG = ${JSON.stringify(cfg, null, 2)};\n`;
-      downloadTextAsFile(content, 'tokenshield.config.js', 'text/javascript;charset=utf-8;');
+      downloadTextAsFile(content, 'maskfirst.config.js', 'text/javascript;charset=utf-8;');
     }
 
     initCustomProtectionState(); // apply built-in defaults first
@@ -2992,7 +2992,7 @@
         const { token, typeKey } = entries[rawValue];
         csvContent += `${vaultCsvEscape(rawValue)},${vaultCsvEscape(token)},${vaultCsvEscape(typeKey)}\n`;
       });
-      downloadTextAsFile(csvContent, 'tokenshield-mapping-vault.csv', 'text/csv;charset=utf-8;');
+      downloadTextAsFile(csvContent, 'maskfirst-mapping-vault.csv', 'text/csv;charset=utf-8;');
       showToast(t('toastVaultExportedUnencrypted'), 'success');
     }
 
@@ -3018,9 +3018,9 @@
         if (pw1 !== pw2) { errorEl.textContent = t('errorVaultPasswordMismatch'); errorEl.classList.remove('hidden'); return; }
         const payload = await encryptVaultPayload({ entries: persistentVault.entries, typeCounters: persistentVault.typeCounters }, pw1);
         const fileContent = JSON.stringify({
-          version: 1, product: 'TokenShield', exportedAt: new Date().toISOString(), encrypted: true, ...payload
+          version: 1, product: 'MaskFirst', exportedAt: new Date().toISOString(), encrypted: true, ...payload
         }, null, 2);
-        downloadTextAsFile(fileContent, 'tokenshield-mapping-vault.json', 'application/json;charset=utf-8;');
+        downloadTextAsFile(fileContent, 'maskfirst-mapping-vault.json', 'application/json;charset=utf-8;');
         closeModal('vaultPasswordModal');
         showToast(t('toastVaultExportedEncrypted'), 'success');
       } else {
@@ -3430,7 +3430,7 @@
       const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.setAttribute("href", url);
-      link.setAttribute("download", "TokenShield_Custom_Dictionary.csv");
+      link.setAttribute("download", "MaskFirst_Custom_Dictionary.csv");
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -3472,7 +3472,7 @@
       const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.setAttribute("href", url);
-      link.setAttribute("download", "TokenShield_Custom_Dictionary_Template.csv");
+      link.setAttribute("download", "MaskFirst_Custom_Dictionary_Template.csv");
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -3754,7 +3754,7 @@
         try {
           regex = new RegExp(rule.pattern, rule.flags);
         } catch (err) {
-          console.warn(`[TokenShield] Rule ${rule.type} has an invalid pattern, skipping: ${err.message}`);
+          console.warn(`[MaskFirst] Rule ${rule.type} has an invalid pattern, skipping: ${err.message}`);
           return;
         }
         let match;

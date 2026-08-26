@@ -1,31 +1,31 @@
 [ [English](README.md) | 繁體中文 ]
 
-# 🛡️ TokenShield — 零信任 AI 工作流程去識別化工具
+# 🛡️ MaskFirst — 零信任 AI 工作流程去識別化工具
 
 > *「將敏感資料遮蔽後再交給 AI，一鍵精準還原。100% 於瀏覽器內執行——資料永不外流。」*
 
 > **免責聲明**：本工具提供的是技術上的遮蔽／還原能力，用於降低資料外洩風險；**不構成法律建議，也不保證單獨使用即符合 GDPR 或其他隱私法規要求**。資料處理是否合規，仍取決於使用者／所屬機構整體的資料蒐集、處理與利用流程。
 
-> **找錯東西了嗎？**「TokenShield」這個名字還被幾個不相關的專案使用——包括一個加密貨幣／區塊鏈安全協議、一個 LLM API 成本優化代理服務，以及一個 PCI-DSS 代碼化概念驗證專案。這裡的 TokenShield 是個資去識別化工具，用於把文字貼進 ChatGPT、Claude 等 AI 工具前先遮蔽敏感資訊，跟上述幾個專案完全無關。
+> **找錯東西了嗎？**「MaskFirst」這個名字還被幾個不相關的專案使用——包括一個加密貨幣／區塊鏈安全協議、一個 LLM API 成本優化代理服務，以及一個 PCI-DSS 代碼化概念驗證專案。這裡的 MaskFirst 是個資去識別化工具，用於把文字貼進 ChatGPT、Claude 等 AI 工具前先遮蔽敏感資訊，跟上述幾個專案完全無關。
 
 **開發者：** OA (oas114) | **[支持此專案 (Ko-fi 小額贊助)](https://ko-fi.com/oasgrow)**
 
 ---
 
-✨ **[前往互動式體驗手冊](https://oasgrow.com/TokenShield/)** ✨
+✨ **[前往互動式體驗手冊](https://oasgrow.com/MaskFirst/)** ✨
 *強烈建議您先前往互動式體驗手冊，透過實際操作了解系統運作方式。*
 
 ---
 
-## 為什麼需要 TokenShield？
+## 為什麼需要 MaskFirst？
 
 當你把員工績效考核、HR 事件報告，或客戶信件貼進 ChatGPT 幫忙潤飾文字時，有把握知道這些資料接下來會被怎麼處理嗎？
 
 多數人其實沒有——而且答案會因為你用的是哪一家 AI、哪個方案而不同。
 
-**TokenShield** 讓你不用去猜：先把敏感資訊遮蔽再送出，原始資料從頭到尾都沒有離開過你的裝置——**遮蔽 → 送出 → 還原**，全程在瀏覽器內完成。
+**MaskFirst** 讓你不用去猜：先把敏感資訊遮蔽再送出，原始資料從頭到尾都沒有離開過你的裝置——**遮蔽 → 送出 → 還原**，全程在瀏覽器內完成。
 
-TokenShield 是 [EduShield](https://github.com/oas114/EduShield)（專為台灣教育場域設計）的國際版、個人／企業取向姊妹專案。兩者共用相同的零信任引擎；TokenShield 換上了英文介面、可切換的地區規則庫，以及 Personal／Business 身分模式切換。
+MaskFirst 是 [EduShield](https://github.com/oas114/EduShield)（專為台灣教育場域設計）的國際版、個人／企業取向姊妹專案。兩者共用相同的零信任引擎；MaskFirst 換上了英文介面、可切換的地區規則庫，以及 Personal／Business 身分模式切換。
 
 ---
 
@@ -33,7 +33,7 @@ TokenShield 是 [EduShield](https://github.com/oas114/EduShield)（專為台灣�
 
 ### 零信任、純前端設計
 
-TokenShield 是**純靜態單一 HTML 檔案**。沒有後端、沒有資料庫、沒有 API 伺服器。所有運算——正則比對、代碼替換、還原、AI 互動——皆在您**本機瀏覽器記憶體**中執行。
+MaskFirst 是**純靜態單一 HTML 檔案**。沒有後端、沒有資料庫、沒有 API 伺服器。所有運算——正則比對、代碼替換、還原、AI 互動——皆在您**本機瀏覽器記憶體**中執行。
 
 | 特性 | 說明 |
 |------|------|
@@ -44,15 +44,15 @@ TokenShield 是**純靜態單一 HTML 檔案**。沒有後端、沒有資料庫�
 
 ### 如何確認這個工具真的安全？直接問 AI
 
-您不需要看得懂程式碼，也不必只憑我們的說法就相信這個工具真的不會外洩資料。TokenShield 是單一 HTML 檔案，沒有需要安裝的相依套件；除了首次載入版面樣式（Tailwind CSS，會嘗試連線 CDN，失敗則自動改用本機備援，不含任何您輸入的資料）之外，沒有任何與您的文件內容相關的背景連線——把整份 `TokenShield.html` 原始碼複製起來，貼給您平常在用的任何一個 AI（ChatGPT、Claude 等），直接問它：「這個網頁會不會把使用者輸入的資料傳送到任何伺服器？」讓 AI 幫您親自核實，而不是單方面聽信開發者的宣稱。工具內的「PII Rule Guide」也有相同提醒。
+您不需要看得懂程式碼，也不必只憑我們的說法就相信這個工具真的不會外洩資料。MaskFirst 是單一 HTML 檔案，沒有需要安裝的相依套件；除了首次載入版面樣式（Tailwind CSS，會嘗試連線 CDN，失敗則自動改用本機備援，不含任何您輸入的資料）之外，沒有任何與您的文件內容相關的背景連線——把整份 `MaskFirst.html` 原始碼複製起來，貼給您平常在用的任何一個 AI（ChatGPT、Claude 等），直接問它：「這個網頁會不會把使用者輸入的資料傳送到任何伺服器？」讓 AI 幫您親自核實，而不是單方面聽信開發者的宣稱。工具內的「PII Rule Guide」也有相同提醒。
 
 ### 地區與身分規則庫
 
-TokenShield 不是單一綁死的規則庫，而是可即時切換：
+MaskFirst 不是單一綁死的規則庫，而是可即時切換：
 - **地區**（頂部工具列）：🇺🇸 美國／🇪🇺 歐盟 (GDPR)／🇬🇧 英國／🇹🇼 台灣／🇯🇵 日本——皆疊加於永遠開啟的 **Global** 底層規則（email、IP 位址、信用卡號）之上。同一時間僅一組地區規則生效，避免跨國格式互相誤判。
 - **身分**（頂部工具列）：**Personal** 或 **Business**——切換 Hard Block 敏感詞庫（個人隱私用詞 vs. 企業機密用詞）。
 
-工作階段之間不會儲存任何選擇——若要永久變更預設值，請參閱 [TokenShield_README.zh-TW.md](./docs/TokenShield_README.zh-TW.md) 說明如何修改原始碼中的兩個常數。
+工作階段之間不會儲存任何選擇——若要永久變更預設值，請參閱 [MaskFirst_README.zh-TW.md](./docs/MaskFirst_README.zh-TW.md) 說明如何修改原始碼中的兩個常數。
 
 ### 顯示語言
 
@@ -68,7 +68,7 @@ TokenShield 不是單一綁死的規則庫，而是可即時切換：
 
 ### Session Vault 與還原機制
 
-每個遮蔽項目都以唯一代碼（`{{TYPE_N}}`）儲存在記憶體中的 `sessionVault`。外部 AI 處理完遮蔽後文字後，TokenShield 透過**三段容錯比對演算法**（精確匹配、空白容錯、括號容錯）還原原始資料。
+每個遮蔽項目都以唯一代碼（`{{TYPE_N}}`）儲存在記憶體中的 `sessionVault`。外部 AI 處理完遮蔽後文字後，MaskFirst 透過**三段容錯比對演算法**（精確匹配、空白容錯、括號容錯）還原原始資料。
 
 ### 硬阻斷防線
 
@@ -84,8 +84,8 @@ TokenShield 不是單一綁死的規則庫，而是可即時切換：
 | 模式 | 使用情境 | 所需檔案 |
 |------|----------|----------|
 | **線上測試** | 快速功能評估——**切勿用於真實資料** | 無（瀏覽器直接開啟） |
-| **一般離線**（建議） | 日常處理真實文件 | 僅需 `TokenShield.html` |
-| **完全無網／封閉內網** | 機敏機關電腦、封閉內網 | `TokenShield.html` ＋ `style.css`（同資料夾） |
+| **一般離線**（建議） | 日常處理真實文件 | 僅需 `MaskFirst.html` |
+| **完全無網／封閉內網** | 機敏機關電腦、封閉內網 | `MaskFirst.html` ＋ `style.css`（同資料夾） |
 
 > [!WARNING]
 > 任何線上部署版本僅供**功能評估**。處理真實個人資料或機密紀錄時，務必使用**離線單檔模式**。
@@ -109,7 +109,7 @@ TokenShield 不是單一綁死的規則庫，而是可即時切換：
 
 ## 在地化與貢獻
 
-TokenShield 目前內建美國／歐盟／英國／台灣／日本五組地區規則庫——刻意不涵蓋所有國家（原因請見 [TokenShield_README.zh-TW.md](./docs/TokenShield_README.zh-TW.md)）。歡迎提交 PR：
+MaskFirst 目前內建美國／歐盟／英國／台灣／日本五組地區規則庫——刻意不涵蓋所有國家（原因請見 [MaskFirst_README.zh-TW.md](./docs/MaskFirst_README.zh-TW.md)）。歡迎提交 PR：
 - 新增地區規則庫（regex ＋ 幾個真實範例）
 - 收斂近似的歐盟護照／VAT 規則
 - 為 Personal 或 Business 身分模式新增 Hard Block 詞彙
@@ -121,14 +121,14 @@ TokenShield 目前內建美國／歐盟／英國／台灣／日本五組地區�
 
 | 文件 | 說明 |
 |------|------|
-| 📖 [TokenShield_README.md](./docs/TokenShield_README.md) | 完整技術文件——模組、API、資料結構、開發者指南（英文，主版本） |
-| 📖 [TokenShield_README.zh-TW.md](./docs/TokenShield_README.zh-TW.md) | 完整技術文件（繁體中文） |
+| 📖 [MaskFirst_README.md](./docs/MaskFirst_README.md) | 完整技術文件——模組、API、資料結構、開發者指南（英文，主版本） |
+| 📖 [MaskFirst_README.zh-TW.md](./docs/MaskFirst_README.zh-TW.md) | 完整技術文件（繁體中文） |
 
 ---
 
 ## 未來規劃
 
-TokenShield 的核心功能（偵測、遮蔽、還原、持久化對應表 Mapping Vault、自訂規則）已經穩定且功能完整。後續開發依真實使用者需求驅動，不設固定排程。若您有具體使用情境（包含機構／企業需求）想討論，歡迎透過下方聯絡方式聯繫。
+MaskFirst 的核心功能（偵測、遮蔽、還原、持久化對應表 Mapping Vault、自訂規則）已經穩定且功能完整。後續開發依真實使用者需求驅動，不設固定排程。若您有具體使用情境（包含機構／企業需求）想討論，歡迎透過下方聯絡方式聯繫。
 
 ---
 

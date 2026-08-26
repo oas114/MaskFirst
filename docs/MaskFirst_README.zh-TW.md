@@ -1,9 +1,9 @@
-# TokenShield — 完整技術文件（繁體中文）
+# MaskFirst — 完整技術文件（繁體中文）
 
 <!--
 [AI_SYSTEM_INSTRUCTIONS_START]
 ATTENTION ALL AI ASSISTANTS:
-If you modify `TokenShield.html` and your modifications include ANY changes, additions, or removals of Tailwind CSS utility classes, you MUST recompile the local CSS fallback file.
+If you modify `MaskFirst.html` and your modifications include ANY changes, additions, or removals of Tailwind CSS utility classes, you MUST recompile the local CSS fallback file.
 Failure to do so will break the application for users in offline environments.
 
 To recompile:
@@ -13,25 +13,25 @@ To recompile:
 [AI_SYSTEM_INSTRUCTIONS_END]
 -->
 
-> **版本基準**：本文件依據 `TokenShield.html` 原始碼事實撰寫，所有函式名稱、常數、DOM ID 均與程式碼一一對應。
+> **版本基準**：本文件依據 `MaskFirst.html` 原始碼事實撰寫，所有函式名稱、常數、DOM ID 均與程式碼一一對應。
 
-[ [English (TokenShield_README.md)](TokenShield_README.md) | 繁體中文 ]
+[ [English (MaskFirst_README.md)](MaskFirst_README.md) | 繁體中文 ]
 
 > [!NOTE]
-> 本文件為英文版 `TokenShield_README.md` 的繁體中文翻譯。若更新本文件，請同步更新英文版。
+> 本文件為英文版 `MaskFirst_README.md` 的繁體中文翻譯。若更新本文件，請同步更新英文版。
 
 > [!IMPORTANT]
-> **免責聲明**：本文件與 TokenShield 工具本身，提供的都只是技術上的遮蔽／還原能力，用於降低送交 AI 處理時的資料外洩風險；**不構成法律建議，也不保證單獨使用即符合 GDPR 或其他隱私法規要求**。資料處理是否合規，仍取決於使用者／所屬機構整體的資料蒐集、處理與利用流程，如有疑慮請諮詢專業法律意見。
+> **免責聲明**：本文件與 MaskFirst 工具本身，提供的都只是技術上的遮蔽／還原能力，用於降低送交 AI 處理時的資料外洩風險；**不構成法律建議，也不保證單獨使用即符合 GDPR 或其他隱私法規要求**。資料處理是否合規，仍取決於使用者／所屬機構整體的資料蒐集、處理與利用流程，如有疑慮請諮詢專業法律意見。
 
 ---
 
 ## 一、系統簡介
 
-### 1.1 TokenShield 是什麼？
+### 1.1 MaskFirst 是什麼？
 
-**TokenShield** 是一套零信任的**個人／企業去識別化工具**——[EduShield](https://github.com/oas114/EduShield) 的國際版姊妹專案（獨立 GitHub repo）。核心痛點：將含有個人或企業機密資料的文件、郵件、試算表交給外部 AI（ChatGPT、Claude 等）處理前，必須先去除敏感內容。TokenShield 提供完整的「遮蔽 → 送 AI → 還原」工作流程。
+**MaskFirst** 是一套零信任的**個人／企業去識別化工具**——[EduShield](https://github.com/oas114/EduShield) 的國際版姊妹專案（獨立 GitHub repo）。核心痛點：將含有個人或企業機密資料的文件、郵件、試算表交給外部 AI（ChatGPT、Claude 等）處理前，必須先去除敏感內容。MaskFirst 提供完整的「遮蔽 → 送 AI → 還原」工作流程。
 
-TokenShield **不是**重寫 EduShield——它是一個獨立的姊妹檔案，沿用相同且已驗證的引擎（正則比對、session vault、還原邏輯），只替換內容層：英文介面、可切換的地區 PII 規則庫（美國／歐盟／英國＋全域底層），以及 Personal／Business 身分模式，取代台灣教育專用規則。
+MaskFirst **不是**重寫 EduShield——它是一個獨立的姊妹檔案，沿用相同且已驗證的引擎（正則比對、session vault、還原邏輯），只替換內容層：英文介面、可切換的地區 PII 規則庫（美國／歐盟／英國＋全域底層），以及 Personal／Business 身分模式，取代台灣教育專用規則。
 
 ### 1.2 架構與資安特點
 
@@ -50,7 +50,7 @@ TokenShield **不是**重寫 EduShield——它是一個獨立的姊妹檔案，
 
 ### 2.1 地區與身分規則庫（`REGEX_PRESETS_DEFAULT` / `HARD_BLOCK_PRESETS_DEFAULT`）
 
-這是 TokenShield 與 EduShield 在結構上最大的差異。偵測規則與 Hard Block 詞庫不再是單一綁死台灣格式的陣列，而是組織成使用者可於頂部工具列兩個下拉選單（`#regionSelect`、`#personaSelect`）即時切換的「規則預設集」。
+這是 MaskFirst 與 EduShield 在結構上最大的差異。偵測規則與 Hard Block 詞庫不再是單一綁死台灣格式的陣列，而是組織成使用者可於頂部工具列兩個下拉選單（`#regionSelect`、`#personaSelect`）即時切換的「規則預設集」。
 
 ```javascript
 const DEFAULT_REGION = "us";      // "us" | "eu" | "uk" | "tw" | "jp"
@@ -60,7 +60,7 @@ const DEFAULT_PERSONA = "personal"; // "personal" | "business"
 let currentPersona = DEFAULT_PERSONA;
 ```
 
-**任何選擇皆不會被儲存**——重新整理頁面永遠會重置為 `DEFAULT_REGION`／`DEFAULT_PERSONA`。若您固定使用某個地區或身分模式，請用文字編輯器開啟 `TokenShield.html`，找到 `<script>` 區塊開頭附近的這兩個常數並修改其值，即成為新的啟動預設值。
+**任何選擇皆不會被儲存**——重新整理頁面永遠會重置為 `DEFAULT_REGION`／`DEFAULT_PERSONA`。若您固定使用某個地區或身分模式，請用文字編輯器開啟 `MaskFirst.html`，找到 `<script>` 區塊開頭附近的這兩個常數並修改其值，即成為新的啟動預設值。
 
 同一時間僅有**一組**地區規則生效，疊加於永遠開啟的 `global` 底層規則之上——這是刻意設計以避免不同國家格式互相誤判（例如同一個 9 碼數字不該同時被當作美國 SSN 又被當作其他東西）。身分模式邏輯相同，同一時間僅有一組詞庫生效。
 
@@ -110,7 +110,7 @@ let currentPersona = DEFAULT_PERSONA;
 
 ### 2.3 安全阻斷防線（`HARD_BLOCK_PRESETS_DEFAULT`）
 
-`personal` 與 `business` 兩組詞庫陣列，各約 20 個詞彙。若目前生效身分模式的詞庫命中輸入文字，TokenShield 會鎖定介面：
+`personal` 與 `business` 兩組詞庫陣列，各約 20 個詞彙。若目前生效身分模式的詞庫命中輸入文字，MaskFirst 會鎖定介面：
 - 顯示**紅色警示橫幅**
 - **複製按鈕停用**
 - 使用者須透過解鎖視窗明確**確認並解除鎖定**
@@ -172,7 +172,7 @@ CSV 範本：硬阻斷詞彙為單欄 `Keyword`；正則規則為 4 欄 `TypeTag
 - **完全取代**：清空該維度的 `custom` 桶，改以本次匯入內容為準。
 - **取消**：不做任何變更。
 
-**手動匯入設定檔**：早期版本曾在開機時以動態注入 `<script src="tokenshield.config.js">` 自動載入同資料夾檔案；這個做法會讓被竄改的檔案在使用者毫無察覺下夾帶任意程式碼執行，牴觸「個資不離開瀏覽器」的核心信任主張，已於 2026-08-25 改為以下的手動匯入流程：
+**手動匯入設定檔**：早期版本曾在開機時以動態注入 `<script src="maskfirst.config.js">` 自動載入同資料夾檔案；這個做法會讓被竄改的檔案在使用者毫無察覺下夾帶任意程式碼執行，牴觸「個資不離開瀏覽器」的核心信任主張，已於 2026-08-25 改為以下的手動匯入流程：
 ```javascript
 window.TOKENSHIELD_AUTO_CONFIG = {
   version: 1,
@@ -190,7 +190,7 @@ window.TOKENSHIELD_AUTO_CONFIG = {
 
 「**Import Config File**」開啟檔案選取視窗，選取的檔案只以字串掃描＋`JSON.parse()` 解析（絕不 `eval`／執行檔案內容），接著會跳出跟 CSV 匯入共用的**「合併／完全取代」**選擇對話框（`openConfigImportDialog()`），列出各維度筆數。**這個選擇在這裡比 CSV 匯入更關鍵**：合併是拿 `custom` 桶項目本身的內容（正則的 pattern 文字、關鍵字文字本身）當比對鍵，如果你編輯的正是這個欄位，合併會認不出「這是同一條規則的新版本」，結果變成新舊並存。`hardBlockOverrides`／`regexOverrides` 讓這點更明顯：因為匯出的清單是不帶身分資訊的純陣列，**合併**只會把新增/變動的值疊加進去（絕不會移除任何東西），只有**完全取代**才能正確重新套用一次刪除，或乾淨地取代掉一個已編輯的值——要讓重新整理後「編輯過或刪除過的內建規則」真正生效，必須選完全取代。有個身分連結的取捨要注意：一個編輯過、文字已經跟真正預設值不完全相同的內建值，匯入回來會標成 `Overridden`／`auto-loaded`，但不會再帶有自己的 `defaultValue`／`defaultPattern` 連結（也就是不會再有專屬的「還原預設」按鈕）——編輯本身會被正確套用，只是「這是編輯前長怎樣」這個麵包屑會遺失。正則的 override 一樣是靠 `type` 找回對應的內建 `validate` 函式。這是**手動**、一次性的操作，不會在重新整理或下次開啟時自動套用，使用者每次都要重新匯入一次；頁面開啟時會有一則常駐提示引導匯入，文字刻意不聲稱「已偵測到」，因為瀏覽器安全機制不允許背景偵測同資料夾檔案是否存在。
 
-「**Export Config File**」會把目前記憶體中四個維度的最新狀態（含所有合併/覆蓋結果，排除 `ai-session` 標籤的暫存名冊項目）打包成同樣格式，下載成固定檔名 `tokenshield.config.js`，可分享給同事或在其他裝置重複使用——`hardBlockOverrides`／`regexOverrides` 只會針對跟真正預設值不同的桶才加入。「**Reset to Defaults**」（會先跳出確認對話框）把四個維度重置回內建預設值，用來捨棄當次手動調整或已匯入的內容。
+「**Export Config File**」會把目前記憶體中四個維度的最新狀態（含所有合併/覆蓋結果，排除 `ai-session` 標籤的暫存名冊項目）打包成同樣格式，下載成固定檔名 `maskfirst.config.js`，可分享給同事或在其他裝置重複使用——`hardBlockOverrides`／`regexOverrides` 只會針對跟真正預設值不同的桶才加入。「**Reset to Defaults**」（會先跳出確認對話框）把四個維度重置回內建預設值，用來捨棄當次手動調整或已匯入的內容。
 
 > [!NOTE]
 > 此機制只處理規則/提示詞設定，完全不涉及使用者實際輸入的文件內容——`sessionVault`、輸入文字框等仍完全遵循 1.2 節提到的既有零持久化承諾，頁面關閉或重整後立即消失。
@@ -200,7 +200,7 @@ window.TOKENSHIELD_AUTO_CONFIG = {
 頂部工具列的 `#langSelect` 下拉選單可切換介面在**英文／繁體中文／日本語**之間顯示，刻意與 `currentRegion`／`currentPersona`（見 2.1 節）脫鉤——Region／Persona 決定套用哪一組*規則資料*，這裡只決定介面文字用哪個*語言*呈現，所以「套用 EU 規則庫、介面顯示繁體中文」這種組合是完全支援的。
 
 ```javascript
-const LANG_STORAGE_KEY = 'tokenshield_display_lang';
+const LANG_STORAGE_KEY = 'maskfirst_display_lang';
 let currentLang = localStorage.getItem(LANG_STORAGE_KEY) || 'en'; // 會被記住——跟 Region/Persona 不同
 const I18N = { someKey: { en: '...', zh: '...', ja: '...' }, /* 約 220 組 key */ };
 function t(key, vars) { /* 查找 I18N[key][currentLang]，找不到就退回 en，再退回 key 本身；支援 {placeholder} 變數插值 */ }
@@ -209,7 +209,7 @@ function applyLanguage(lang) { /* 設定 currentLang、寫入 localStorage、掃
 
 靜態畫面透過 `data-i18n`（設定 `innerHTML`）、`data-i18n-placeholder`、`data-i18n-title`、`data-i18n-aria-label` 這幾個屬性接入字典。動態組出來的字串（toast 訊息、`showConfirmModal()` 的訊息、`renderHardBlockMgmtTable()`／`renderRegexMgmtTable()` 這類表格渲染函式）則直接呼叫 `t()`，不再把英文字面字串寫死。`refreshDynamicText()` 會重新執行這些「純渲染」函式，讓當下已經開啟的面板在切換語言的當下就立即反映新語言，不需要使用者重新開啟一次。PII Rule Guide 已不再渲染即時規則表格（`renderGuideTable()` 已移除，指南改為純概念說明，見 2.8 節）——`refreshGuideModalIfOpen()` 保留成一個有記錄的空函式，這樣其他呼叫它的地方不用知道這件事。
 
-**刻意不翻譯的部分**（視為技術／參考內容）：`REGEX_PRESETS_DEFAULT`／`HARD_BLOCK_PRESETS_DEFAULT` 規則庫本身（規則的 `name`／`example` 欄位、硬阻斷關鍵字清單——翻譯關鍵字清單會直接改變實際偵測行為，不只是顯示文字而已），以及 `LOCAL_AI_PROMPTS`／`aiPrompts` 這些提示詞內容（這些是要送給另一個 AI 模型的指令，不是給使用者看的介面文字）。`localStorage` 持久化是刻意對 TokenShield「設計上零持久化」原則（見 1.2 節）的例外——這是顯示偏好設定，不是文件內容或掃描狀態。
+**刻意不翻譯的部分**（視為技術／參考內容）：`REGEX_PRESETS_DEFAULT`／`HARD_BLOCK_PRESETS_DEFAULT` 規則庫本身（規則的 `name`／`example` 欄位、硬阻斷關鍵字清單——翻譯關鍵字清單會直接改變實際偵測行為，不只是顯示文字而已），以及 `LOCAL_AI_PROMPTS`／`aiPrompts` 這些提示詞內容（這些是要送給另一個 AI 模型的指令，不是給使用者看的介面文字）。`localStorage` 持久化是刻意對 MaskFirst「設計上零持久化」原則（見 1.2 節）的例外——這是顯示偏好設定，不是文件內容或掃描狀態。
 
 ---
 
@@ -220,7 +220,7 @@ function applyLanguage(lang) { /* 設定 currentLang、寫入 localStorage、掃
 | 項目 | 需求 |
 |------|------|
 | 瀏覽器 | Chrome / Edge 建議（需支援 ES2020+、ReadableStream、Clipboard API） |
-| 啟動方式／網路需求 | **一般離線**：直接開啟 `TokenShield.html`。**封閉型內網（無網際網路）**：`TokenShield.html` 與 `style.css` 需置於同資料夾。 |
+| 啟動方式／網路需求 | **一般離線**：直接開啟 `MaskFirst.html`。**封閉型內網（無網際網路）**：`MaskFirst.html` 與 `style.css` 需置於同資料夾。 |
 | 地端 AI（選用） | 安裝 [Ollama](https://ollama.com/)、下載 `qwen2.5:3b`（建議預設，較舊硬體也能順利運作）、設定 `OLLAMA_ORIGINS=*`。 |
 
 ### 3.2 標準操作流程
@@ -251,7 +251,7 @@ function applyLanguage(lang) { /* 設定 currentLang、寫入 localStorage、掃
 ## 四、進階開發者資訊
 
 ### 4.1 新增 Hard Block 詞彙
-完全不需要改原始碼——透過「管理自訂防護規則」→「硬阻斷詞彙」分頁（見 2.8 節）：點「+ Add Row」新增 `custom` 項目，或直接點擊目前 Persona 顯示中的任一列編輯/刪除內建項目，CSV 匯入則用於批次異動。這只會影響你自己的工作副本（工作階段狀態，或你匯出的設定檔）——如果要改變這個檔案分享給所有人時的 `personal`／`business` **預設值**本身，請改到 `TokenShield.html` 原始碼編輯 `HARD_BLOCK_PRESETS_DEFAULT`。
+完全不需要改原始碼——透過「管理自訂防護規則」→「硬阻斷詞彙」分頁（見 2.8 節）：點「+ Add Row」新增 `custom` 項目，或直接點擊目前 Persona 顯示中的任一列編輯/刪除內建項目，CSV 匯入則用於批次異動。這只會影響你自己的工作副本（工作階段狀態，或你匯出的設定檔）——如果要改變這個檔案分享給所有人時的 `personal`／`business` **預設值**本身，請改到 `MaskFirst.html` 原始碼編輯 `HARD_BLOCK_PRESETS_DEFAULT`。
 
 ### 4.2 新增偵測規則
 透過「管理自訂防護規則」→「正則規則」分頁（見 2.8 節）：點「+ Add Row」新增 `custom` 項目，或直接點擊目前 Region 顯示中的任一列編輯/刪除內建項目（儲存時會自動驗證格式與 ReDoS 風險），CSV 匯入則用於批次異動。範圍限制同上——這只會影響你的工作副本；若要改變出廠預設值，請到原始碼在 `REGEX_PRESETS_DEFAULT` 的 `global`（永遠開啟）或特定地區陣列（`us`／`eu`／`uk`／`tw`／`jp`）中加入 `{ type: "TAG_NAME", regex: /您的正規表示式/g, name: "顯示名稱", example: "範例" }`。
@@ -260,7 +260,7 @@ function applyLanguage(lang) { /* 設定 currentLang、寫入 localStorage、掃
 於 `REGEX_PRESETS_DEFAULT` 與 `buildDefaultRegexPresetsState()` 的初始化邏輯中新增一個鍵值（例如加拿大用 `ca`），並在 HTML 中的 `#regionSelect` 加入對應 `<option>`。新地區規則與現有五組一樣，會疊加於 `global` 之上。`tw`／`jp` 兩組就是照這個擴充點加入的範例，可直接參考它們的寫法。
 
 ### 4.4 重新編譯 `style.css`
-Tailwind 建置工具就在本 repo 自己的 `dev/` 資料夾內，不依賴任何外部專案。修改 `TokenShield.html` 的 Tailwind class 後：
+Tailwind 建置工具就在本 repo 自己的 `dev/` 資料夾內，不依賴任何外部專案。修改 `MaskFirst.html` 的 Tailwind class 後：
 ```powershell
 cd dev
 npm install   # 第一次執行才需要
@@ -271,11 +271,11 @@ npm run build:css
 ### 4.5 資料夾結構
 
 ```text
-TokenShield/（專案根目錄）
-├── TokenShield.html                 <- TokenShield 主程式（本文件主題）
+MaskFirst/（專案根目錄）
+├── MaskFirst.html                 <- MaskFirst 主程式（本文件主題）
 ├── docs/
-│   ├── TokenShield_README.md        <- 英文版技術文件（主版本）
-│   └── TokenShield_README.zh-TW.md  <- 本文件（繁體中文）
+│   ├── MaskFirst_README.md        <- 英文版技術文件（主版本）
+│   └── MaskFirst_README.zh-TW.md  <- 本文件（繁體中文）
 ├── README.md / README.zh-TW.md      <- 專案介紹文件
 ├── LICENSE                          <- MIT 授權
 ├── .gitignore / .nojekyll
@@ -285,7 +285,7 @@ TokenShield/（專案根目錄）
 ```
 
 > [!NOTE]
-> 發佈給使用者時，只需提供 `TokenShield.html` 與 `style.css` 兩個檔案。`dev/` 資料夾僅供開發使用。
+> 發佈給使用者時，只需提供 `MaskFirst.html` 與 `style.css` 兩個檔案。`dev/` 資料夾僅供開發使用。
 
 ---
 
@@ -297,7 +297,7 @@ TokenShield/（專案根目錄）
 
 ## 六、關於本專案
 
-* **GitHub**：[oas114/TokenShield](https://github.com/oas114/TokenShield)
+* **GitHub**：[oas114/MaskFirst](https://github.com/oas114/MaskFirst)
 * **姊妹專案**：[oas114/EduShield](https://github.com/oas114/EduShield) — 台灣教育場域專用版，獨立的 GitHub repo
 * **開發者**：OA (oas114)
 * **支持開發者**：[Ko-fi](https://ko-fi.com/oasgrow)

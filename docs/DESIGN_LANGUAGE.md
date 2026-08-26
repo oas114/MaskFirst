@@ -1,6 +1,6 @@
-# TokenShield Design Language
+# MaskFirst Design Language
 
-This document describes the visual design system used by `TokenShield.html`: the semantic color
+This document describes the visual design system used by `MaskFirst.html`: the semantic color
 tokens, the component-state conventions, and the rules for forms and destructive actions. It's a
 reference for anyone (human or AI assistant) making UI changes to the tool, so the interface stays
 internally consistent instead of drifting one raw Tailwind class at a time.
@@ -8,7 +8,7 @@ internally consistent instead of drifting one raw Tailwind class at a time.
 ## 1. Design tokens
 
 All colors are semantic Tailwind classes backed by CSS custom properties (defined once in an
-inline `<style>` block in `TokenShield.html`'s `<head>`, and mirrored in `dev/tailwind.config.js`
+inline `<style>` block in `MaskFirst.html`'s `<head>`, and mirrored in `dev/tailwind.config.js`
 so the same class names work whether the page is running off the Tailwind CDN or the compiled
 `style.css` fallback — see the comment at the top of `dev/input.css` for why the variables live in
 the HTML rather than in the CSS source).
@@ -24,16 +24,16 @@ shade you need doesn't have a token yet, add one to *both* the `<head>` variable
 | `ink`, `ink-hover`, `ink-secondary`, `ink-muted`, `ink-faint` | Text and dark-surface hierarchy | Darkest → lightest. `ink-hover` doubles as the hover shade for `bg-ink` dark buttons/menus, not just a text tone |
 | `line`, `line-strong`, `line-soft` | Borders | `line` = card/modal containers, `line-strong` = interactive elements (inputs, buttons, selects), `line-soft` = subtle inner dividers |
 | `scrim` | Modal backdrop overlay, dark surfaces (right-click context menu) | Used with an opacity modifier, e.g. `bg-scrim/40` |
-| `brand` (50–900) | Primary actions, active states, links, and — deliberately — the "success/info" role too | TokenShield's brand is **emerald**. Success/info were kept tied to brand color rather than split into a separate token; see the decision note below |
+| `brand` (50–900) | Primary actions, active states, links, and — deliberately — the "success/info" role too | MaskFirst's brand is **emerald**. Success/info were kept tied to brand color rather than split into a separate token; see the decision note below |
 | `danger` (50–800) | Destructive actions, errors, critical findings | Merges the original red *and* rose usage into one family |
 | `warning` (50–900) | Non-blocking warnings, caution states | |
-| `accent-ai` (50–700, indigo) | The Layer-2 local-AI semantic-scan trigger button, and manual table-mask highlight chips | A brand-independent accent — same hue in both TokenShield and EduShield, since it marks "a secondary flagged action," not brand identity |
+| `accent-ai` (50–700, indigo) | The Layer-2 local-AI semantic-scan trigger button, and manual table-mask highlight chips | A brand-independent accent — same hue in both MaskFirst and EduShield, since it marks "a secondary flagged action," not brand identity |
 | `ai-finding` (50–700, purple) | Entity chips for things the local AI (not the static regex layer) detected | Also brand-independent and shared with EduShield — this is what visually tells a user "this highlight came from the AI pass," distinct from `accent-ai`'s button/action role |
 
 **Decision note (success = brand):** unlike a typical design system that gives "success" its own
-green independent of brand color, TokenShield's brand *is* emerald, so a separate success token
+green independent of brand color, MaskFirst's brand *is* emerald, so a separate success token
 would just be a second shade of green with no practical distinction. Kept as one token
-deliberately — revisit only if TokenShield's brand color ever changes to something success
+deliberately — revisit only if MaskFirst's brand color ever changes to something success
 wouldn't suit.
 
 **RGB-triplet variables** (`--brand-500-rgb`, `--danger-500-rgb`, `--ai-finding-500-rgb`) exist

@@ -1,9 +1,9 @@
-# TokenShield — Full Technical Reference
+# MaskFirst — Full Technical Reference
 
 <!--
 [AI_SYSTEM_INSTRUCTIONS_START]
 ATTENTION ALL AI ASSISTANTS:
-If you modify `TokenShield.html` and your modifications include ANY changes, additions, or removals of Tailwind CSS utility classes, you MUST recompile the local CSS fallback file.
+If you modify `MaskFirst.html` and your modifications include ANY changes, additions, or removals of Tailwind CSS utility classes, you MUST recompile the local CSS fallback file.
 Failure to do so will break the application for users in offline environments.
 
 To recompile:
@@ -13,25 +13,25 @@ To recompile:
 [AI_SYSTEM_INSTRUCTIONS_END]
 -->
 
-> **Version basis**: this document is written against the actual `TokenShield.html` source. All function names, constants, and DOM IDs correspond 1:1 with the code.
+> **Version basis**: this document is written against the actual `MaskFirst.html` source. All function names, constants, and DOM IDs correspond 1:1 with the code.
 
-[ English | [繁體中文 (TokenShield_README.zh-TW.md)](TokenShield_README.zh-TW.md) ]
+[ English | [繁體中文 (MaskFirst_README.zh-TW.md)](MaskFirst_README.zh-TW.md) ]
 
 > [!NOTE]
-> This is the primary version of this document. If you update this file, please also update the Traditional Chinese translation `TokenShield_README.zh-TW.md`.
+> This is the primary version of this document. If you update this file, please also update the Traditional Chinese translation `MaskFirst_README.zh-TW.md`.
 
 > [!IMPORTANT]
-> **Disclaimer**: This document and the TokenShield tool itself provide only technical masking/restoration capability to reduce data-exposure risk when submitting content to AI; **neither constitutes legal advice, and using them alone does not guarantee compliance with GDPR or any other privacy regulation**. Whether your data handling is compliant still depends on your (or your organization's) overall data collection, processing, and use practices — consult professional legal advice if in doubt.
+> **Disclaimer**: This document and the MaskFirst tool itself provide only technical masking/restoration capability to reduce data-exposure risk when submitting content to AI; **neither constitutes legal advice, and using them alone does not guarantee compliance with GDPR or any other privacy regulation**. Whether your data handling is compliant still depends on your (or your organization's) overall data collection, processing, and use practices — consult professional legal advice if in doubt.
 
 ---
 
 ## 1. Overview
 
-### 1.1 What is TokenShield?
+### 1.1 What is MaskFirst?
 
-**TokenShield** is a zero-trust **PII de-identification tool for individuals and businesses** — the international, non-education sibling of [EduShield](https://github.com/oas114/EduShield). The core problem it solves: before handing a document, email, or spreadsheet containing personal or confidential business data to an external AI (ChatGPT, Claude, etc.), you need to strip out the sensitive parts first. TokenShield provides a complete **Mask → Send to AI → Restore** workflow.
+**MaskFirst** is a zero-trust **PII de-identification tool for individuals and businesses** — the international, non-education sibling of [EduShield](https://github.com/oas114/EduShield). The core problem it solves: before handing a document, email, or spreadsheet containing personal or confidential business data to an external AI (ChatGPT, Claude, etc.), you need to strip out the sensitive parts first. MaskFirst provides a complete **Mask → Send to AI → Restore** workflow.
 
-TokenShield is **not** a rewrite of EduShield — it's a separate sibling file that reuses the same proven engine (regex matching, session vault, restore logic) but swaps out the content layer: English UI, region-switchable PII rulesets (US / EU / UK + a Global baseline), and a Personal/Business persona toggle instead of Taiwan-education-specific rules.
+MaskFirst is **not** a rewrite of EduShield — it's a separate sibling file that reuses the same proven engine (regex matching, session vault, restore logic) but swaps out the content layer: English UI, region-switchable PII rulesets (US / EU / UK + a Global baseline), and a Personal/Business persona toggle instead of Taiwan-education-specific rules.
 
 ### 1.2 Architecture & Security Properties
 
@@ -50,7 +50,7 @@ TokenShield is **not** a rewrite of EduShield — it's a separate sibling file t
 
 ### 2.1 Region & Persona Presets
 
-This is TokenShield's key structural difference from EduShield. Instead of one flat, Taiwan-specific rule set, detection rules and Hard Block keywords are organized into **presets** the user switches between at runtime via two `<select>` dropdowns in the header toolbar (`#regionSelect`, `#personaSelect`).
+This is MaskFirst's key structural difference from EduShield. Instead of one flat, Taiwan-specific rule set, detection rules and Hard Block keywords are organized into **presets** the user switches between at runtime via two `<select>` dropdowns in the header toolbar (`#regionSelect`, `#personaSelect`).
 
 ```javascript
 const DEFAULT_REGION = "us";      // "us" | "eu" | "uk" | "tw" | "jp"
@@ -60,7 +60,7 @@ const DEFAULT_PERSONA = "personal"; // "personal" | "business"
 let currentPersona = DEFAULT_PERSONA;
 ```
 
-**Nothing is persisted** — reloading the page always resets to `DEFAULT_REGION`/`DEFAULT_PERSONA`. If you always work in one region or persona, open `TokenShield.html` in a text editor, find these two constants near the top of the `<script>` block, and change the value. That becomes your new startup default.
+**Nothing is persisted** — reloading the page always resets to `DEFAULT_REGION`/`DEFAULT_PERSONA`. If you always work in one region or persona, open `MaskFirst.html` in a text editor, find these two constants near the top of the `<script>` block, and change the value. That becomes your new startup default.
 
 Only **one** region preset is active at a time, layered on top of the always-on `global` baseline — this deliberately avoids cross-country format collisions (e.g. a bare 9-digit number shouldn't simultaneously be tested as a US SSN and something unrelated). Persona works the same way: only one keyword set is active at a time.
 
@@ -110,7 +110,7 @@ The Credit Card rule additionally runs a **Luhn checksum** (`luhnCheck()`) again
 
 ### 2.3 Hard Block Interlock (`HARD_BLOCK_PRESETS_DEFAULT`)
 
-Two keyword arrays, `personal` and `business`, each ~20 terms. If the currently-active persona's list matches the input text, TokenShield locks the UI:
+Two keyword arrays, `personal` and `business`, each ~20 terms. If the currently-active persona's list matches the input text, MaskFirst locks the UI:
 - A **red warning banner** appears
 - The **copy button is disabled**
 - The user must explicitly **acknowledge and unlock** via the Unlock modal
@@ -172,7 +172,7 @@ Importing a CSV shows a **Merge with Existing / Replace All / Cancel** dialog wh
 - **Replace All**: wipe the `custom` bucket for that dimension and use only the imported content.
 - **Cancel**: no changes.
 
-**Manual config file import**: an earlier version auto-loaded `tokenshield.config.js` from the same folder on startup via a dynamically-injected `<script src="tokenshield.config.js">`. That approach let a tampered file execute arbitrary code without the user noticing, contradicting the "PII never leaves the browser" trust claim — it was replaced on 2026-08-25 with a manual import flow:
+**Manual config file import**: an earlier version auto-loaded `maskfirst.config.js` from the same folder on startup via a dynamically-injected `<script src="maskfirst.config.js">`. That approach let a tampered file execute arbitrary code without the user noticing, contradicting the "PII never leaves the browser" trust claim — it was replaced on 2026-08-25 with a manual import flow:
 ```javascript
 window.TOKENSHIELD_AUTO_CONFIG = {
   version: 1,
@@ -191,7 +191,7 @@ The three buttons live inside a collapsible "Advanced Settings: Import / Export 
 
 **Import Config File** opens a file picker; the selected file is parsed by string-scanning and `JSON.parse()` only (never `eval`, never executed), then shows the same **Merge with Existing / Replace All** dialog CSV import uses (`openConfigImportDialog()`), with entry counts per dimension. **The choice matters more here than for CSV**: merge keys `custom`-bucket entries on their own content (a regex's pattern text, a keyword's own text), so editing exactly that field breaks merge's ability to recognize "same rule, updated" — it adds a duplicate instead. `hardBlockOverrides`/`regexOverrides` make this sharper still: since the exported list is a flat array with no identity beyond its content, a **Merge** import folds new/changed values in additively (nothing is ever removed), while only **Replace All** actually reapplies a deletion or cleanly supersedes an edited value — reapplying an edited or deleted built-in rule after a reload requires Replace All. One identity caveat: an edited built-in value that doesn't exactly match a true default text comes back tagged `Overridden`/`auto-loaded` without its own `defaultValue`/`defaultPattern` link (i.e. no more per-row "Revert to Default" for it specifically) — the edit itself is correctly reapplied, just not the "what it looked like before this edit" breadcrumb. Regex overrides are matched back to their built-in `validate` function by `type`. This is a manual, one-shot action: it does **not** re-apply on refresh or the next launch, so the user re-imports each time; a persistent on-load notice nudges them to do so, worded without claiming a file was "detected" since browser security blocks background-checking whether one exists.
 
-**Export Config File** packages the current in-memory state (all four dimensions, all merge/override results, excluding `ai-session`-tagged roster entries) into the same format, downloaded as the fixed filename `tokenshield.config.js`, for sharing with a colleague or reuse on another machine — `hardBlockOverrides`/`regexOverrides` are added only for buckets that differ from true defaults. **Reset to Defaults** (with a confirmation prompt) resets all four dimensions to built-in defaults, discarding this session's manual edits or imported settings.
+**Export Config File** packages the current in-memory state (all four dimensions, all merge/override results, excluding `ai-session`-tagged roster entries) into the same format, downloaded as the fixed filename `maskfirst.config.js`, for sharing with a colleague or reuse on another machine — `hardBlockOverrides`/`regexOverrides` are added only for buckets that differ from true defaults. **Reset to Defaults** (with a confirmation prompt) resets all four dimensions to built-in defaults, discarding this session's manual edits or imported settings.
 
 > [!NOTE]
 > This mechanism only ever touches rule/prompt configuration — never the actual document content typed into the app. The existing zero-persistence promise (everything destroyed on page close/reload, see §1.2) is untouched for `sessionVault` and the input textareas.
@@ -201,7 +201,7 @@ The three buttons live inside a collapsible "Advanced Settings: Import / Export 
 A `#langSelect` dropdown in the header toolbar switches the interface between **English / 繁體中文 / 日本語**, deliberately decoupled from `currentRegion`/`currentPersona` (§2.1) — Region/Persona pick which *rule data* is active, this only picks which *language* the chrome renders in, so e.g. running the EU ruleset with a Traditional Chinese interface is a supported combination.
 
 ```javascript
-const LANG_STORAGE_KEY = 'tokenshield_display_lang';
+const LANG_STORAGE_KEY = 'maskfirst_display_lang';
 let currentLang = localStorage.getItem(LANG_STORAGE_KEY) || 'en'; // persisted — unlike Region/Persona
 const I18N = { someKey: { en: '...', zh: '...', ja: '...' }, /* ~220 keys */ };
 function t(key, vars) { /* looks up I18N[key][currentLang], falls back to en, then the raw key; supports {placeholder} interpolation */ }
@@ -210,7 +210,7 @@ function applyLanguage(lang) { /* sets currentLang, persists it, walks data-i18n
 
 Static markup opts in via `data-i18n` (sets `innerHTML`), `data-i18n-placeholder`, `data-i18n-title`, and `data-i18n-aria-label`. Dynamically-generated strings (toasts, `showConfirmModal()` messages, table renderers like `renderHardBlockMgmtTable()`/`renderRegexMgmtTable()`) call `t()` directly instead of embedding literal English. `refreshDynamicText()` re-runs the pure-render functions so a panel that's already open updates immediately on a language switch, without needing the user to reopen it. The PII Rule Guide no longer renders a live rule table (`renderGuideTable()` was removed when the guide became a static concept explainer, see §2.8) — `refreshGuideModalIfOpen()` is kept as a documented no-op so callers elsewhere don't need to know that.
 
-**Deliberately left untranslated** (treated as technical/reference content): the `REGEX_PRESETS_DEFAULT`/`HARD_BLOCK_PRESETS_DEFAULT` catalog (rule `name`/`example` fields, Hard Block keyword lists — translating the keyword lists would change actual detection behavior, not just display), and the `LOCAL_AI_PROMPTS`/`aiPrompts` prompt text (these are instructions sent to another AI model, not UI copy). `localStorage` persistence is a deliberate exception to TokenShield's zero-persistence-by-design rule (§1.2) — it's a display preference, not document content or scan state.
+**Deliberately left untranslated** (treated as technical/reference content): the `REGEX_PRESETS_DEFAULT`/`HARD_BLOCK_PRESETS_DEFAULT` catalog (rule `name`/`example` fields, Hard Block keyword lists — translating the keyword lists would change actual detection behavior, not just display), and the `LOCAL_AI_PROMPTS`/`aiPrompts` prompt text (these are instructions sent to another AI model, not UI copy). `localStorage` persistence is a deliberate exception to MaskFirst's zero-persistence-by-design rule (§1.2) — it's a display preference, not document content or scan state.
 
 ---
 
@@ -221,7 +221,7 @@ Static markup opts in via `data-i18n` (sets `innerHTML`), `data-i18n-placeholder
 | Item | Requirement |
 |------|-------------|
 | Browser | Chrome / Edge recommended (needs ES2020+, ReadableStream, Clipboard API) |
-| Startup / network | **Normal offline**: just open `TokenShield.html`. **Closed intranet (no internet at all)**: keep `TokenShield.html` and `style.css` in the same folder. |
+| Startup / network | **Normal offline**: just open `MaskFirst.html`. **Closed intranet (no internet at all)**: keep `MaskFirst.html` and `style.css` in the same folder. |
 | Local AI (optional) | Install [Ollama](https://ollama.com/), pull `qwen2.5:3b` (recommended default — runs on modest hardware), set `OLLAMA_ORIGINS=*`. |
 
 ### 3.2 Standard Workflow
@@ -252,7 +252,7 @@ Static markup opts in via `data-i18n` (sets `innerHTML`), `data-i18n-placeholder
 ## 4. Advanced / Developer Notes
 
 ### 4.1 Adding a Hard Block term
-No source editing needed at all — use "Manage Custom Protection Rules" → "Hard Block Keywords" tab (§2.8): "+ Add Row" for a `custom` entry, or click directly into any row shown for the active Persona to edit or delete a built-in one, CSV import for bulk changes. This only affects your own working copy (session state, or your exported config file) — to change what ships as the `personal`/`business` **default** for everyone using this file, edit `HARD_BLOCK_PRESETS_DEFAULT` in `TokenShield.html` source instead.
+No source editing needed at all — use "Manage Custom Protection Rules" → "Hard Block Keywords" tab (§2.8): "+ Add Row" for a `custom` entry, or click directly into any row shown for the active Persona to edit or delete a built-in one, CSV import for bulk changes. This only affects your own working copy (session state, or your exported config file) — to change what ships as the `personal`/`business` **default** for everyone using this file, edit `HARD_BLOCK_PRESETS_DEFAULT` in `MaskFirst.html` source instead.
 
 ### 4.2 Adding a detection rule
 Use "Manage Custom Protection Rules" → "Regex Rules" tab (§2.8): "+ Add Row" for a `custom` entry, or click directly into any row shown for the active Region to edit or delete a built-in one (edits are validated for syntax and ReDoS risk on save), CSV import for bulk changes. Same scope note as above — this only affects your working copy; to change the shipped default, add `{ type: "TAG_NAME", regex: /your-regex/g, name: "Display Name", example: "Match Example" }` to `REGEX_PRESETS_DEFAULT`'s `global` array (always on) or a specific region array (`us`/`eu`/`uk`/`tw`/`jp`) in source.
@@ -261,7 +261,7 @@ Use "Manage Custom Protection Rules" → "Regex Rules" tab (§2.8): "+ Add Row" 
 Add a new key to `REGEX_PRESETS_DEFAULT` (e.g. `ca` for Canada) and to the live-state initializer in `buildDefaultRegexPresetsState()`, then add a matching `<option>` to `#regionSelect` in the HTML. Rules in a new region are layered on top of `global` exactly like the existing five. `tw`/`jp` were added through this exact extension point and can be used as a reference.
 
 ### 4.4 Rebuilding `style.css`
-The Tailwind build tooling lives in this repo's own `dev/` folder — no external dependency on any other project. After changing Tailwind classes in `TokenShield.html`:
+The Tailwind build tooling lives in this repo's own `dev/` folder — no external dependency on any other project. After changing Tailwind classes in `MaskFirst.html`:
 ```powershell
 cd dev
 npm install   # first time only
@@ -272,11 +272,11 @@ This runs `tailwindcss -i ./input.css -o ../style.css --minify`, per the script 
 ### 4.5 Folder structure
 
 ```text
-TokenShield/  (repo root)
-├── TokenShield.html                 <- TokenShield app (this document's subject)
+MaskFirst/  (repo root)
+├── MaskFirst.html                 <- MaskFirst app (this document's subject)
 ├── docs/
-│   ├── TokenShield_README.md        <- This document (English-primary)
-│   └── TokenShield_README.zh-TW.md  <- Traditional Chinese translation
+│   ├── MaskFirst_README.md        <- This document (English-primary)
+│   └── MaskFirst_README.zh-TW.md  <- Traditional Chinese translation
 ├── README.md / README.zh-TW.md      <- Project introduction
 ├── LICENSE                          <- MIT License
 ├── .gitignore / .nojekyll
@@ -286,7 +286,7 @@ TokenShield/  (repo root)
 ```
 
 > [!NOTE]
-> When distributing to end users, only `TokenShield.html` and `style.css` are needed. Everything under `dev/` is for development only.
+> When distributing to end users, only `MaskFirst.html` and `style.css` are needed. Everything under `dev/` is for development only.
 
 ---
 
@@ -298,7 +298,7 @@ Region coverage is intentionally limited to US / EU / UK + Global at launch — 
 
 ## 6. About
 
-* **GitHub**: [oas114/TokenShield](https://github.com/oas114/TokenShield)
+* **GitHub**: [oas114/MaskFirst](https://github.com/oas114/MaskFirst)
 * **Sibling project**: [oas114/EduShield](https://github.com/oas114/EduShield) — the Taiwan education-focused edition, in its own separate repository
 * **Author**: OA (oas114)
 * **Support**: [Ko-fi](https://ko-fi.com/oasgrow)
