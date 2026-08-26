@@ -1088,7 +1088,9 @@
           <div class="border border-line rounded-lg overflow-x-auto max-h-64 overflow-y-auto">
             <table class="w-full text-left text-sm">
               <thead class="bg-paper-sunken sticky top-0"><tr>
-                <th class="px-3 py-2 font-medium text-ink-secondary border-b border-line" data-i18n="pmColKeyword">Keyword</th>
+                <th class="px-3 py-2 font-medium text-ink-secondary border-b border-line">English</th>
+                <th class="px-3 py-2 font-medium text-ink-secondary border-b border-line">繁體中文</th>
+                <th class="px-3 py-2 font-medium text-ink-secondary border-b border-line">日本語</th>
                 <th class="px-3 py-2 font-medium text-ink-secondary border-b border-line w-28 text-center" data-i18n="pmColActions">Actions</th>
               </tr></thead>
               <tbody id="hardBlockMgmtTbody" class="divide-y divide-line bg-white"></tbody>
@@ -1435,11 +1437,10 @@
       pmTabHardBlock: { en: 'Hard Block Keywords', zh: '硬阻斷關鍵字', ja: 'ハードブロックキーワード' },
       pmTabRegex: { en: 'Regex Rules', zh: '正則規則', ja: '正規表現ルール' },
       pmTabPrompts: { en: 'Local AI Prompts', zh: '本機 AI 提示詞', ja: 'ローカルAIプロンプト' },
-      pmHardBlockIntro: { en: `Add or edit rows directly in the table below, or batch-import a single-column CSV (one keyword per row). This only manages your custom layer — the built-in Personal/Business keyword lists aren't editable here (see PII Rule Guide).`, zh: `可直接在下方表格新增/編輯列，或用單欄 CSV（每列一個關鍵字）批次匯入。這裡只管理你的自訂層──內建的個人／企業關鍵字清單無法在此編輯（請見個資規則說明）。`, ja: `下の表で直接行を追加／編集するか、単一列のCSV（1行につき1キーワード）で一括インポートできます。ここで管理できるのはカスタム層のみです──組み込みの個人／ビジネスキーワードリストはここでは編集できません（PIIルールガイドを参照）。` },
+      pmHardBlockIntro: { en: `Each row below is one concept with its English/Chinese/Japanese equivalents side by side — all three stay active for detection at once, regardless of your display language, so edit or clear any single field, revert a row to its default, or delete it entirely. Shows the built-in Personal/Business list for the currently selected Persona plus your own custom terms (single value, added below or via CSV import) appended at the end.`, zh: `下方每一列是一個概念，英文／中文／日文對照並列——三者永遠同時生效參與偵測，跟目前顯示語言無關，你可以編輯或清空任一欄位、把整列還原成預設值，或整列刪除。顯示的是目前選定身分（個人／企業）的內建清單，加上你自己新增的自訂關鍵字（單一詞彙，可在下方新增或用 CSV 匯入）附加在最後。`, ja: `以下の各行は一つの概念を英語／中国語／日本語で並べたものです──表示言語に関係なく三つとも常に検出対象として有効なので、任意の項目を編集・空欄にする、行を既定値に戻す、行ごと削除するといった操作ができます。現在選択中のPersona（個人／ビジネス）の組み込みリストに加え、末尾にあなた自身のカスタム用語（単一の値、下のボタンまたはCSVインポートで追加）が表示されます。` },
       pmBtnDownloadTemplate: { en: 'Download Template', zh: '下載範本', ja: 'テンプレートをダウンロード' },
       pmBtnImportCsv: { en: 'Import CSV', zh: '匯入 CSV', ja: 'CSVをインポート' },
       pmBtnAddRow: { en: '+ Add Row', zh: '+ 手動新增一列', ja: '+ 行を手動追加' },
-      pmColKeyword: { en: 'Keyword', zh: '關鍵字', ja: 'キーワード' },
       pmRegexIntro: { en: `Add or edit rows directly in the table below, or batch-import a 4-column CSV (TypeTag,RuleName,Pattern,ExampleText). The Pattern column accepts a bare pattern or a full /pattern/flags literal; edits are validated for syntax and ReDoS risk on save. This only manages your custom layer — the built-in region-specific rules aren't editable here (see PII Rule Guide).`, zh: `可直接在下方表格新增/編輯列，或用 4 欄 CSV（TypeTag,RuleName,Pattern,ExampleText）批次匯入。Pattern 欄位可以是單純的規則字串，也可以是完整的 /pattern/flags 格式，儲存時會自動驗證格式與 ReDoS 風險。這裡只管理你的自訂層──內建的地區專屬規則無法在此編輯（請見個資規則說明）。`, ja: `下の表で直接行を追加／編集するか、4列構成のCSV（TypeTag,RuleName,Pattern,ExampleText）で一括インポートできます。Pattern列には素のパターン、または完全な /pattern/flags 形式のどちらでも指定でき、保存時に構文とReDoSリスクを自動検証します。ここで管理できるのはカスタム層のみです──組み込みの地域別ルールはここでは編集できません（PIIルールガイドを参照）。` },
       pmColTag: { en: 'Tag', zh: '標籤', ja: 'タグ' },
       pmColName: { en: 'Name', zh: '名稱', ja: '名前' },
@@ -1526,6 +1527,7 @@
       scanChannel2Progress: { en: 'Confirming semantic risk ({current}/{total})', zh: '語意風險確認中 (第 {current}/{total} 次)', ja: '意味リスク確認中 ({current}/{total})' },
       reasonAiDeepScanFlagged: { en: 'AI deep scan flagged: {reason}', zh: 'AI 深度掃描標記：{reason}', ja: 'AI詳細スキャンでフラグ：{reason}' },
       reasonStaticKeywordMatch: { en: 'Static keyword match: detected "{keywords}"', zh: '靜態關鍵字比對：偵測到「{keywords}」', ja: '静的キーワード照合：「{keywords}」を検出' },
+      reasonExtremelySensitiveTerm: { en: 'Extremely sensitive term', zh: '極度敏感詞彙', ja: '極めて機微な用語' },
       reasonAiDeepScanFallback: { en: 'a potential sensitive-risk finding', zh: '潛在的敏感風險項目', ja: '機微リスクの可能性がある事項' },
       toastScanCompleteBlocked: { en: 'Scan complete!\nAdded {count} new masked entities.\nA sensitive-risk finding was detected — copy has been force-locked!', zh: '掃描完成！\n新增了 {count} 個遮蔽項目。\n偵測到敏感風險項目──複製功能已被強制鎖定！', ja: 'スキャン完了！\n{count}件のマスク項目を追加しました。\n機微リスクが検出されたため、コピー機能を強制的にロックしました！' },
       toastScanCompleteOk: { en: 'Scan complete! Added {count} new masked entities. No additional sensitive risks found.', zh: '掃描完成！新增了 {count} 個遮蔽項目，未發現其他敏感風險。', ja: 'スキャン完了！{count}件のマスク項目を追加しました。追加の機微リスクは見つかりませんでした。' },
@@ -1645,6 +1647,7 @@
       const prevLang = currentLang;
       currentLang = lang;
       if (typeof syncAiPromptsToLanguage === 'function') syncAiPromptsToLanguage(prevLang, lang);
+      if (typeof syncRegexNamesToLanguage === 'function') syncRegexNamesToLanguage(prevLang, lang);
       if (typeof maybeStartRegionFromLanguage === 'function') maybeStartRegionFromLanguage(lang);
       localStorage.setItem(LANG_STORAGE_KEY, lang);
       document.documentElement.lang = lang === 'zh' ? 'zh-Hant' : (lang === 'ja' ? 'ja' : 'en');
@@ -1814,57 +1817,73 @@
 
     // Built-in defaults, frozen — never mutated. "Reset to Defaults" and merge/replace imports
     // restore to this baseline. To add your own terms, use the "Manage Custom Protection Rules" UI instead.
-    // Each bucket carries EN + ZH (Traditional) + JA equivalents side by side (not switched by display
-    // language) — matching is a flat substring scan (see getHardBlockKeywords()), so keeping all three
-    // scripts always active is what actually catches sensitive content regardless of what language the
-    // pasted text itself is in, independent of whatever language the UI happens to be displaying.
+    // Each bucket entry is one concept with its EN/ZH(Traditional)/JA equivalents grouped together —
+    // shown as one row with three fields in the management panel (someone reading zh/ja usually also
+    // reads en, so seeing the three side by side beats scrolling three separate copies of the same
+    // 20-odd concepts). Matching (getHardBlockKeywords()) flattens every non-empty field from every
+    // concept into one substring-scan list, always active regardless of display language — clearing a
+    // field opts that language out of matching without deleting the row; deleting the row removes all
+    // three. What determines a hit is the pasted content's own script, not currentLang/currentRegion.
     const HARD_BLOCK_PRESETS_DEFAULT = Object.freeze({
       personal: [
-        "sexual assault", "sexual abuse", "domestic violence", "child abuse", "self-harm",
-        "suicidal ideation", "suicide attempt", "substance abuse treatment", "mental health diagnosis",
-        "psychiatric treatment", "HIV status", "sexually transmitted infection", "sexual orientation",
-        "gender transition", "immigration status", "asylum status", "undocumented status",
-        "child custody dispute", "protective order", "eviction notice", "bankruptcy filing",
-        "性侵害", "性虐待", "家庭暴力", "兒童虐待", "自我傷害",
-        "自殺意念", "自殺未遂", "藥物濫用治療", "精神疾病診斷",
-        "精神科治療", "HIV感染狀態", "性傳染病", "性傾向",
-        "性別轉換", "移民身分", "庇護身分", "無證移民身分",
-        "子女監護權糾紛", "保護令", "驅離通知", "破產申請",
-        "性的暴行", "性的虐待", "家庭内暴力", "児童虐待", "自傷行為",
-        "自殺念慮", "自殺未遂", "薬物乱用治療", "精神疾患の診断",
-        "精神科治療", "HIV感染状況", "性感染症", "性的指向",
-        "性別移行", "在留資格", "難民認定状況", "非正規滞在状況",
-        "親権争い", "保護命令", "立ち退き通知", "破産申立て"
+        { en: "sexual assault", zh: "性侵害", ja: "性的暴行" },
+        { en: "sexual abuse", zh: "性虐待", ja: "性的虐待" },
+        { en: "domestic violence", zh: "家庭暴力", ja: "家庭内暴力" },
+        { en: "child abuse", zh: "兒童虐待", ja: "児童虐待" },
+        { en: "self-harm", zh: "自我傷害", ja: "自傷行為" },
+        { en: "suicidal ideation", zh: "自殺意念", ja: "自殺念慮" },
+        { en: "suicide attempt", zh: "自殺未遂", ja: "自殺未遂" },
+        { en: "substance abuse treatment", zh: "藥物濫用治療", ja: "薬物乱用治療" },
+        { en: "mental health diagnosis", zh: "精神疾病診斷", ja: "精神疾患の診断" },
+        { en: "psychiatric treatment", zh: "精神科治療", ja: "精神科治療" },
+        { en: "HIV status", zh: "HIV感染狀態", ja: "HIV感染状況" },
+        { en: "sexually transmitted infection", zh: "性傳染病", ja: "性感染症" },
+        { en: "sexual orientation", zh: "性傾向", ja: "性的指向" },
+        { en: "gender transition", zh: "性別轉換", ja: "性別移行" },
+        { en: "immigration status", zh: "移民身分", ja: "在留資格" },
+        { en: "asylum status", zh: "庇護身分", ja: "難民認定状況" },
+        { en: "undocumented status", zh: "無證移民身分", ja: "非正規滞在状況" },
+        { en: "child custody dispute", zh: "子女監護權糾紛", ja: "親権争い" },
+        { en: "protective order", zh: "保護令", ja: "保護命令" },
+        { en: "eviction notice", zh: "驅離通知", ja: "立ち退き通知" },
+        { en: "bankruptcy filing", zh: "破產申請", ja: "破産申立て" }
       ],
       business: [
-        "insider information", "material non-public information", "trade secret", "merger and acquisition",
-        "acquisition target", "reduction in force", "layoff plan", "unreleased earnings",
-        "pending patent application", "data breach", "security incident", "whistleblower report",
-        "internal investigation", "attorney-client privileged", "pending litigation", "regulatory investigation",
-        "non-disclosure breach", "confidential settlement", "bribery allegation", "antitrust investigation",
-        "內線消息", "重大非公開資訊", "營業秘密", "併購案",
-        "收購目標", "組織精簡裁員", "裁員計畫", "未公布財報",
-        "待審專利申請", "資料外洩", "資安事件", "吹哨者檢舉",
-        "內部調查", "律師與當事人保密特權", "待審訴訟", "主管機關調查",
-        "保密協議違反", "保密和解", "賄賂指控", "反壟斷調查",
-        "インサイダー情報", "重要未公開情報", "営業秘密", "合併買収",
-        "買収対象企業", "人員削減計画", "解雇計画", "未公表決算",
-        "出願中の特許", "データ漏えい", "セキュリティインシデント", "内部告発",
-        "内部調査", "弁護士秘匿特権", "係属中の訴訟", "規制当局の調査",
-        "秘密保持契約違反", "秘密和解", "贈収賄疑惑", "独占禁止法調査"
+        { en: "insider information", zh: "內線消息", ja: "インサイダー情報" },
+        { en: "material non-public information", zh: "重大非公開資訊", ja: "重要未公開情報" },
+        { en: "trade secret", zh: "營業秘密", ja: "営業秘密" },
+        { en: "merger and acquisition", zh: "併購案", ja: "合併買収" },
+        { en: "acquisition target", zh: "收購目標", ja: "買収対象企業" },
+        { en: "reduction in force", zh: "組織精簡裁員", ja: "人員削減計画" },
+        { en: "layoff plan", zh: "裁員計畫", ja: "解雇計画" },
+        { en: "unreleased earnings", zh: "未公布財報", ja: "未公表決算" },
+        { en: "pending patent application", zh: "待審專利申請", ja: "出願中の特許" },
+        { en: "data breach", zh: "資料外洩", ja: "データ漏えい" },
+        { en: "security incident", zh: "資安事件", ja: "セキュリティインシデント" },
+        { en: "whistleblower report", zh: "吹哨者檢舉", ja: "内部告発" },
+        { en: "internal investigation", zh: "內部調查", ja: "内部調査" },
+        { en: "attorney-client privileged", zh: "律師與當事人保密特權", ja: "弁護士秘匿特権" },
+        { en: "pending litigation", zh: "待審訴訟", ja: "係属中の訴訟" },
+        { en: "regulatory investigation", zh: "主管機關調查", ja: "規制当局の調査" },
+        { en: "non-disclosure breach", zh: "保密協議違反", ja: "秘密保持契約違反" },
+        { en: "confidential settlement", zh: "保密和解", ja: "秘密和解" },
+        { en: "bribery allegation", zh: "賄賂指控", ja: "贈収賄疑惑" },
+        { en: "antitrust investigation", zh: "反壟斷調查", ja: "独占禁止法調査" }
       ]
     });
 
     // Live working state — this is what the rest of the app actually reads from.
-    // hardBlockPresets.custom is always merged in regardless of persona (see getHardBlockKeywords below);
-    // it holds custom/imported/auto-loaded entries that aren't tied to a specific persona.
+    // hardBlockPresets.custom stays single-value ({value, source}) and is always merged in regardless
+    // of persona — a custom entry is one arbitrary term the user typed, not a translated triplet, so it
+    // doesn't get the three-language row treatment the builtin personal/business buckets get.
+    // hardBlockPresets.personal/business hold concept rows: { en, zh, ja, source, default: {en,zh,ja} }.
     let hardBlockPresets = { personal: [], business: [], custom: [] };
 
-    function getHardBlockKeywordEntries() {
-      return [...hardBlockPresets.custom, ...(hardBlockPresets[currentPersona] || hardBlockPresets.personal)];
-    }
     function getHardBlockKeywords() {
-      return getHardBlockKeywordEntries().map(e => e.value);
+      const customValues = hardBlockPresets.custom.map(e => e.value).filter(v => v && v.trim());
+      const personaBucket = hardBlockPresets[currentPersona] || hardBlockPresets.personal;
+      const personaValues = personaBucket.flatMap(e => [e.en, e.zh, e.ja]).filter(v => v && v.trim());
+      return [...customValues, ...personaValues];
     }
 
     function luhnCheck(numStr) {
@@ -1949,49 +1968,60 @@
     // Format: { type: "TAG_NAME", regex: /your-regex/g, name: "Display Name", example: "Match Example", validate: optionalFn }
     // Built-in defaults, frozen — never mutated. To add your own rules, use the
     // "Manage Custom Protection Rules" UI instead of editing this literal.
+    // name is {en, zh, ja} — a display label the entity-chip preview shows verbatim as the match reason
+    // (see getActiveRegexRules() consumers), so it needs the same three-language treatment as everything
+    // else a user reads. `type` stays a plain string in every rule: it's a stable technical tag consumed
+    // by token generation ({{TYPE_N}}) and CSV/config import matching, not something a person reads.
+    // `example` also stays plain: match samples are format demonstrations (digits, punctuation), not
+    // language content — except TW_ADDRESS, whose example is itself a literal Taiwan address, already
+    // in the language the pattern is meant to match.
+    const N = (en, zh, ja) => ({ en, zh, ja });
     const REGEX_PRESETS_DEFAULT = Object.freeze({
       // Always merged in, regardless of selected region.
       global: [
-        { type: "EMAIL", regex: /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g, name: "Email Address", example: "user@example.com" },
-        { type: "IPV4", regex: /\b(?:(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)\.){3}(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)\b/g, name: "IPv4 Address", example: "192.168.1.1" },
-        { type: "IPV6", regex: /\b(?:[A-Fa-f0-9]{1,4}:){7}[A-Fa-f0-9]{1,4}\b/g, name: "IPv6 Address", example: "2001:0db8:85a3:0000:0000:8a2e:0370:7334" },
-        { type: "CREDIT_CARD", regex: /\b(?:4[0-9]{3}|5[1-5][0-9]{2}|3[47][0-9]{2}|6(?:011|5[0-9]{2}))[- ]?[0-9]{4}[- ]?[0-9]{4}[- ]?[0-9]{1,4}\b/g, name: "Credit Card Number", example: "4111 1111 1111 1111", validate: (m) => luhnCheck(m) },
-        { type: "INTL_PHONE", regex: /\+\d{1,3}[-.\s]?\(?\d{1,4}\)?(?:[-.\s]?\d{2,4}){2,4}\b/g, name: "International Phone", example: "+1 415 555 2671" },
-        { type: "DATE", regex: /\b(19\d{2}|20\d{2})[-/.](0?[1-9]|1[0-2])[-/.](0?[1-9]|[12]\d|3[01])\b/g, name: "Gregorian Date", example: "2026-08-19" }
+        { type: "EMAIL", regex: /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g, name: N("Email Address", "電子郵件地址", "メールアドレス"), example: "user@example.com" },
+        { type: "IPV4", regex: /\b(?:(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)\.){3}(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)\b/g, name: N("IPv4 Address", "IPv4 位址", "IPv4アドレス"), example: "192.168.1.1" },
+        { type: "IPV6", regex: /\b(?:[A-Fa-f0-9]{1,4}:){7}[A-Fa-f0-9]{1,4}\b/g, name: N("IPv6 Address", "IPv6 位址", "IPv6アドレス"), example: "2001:0db8:85a3:0000:0000:8a2e:0370:7334" },
+        { type: "CREDIT_CARD", regex: /\b(?:4[0-9]{3}|5[1-5][0-9]{2}|3[47][0-9]{2}|6(?:011|5[0-9]{2}))[- ]?[0-9]{4}[- ]?[0-9]{4}[- ]?[0-9]{1,4}\b/g, name: N("Credit Card Number", "信用卡號", "クレジットカード番号"), example: "4111 1111 1111 1111", validate: (m) => luhnCheck(m) },
+        { type: "INTL_PHONE", regex: /\+\d{1,3}[-.\s]?\(?\d{1,4}\)?(?:[-.\s]?\d{2,4}){2,4}\b/g, name: N("International Phone", "國際電話號碼", "国際電話番号"), example: "+1 415 555 2671" },
+        { type: "DATE", regex: /\b(19\d{2}|20\d{2})[-/.](0?[1-9]|1[0-2])[-/.](0?[1-9]|[12]\d|3[01])\b/g, name: N("Gregorian Date", "西元日期", "西暦の日付"), example: "2026-08-19" }
       ],
       us: [
-        { type: "US_SSN", regex: /\b\d{3}-\d{2}-\d{4}\b/g, name: "US Social Security Number", example: "123-45-6789" },
-        { type: "US_EIN", regex: /\b\d{2}-\d{7}\b/g, name: "US Employer ID Number (EIN)", example: "12-3456789" },
-        { type: "US_PHONE", regex: /\b(?:\+?1[-.\s]?)?\(?[2-9]\d{2}\)?[-.\s]?\d{3}[-.\s]?\d{4}\b/g, name: "US Phone Number", example: "(415) 555-2671" },
-        { type: "US_ZIP", regex: /\b\d{5}(?:-\d{4})?\b/g, name: "US ZIP Code", example: "94105-1234" }
+        { type: "US_SSN", regex: /\b\d{3}-\d{2}-\d{4}\b/g, name: N("US Social Security Number", "美國社會安全號碼", "米国社会保障番号（SSN）"), example: "123-45-6789" },
+        { type: "US_EIN", regex: /\b\d{2}-\d{7}\b/g, name: N("US Employer ID Number (EIN)", "美國雇主識別號（EIN）", "米国雇用主識別番号（EIN）"), example: "12-3456789" },
+        { type: "US_PHONE", regex: /\b(?:\+?1[-.\s]?)?\(?[2-9]\d{2}\)?[-.\s]?\d{3}[-.\s]?\d{4}\b/g, name: N("US Phone Number", "美國電話號碼", "米国電話番号"), example: "(415) 555-2671" },
+        { type: "US_ZIP", regex: /\b\d{5}(?:-\d{4})?\b/g, name: N("US ZIP Code", "美國郵遞區號", "米国郵便番号（ZIPコード）"), example: "94105-1234" }
       ],
       eu: [
-        { type: "IBAN", regex: /\b[A-Z]{2}\d{2}[A-Z0-9]{10,30}\b/g, name: "IBAN (Bank Account)", example: "DE89370400440532013000" },
-        { type: "EU_PASSPORT", regex: /\b[A-Z]{2}\d{7}\b/g, name: "EU-style Passport Number (approximate)", example: "PA1234567" },
-        { type: "EU_VAT", regex: /\b[A-Z]{2}\d{8,12}\b/g, name: "EU VAT Number (approximate)", example: "DE123456789" }
+        { type: "IBAN", regex: /\b[A-Z]{2}\d{2}[A-Z0-9]{10,30}\b/g, name: N("IBAN (Bank Account)", "IBAN（銀行帳號）", "IBAN（銀行口座番号）"), example: "DE89370400440532013000" },
+        { type: "EU_PASSPORT", regex: /\b[A-Z]{2}\d{7}\b/g, name: N("EU-style Passport Number (approximate)", "歐盟式護照號碼（概略格式）", "EU式パスポート番号（概算）"), example: "PA1234567" },
+        { type: "EU_VAT", regex: /\b[A-Z]{2}\d{8,12}\b/g, name: N("EU VAT Number (approximate)", "歐盟加值稅編號（概略格式）", "EU付加価値税番号（概算）"), example: "DE123456789" }
       ],
       uk: [
-        { type: "UK_NI", regex: /\b[A-CEGHJ-PR-TW-Z]{1}[A-CEGHJ-NPR-TW-Z]{1}\d{6}[A-D]\b/gi, name: "UK National Insurance Number", example: "AB123456C" },
-        { type: "UK_POSTCODE", regex: /\b[A-Z]{1,2}\d[A-Z\d]?\s?\d[A-Z]{2}\b/gi, name: "UK Postcode", example: "SW1A 1AA" },
-        { type: "UK_PHONE", regex: /\b(?:\+44\s?|0)(?:\d{2,4}[-.\s]?){2,3}\d{3,4}\b/g, name: "UK Phone Number", example: "+44 7911 123456" }
+        { type: "UK_NI", regex: /\b[A-CEGHJ-PR-TW-Z]{1}[A-CEGHJ-NPR-TW-Z]{1}\d{6}[A-D]\b/gi, name: N("UK National Insurance Number", "英國國民保險號碼", "英国国民保険番号"), example: "AB123456C" },
+        { type: "UK_POSTCODE", regex: /\b[A-Z]{1,2}\d[A-Z\d]?\s?\d[A-Z]{2}\b/gi, name: N("UK Postcode", "英國郵遞區號", "英国郵便番号"), example: "SW1A 1AA" },
+        { type: "UK_PHONE", regex: /\b(?:\+44\s?|0)(?:\d{2,4}[-.\s]?){2,3}\d{3,4}\b/g, name: N("UK Phone Number", "英國電話號碼", "英国電話番号"), example: "+44 7911 123456" }
       ],
       tw: [
-        { type: "TW_ID", regex: /\b[A-Z][12]\d{8}\b/g, name: "Taiwan National ID", example: "A123456789", validate: (m) => twIdChecksum(m) },
-        { type: "TW_ARC", regex: /\b[A-Z][A-D89]\d{8}\b/g, name: "Taiwan Resident Certificate / Uniform ID", example: "A800000014" },
-        { type: "TW_MOBILE", regex: /\b09\d{2}-?\d{3}-?\d{3}\b/g, name: "Taiwan Mobile Number", example: "0912-345-678" },
-        { type: "TW_TEL", regex: /\b0(?!9)\d{1,2}-?\d{7,8}(?:\s*(?:#|分機|ext\.?)\s*\d{1,5})?\b/gi, name: "Taiwan Landline / Extension", example: "02-23456789#123" },
-        { type: "TW_UBN", regex: /\b\d{8}\b/g, name: "Taiwan Business Unified Number", example: "04595257", validate: (m) => twUbnChecksum(m) },
-        { type: "TW_ADDRESS", regex: /(?:\d{3,6}\s*)?(?:(?:[臺台][北中南東]|新北|桃園|新竹|苗栗|彰化|南投|雲林|嘉義|屏東|宜蘭|花蓮|[臺台]東|澎湖|金門|連江)[縣市])(?:[一-龥]{2,4}[區市鎮鄉])(?:[一-龥]{1,10}[路街道段區里村])(?:\d+巷)?(?:\d+弄)?(?:\d+號)(?:之\d+)?(?:\d+樓)?/g, name: "Taiwan Household/Mailing Address", example: "406 台中市北屯區崇德路三段100號" }
+        { type: "TW_ID", regex: /\b[A-Z][12]\d{8}\b/g, name: N("Taiwan National ID", "台灣身分證字號", "台湾国民身分証番号"), example: "A123456789", validate: (m) => twIdChecksum(m) },
+        { type: "TW_ARC", regex: /\b[A-Z][A-D89]\d{8}\b/g, name: N("Taiwan Resident Certificate / Uniform ID", "台灣居留證／統一證號", "台湾居留証／統一証番号"), example: "A800000014" },
+        { type: "TW_MOBILE", regex: /\b09\d{2}-?\d{3}-?\d{3}\b/g, name: N("Taiwan Mobile Number", "台灣手機號碼", "台湾携帯電話番号"), example: "0912-345-678" },
+        { type: "TW_TEL", regex: /\b0(?!9)\d{1,2}-?\d{7,8}(?:\s*(?:#|分機|ext\.?)\s*\d{1,5})?\b/gi, name: N("Taiwan Landline / Extension", "台灣市話／分機號碼", "台湾固定電話／内線番号"), example: "02-23456789#123" },
+        { type: "TW_UBN", regex: /\b\d{8}\b/g, name: N("Taiwan Business Unified Number", "台灣統一編號", "台湾統一番号（法人番号）"), example: "04595257", validate: (m) => twUbnChecksum(m) },
+        { type: "TW_ADDRESS", regex: /(?:\d{3,6}\s*)?(?:(?:[臺台][北中南東]|新北|桃園|新竹|苗栗|彰化|南投|雲林|嘉義|屏東|宜蘭|花蓮|[臺台]東|澎湖|金門|連江)[縣市])(?:[一-龥]{2,4}[區市鎮鄉])(?:[一-龥]{1,10}[路街道段區里村])(?:\d+巷)?(?:\d+弄)?(?:\d+號)(?:之\d+)?(?:\d+樓)?/g, name: N("Taiwan Household/Mailing Address", "台灣戶籍／通訊地址", "台湾の住所"), example: "406 台中市北屯區崇德路三段100號" }
       ],
       jp: [
-        { type: "JP_MYNUMBER", regex: /\b\d{4}-?\d{4}-?\d{4}\b/g, name: "Japan My Number (個人番号)", example: "1234-5678-9018", validate: (m) => jpMyNumberChecksum(m) },
-        { type: "JP_CORP_NUMBER", regex: /\b\d{13}\b/g, name: "Japan Corporate Number (法人番号)", example: "8700110005901", validate: (m) => jpCorpNumberChecksum(m) },
-        { type: "JP_MOBILE", regex: /\b0[789]0-?\d{4}-?\d{4}\b/g, name: "Japan Mobile Number", example: "090-1234-5678" },
-        { type: "JP_TEL", regex: /\b0\d{1,4}-?\d{1,4}-?\d{4}\b/g, name: "Japan Landline Number", example: "03-1234-5678" },
-        { type: "JP_POSTAL", regex: /\b\d{3}-?\d{4}\b/g, name: "Japan Postal Code", example: "123-4567" },
-        { type: "JP_PASSPORT", regex: /\b[A-Z]{2}\d{7}\b/g, name: "Japan Passport Number (approximate)", example: "TH1234567" }
+        { type: "JP_MYNUMBER", regex: /\b\d{4}-?\d{4}-?\d{4}\b/g, name: N("Japan My Number (個人番号)", "日本個人番號（My Number）", "マイナンバー（個人番号）"), example: "1234-5678-9018", validate: (m) => jpMyNumberChecksum(m) },
+        { type: "JP_CORP_NUMBER", regex: /\b\d{13}\b/g, name: N("Japan Corporate Number (法人番号)", "日本法人番號", "法人番号"), example: "8700110005901", validate: (m) => jpCorpNumberChecksum(m) },
+        { type: "JP_MOBILE", regex: /\b0[789]0-?\d{4}-?\d{4}\b/g, name: N("Japan Mobile Number", "日本手機號碼", "日本の携帯電話番号"), example: "090-1234-5678" },
+        { type: "JP_TEL", regex: /\b0\d{1,4}-?\d{1,4}-?\d{4}\b/g, name: N("Japan Landline Number", "日本市話號碼", "日本の固定電話番号"), example: "03-1234-5678" },
+        { type: "JP_POSTAL", regex: /\b\d{3}-?\d{4}\b/g, name: N("Japan Postal Code", "日本郵遞區號", "日本の郵便番号"), example: "123-4567" },
+        { type: "JP_PASSPORT", regex: /\b[A-Z]{2}\d{7}\b/g, name: N("Japan Passport Number (approximate)", "日本護照號碼（概略格式）", "日本のパスポート番号（概算）"), example: "TH1234567" }
       ]
     });
+    function regexNameFor(def) {
+      return (def.name && def.name[currentLang]) || (def.name && def.name.en) || '';
+    }
 
     // Live working state — this is what the rest of the app actually reads from.
     // regexPresets.custom is always merged in regardless of region (like "global"); it holds
@@ -2180,18 +2210,25 @@
     // renderRegexMgmtTable() and updateHardBlockValue()/updateRegexField(). Those edits are working-copy
     // state only (same as everything else here): they don't survive a reload and aren't included in
     // "Export Config File", which still only exports the custom bucket.
+    // `default` is a stable link back to HARD_BLOCK_PRESETS_DEFAULT[bucket] that survives inline edits
+    // (see updateHardBlockField()), so a builtin row can always be reverted/re-added even after any of
+    // its three fields changed or the row was deleted. Keyed by `en` elsewhere (renderHardBlockRemovedDefaults(),
+    // restoreRemovedHardBlockDefault()) since `en` is always present and unique within each bucket.
+    function mapHardBlockConceptToRow(concept) {
+      return { en: concept.en, zh: concept.zh, ja: concept.ja, source: 'builtin', default: { en: concept.en, zh: concept.zh, ja: concept.ja } };
+    }
     function buildDefaultHardBlockPresetsState() {
-      // defaultValue is a stable link back to HARD_BLOCK_PRESETS_DEFAULT[bucket] that survives inline
-      // edits (see updateHardBlockValue()), so a builtin row can always be reverted/re-added even after
-      // its visible value has changed or the row was deleted.
       return {
-        personal: HARD_BLOCK_PRESETS_DEFAULT.personal.map(value => ({ value, source: 'builtin', defaultValue: value })),
-        business: HARD_BLOCK_PRESETS_DEFAULT.business.map(value => ({ value, source: 'builtin', defaultValue: value })),
+        personal: HARD_BLOCK_PRESETS_DEFAULT.personal.map(mapHardBlockConceptToRow),
+        business: HARD_BLOCK_PRESETS_DEFAULT.business.map(mapHardBlockConceptToRow),
         custom: []
       };
     }
     function buildDefaultRegexPresetsState() {
-      const mapRule = r => ({ type: r.type, pattern: r.regex.source, flags: r.regex.flags, name: r.name, example: r.example, validate: r.validate, source: 'builtin', defaultPattern: r.regex.source });
+      // defaultNameByLang keeps the whole {en,zh,ja} triplet alongside the live, already-resolved
+      // `name` string — syncRegexNamesToLanguage() needs it to tell "still exactly the old language's
+      // default" (safe to swap) apart from "user edited this" (leave alone) on a display-language switch.
+      const mapRule = r => ({ type: r.type, pattern: r.regex.source, flags: r.regex.flags, name: regexNameFor(r), defaultNameByLang: r.name, example: r.example, validate: r.validate, source: 'builtin', defaultPattern: r.regex.source });
       return {
         global: REGEX_PRESETS_DEFAULT.global.map(mapRule),
         us: REGEX_PRESETS_DEFAULT.us.map(mapRule),
@@ -2220,6 +2257,20 @@
       const newDefaults = AI_PROMPTS_DEFAULT[lang] || AI_PROMPTS_DEFAULT.en;
       ['channel1', 'channel2Personal', 'channel2Business'].forEach(channel => {
         if (aiPrompts[channel] === prevDefaults[channel]) aiPrompts[channel] = newDefaults[channel];
+      });
+    }
+    // Same "swap only if still exactly the old default" rule as syncAiPromptsToLanguage() above, applied
+    // per regex rule's `name` field instead of to a handful of fixed fields — every rule across every
+    // region (plus global/custom) that still carries a defaultNameByLang link gets checked individually,
+    // so an edited name is left alone while an untouched one follows the display-language switch.
+    function syncRegexNamesToLanguage(prevLang, lang) {
+      if (prevLang === lang) return;
+      Object.keys(regexPresets).forEach(bucket => {
+        regexPresets[bucket].forEach(rule => {
+          if (!rule.defaultNameByLang) return;
+          const prevDefault = rule.defaultNameByLang[prevLang] || rule.defaultNameByLang.en;
+          if (rule.name === prevDefault) rule.name = rule.defaultNameByLang[lang] || rule.defaultNameByLang.en;
+        });
       });
     }
     function initCustomProtectionState() {
@@ -2299,26 +2350,36 @@
         errors = errors.concat(regexErrors);
       }
       // hardBlockOverrides/regexOverrides carry edits/deletions made to builtin Persona/Region buckets
-      // (see exportAutoConfig()). Round-tripping through a flat string/row list loses the original
-      // defaultValue/defaultPattern link for anything that was actually edited — an edited entry comes
+      // (see exportAutoConfig()). Round-tripping through a flat row list loses the original
+      // default/defaultPattern link for anything that was actually edited — an edited entry comes
       // back as source 'auto-loaded' with no "Revert to Default" of its own, but the edit itself is
       // correctly reapplied, which is the part that matters when reloading or moving to another machine.
-      // A value that matches a true default exactly is recognized and restored as pristine 'builtin'.
+      // A row that matches a true default exactly is recognized and restored as pristine 'builtin'.
       if (cfg.hardBlockOverrides && typeof cfg.hardBlockOverrides === 'object') {
         Object.keys(cfg.hardBlockOverrides).forEach(persona => {
           const defaults = HARD_BLOCK_PRESETS_DEFAULT[persona];
-          const values = cfg.hardBlockOverrides[persona];
-          if (!defaults || !Array.isArray(values)) return;
-          const defaultSet = new Set(defaults);
-          const incoming = values.filter(v => typeof v === 'string' && v.trim()).map(v => {
-            const trimmed = v.trim();
-            return defaultSet.has(trimmed) ? { value: trimmed, source: 'builtin', defaultValue: trimmed } : { value: trimmed, source: 'auto-loaded' };
+          const rows = cfg.hardBlockOverrides[persona];
+          if (!defaults || !Array.isArray(rows)) return;
+          // Rows are matched back to a default concept by its `en` field (always present, unique within
+          // a bucket) — an untouched concept round-trips as pristine 'builtin'; anything where zh/ja no
+          // longer matches that concept's default (edited, or `en` itself no longer matches any default)
+          // comes back as 'auto-loaded' with the edit intact but no "Revert to Default" link of its own,
+          // same known limitation already documented for regexOverrides below.
+          const defaultByEn = new Map(defaults.map(c => [c.en, c]));
+          const incoming = rows.filter(r => r && typeof r === 'object').map(r => {
+            const en = typeof r.en === 'string' ? r.en.trim() : '';
+            const zh = typeof r.zh === 'string' ? r.zh.trim() : '';
+            const ja = typeof r.ja === 'string' ? r.ja.trim() : '';
+            const def = defaultByEn.get(en);
+            return (def && def.zh === zh && def.ja === ja)
+              ? { en, zh, ja, source: 'builtin', default: { en: def.en, zh: def.zh, ja: def.ja } }
+              : { en, zh, ja, source: 'auto-loaded' };
           });
           if (mode === 'replace') {
             hardBlockPresets[persona] = incoming;
           } else {
-            const existingKeys = new Set(hardBlockPresets[persona].map(e => e.value.toLowerCase()));
-            incoming.forEach(e => { if (!existingKeys.has(e.value.toLowerCase())) hardBlockPresets[persona].push(e); });
+            const existingKeys = new Set(hardBlockPresets[persona].map(e => e.en.toLowerCase()));
+            incoming.forEach(e => { if (!existingKeys.has(e.en.toLowerCase())) hardBlockPresets[persona].push(e); });
           }
         });
       }
@@ -2332,14 +2393,19 @@
             const check = tryCompileRegexRow(row, idx);
             if (!check.ok) { errors.push(check); return; }
             // Match by type (a stable identifier like "TW_ID") rather than pattern text, so the checksum
-            // validator survives even if the pattern/name/example were edited.
+            // validator survives even if the pattern/name/example were edited. typeMatch.name is now an
+            // {en,zh,ja} object (the row was exported with whatever single language was active at export
+            // time — see regexNameFor()) — check.entry.name matching ANY of the three still counts as
+            // "this name wasn't touched", not just the one active when this particular file was written.
             const typeMatch = defaults.find(d => d.type === check.entry.type);
-            const isExactDefault = !!typeMatch && typeMatch.regex.source === check.entry.pattern && typeMatch.name === check.entry.name && typeMatch.example === check.entry.example;
+            const nameMatchesAnyLang = !!typeMatch && !!typeMatch.name && [typeMatch.name.en, typeMatch.name.zh, typeMatch.name.ja].includes(check.entry.name);
+            const isExactDefault = !!typeMatch && typeMatch.regex.source === check.entry.pattern && nameMatchesAnyLang && typeMatch.example === check.entry.example;
             incoming.push({
               ...check.entry,
               validate: typeMatch ? typeMatch.validate : undefined,
               source: isExactDefault ? 'builtin' : 'auto-loaded',
-              defaultPattern: isExactDefault ? typeMatch.regex.source : undefined
+              defaultPattern: isExactDefault ? typeMatch.regex.source : undefined,
+              defaultNameByLang: isExactDefault ? typeMatch.name : undefined
             });
           });
           if (mode === 'replace') {
@@ -2591,21 +2657,38 @@
       const tbody = document.getElementById('hardBlockMgmtTbody');
       if (!tbody) return;
       const personaBucket = currentPersona === 'business' ? 'business' : 'personal';
-      const rows = [
-        ...hardBlockPresets.custom.map((e, i) => ({ ...e, bucket: 'custom', bucketIdx: i })),
-        ...hardBlockPresets[personaBucket].map((e, i) => ({ ...e, bucket: personaBucket, bucketIdx: i }))
-      ];
-      tbody.innerHTML = rows.map(entry => `
+      // Builtin/persona rows first (the "main" content, one row per concept with EN/ZH/JA side by
+      // side), custom single-value rows appended after — addHardBlockRow() always pushes to the end
+      // of hardBlockPresets.custom, so a freshly-added row stays the tbody's true last child and the
+      // focus() in addHardBlockRow() keeps landing on it.
+      const personaRowsHtml = hardBlockPresets[personaBucket].map((entry, i) => `
         <tr>
           <td class="px-3 py-2">
-            <input type="text" value="${escapeHtml(entry.value)}" data-bucket="${entry.bucket}" data-idx="${entry.bucketIdx}" onchange="updateHardBlockValue(this)" placeholder="${escapeHtml(t('editCsvRowKeywordPlaceholder'))}" class="w-full text-sm bg-transparent border border-transparent hover:border-line-strong focus:border-brand-500 focus:outline-none rounded px-1.5 py-1">${sourceBadgeHtml(entry.source)}${entry.bucket !== 'custom' ? bucketTagHtml(entry.bucket) : ''}
+            <input type="text" value="${escapeHtml(entry.en)}" onchange="updateHardBlockField('${personaBucket}', ${i}, 'en', this.value)" placeholder="EN" class="w-full text-sm bg-transparent border border-transparent hover:border-line-strong focus:border-brand-500 focus:outline-none rounded px-1.5 py-1">
+          </td>
+          <td class="px-3 py-2">
+            <input type="text" value="${escapeHtml(entry.zh)}" onchange="updateHardBlockField('${personaBucket}', ${i}, 'zh', this.value)" placeholder="中文" class="w-full text-sm bg-transparent border border-transparent hover:border-line-strong focus:border-brand-500 focus:outline-none rounded px-1.5 py-1">
+          </td>
+          <td class="px-3 py-2">
+            <input type="text" value="${escapeHtml(entry.ja)}" onchange="updateHardBlockField('${personaBucket}', ${i}, 'ja', this.value)" placeholder="日本語" class="w-full text-sm bg-transparent border border-transparent hover:border-line-strong focus:border-brand-500 focus:outline-none rounded px-1.5 py-1">${sourceBadgeHtml(entry.source)}${bucketTagHtml(personaBucket)}
           </td>
           <td class="px-3 py-2 text-center whitespace-nowrap">
-            ${entry.defaultValue !== undefined ? `<button onclick="revertHardBlockEntryAt('${entry.bucket}', ${entry.bucketIdx})" class="text-ink-muted hover:text-ink-hover text-xs mr-2">${t('pmBtnRevertDefault')}</button>` : ''}
-            <button onclick="deleteHardBlockEntryAt('${entry.bucket}', ${entry.bucketIdx})" class="text-danger-500 hover:text-danger-700 text-xs">${t('commonDelete')}</button>
+            ${entry.default ? `<button onclick="revertHardBlockEntryAt('${personaBucket}', ${i})" class="text-ink-muted hover:text-ink-hover text-xs mr-2">${t('pmBtnRevertDefault')}</button>` : ''}
+            <button onclick="deleteHardBlockEntryAt('${personaBucket}', ${i})" class="text-danger-500 hover:text-danger-700 text-xs">${t('commonDelete')}</button>
           </td>
         </tr>
-      `).join('') || `<tr><td colspan="2" class="px-3 py-4 text-center text-ink-faint text-xs">${t('pmNoCustomHardBlock')}</td></tr>`;
+      `).join('');
+      const customRowsHtml = hardBlockPresets.custom.map((entry, i) => `
+        <tr>
+          <td class="px-3 py-2" colspan="3">
+            <input type="text" value="${escapeHtml(entry.value)}" data-bucket="custom" data-idx="${i}" onchange="updateHardBlockValue(this)" placeholder="${escapeHtml(t('editCsvRowKeywordPlaceholder'))}" class="w-full text-sm bg-transparent border border-transparent hover:border-line-strong focus:border-brand-500 focus:outline-none rounded px-1.5 py-1">${sourceBadgeHtml(entry.source)}${bucketTagHtml('custom')}
+          </td>
+          <td class="px-3 py-2 text-center whitespace-nowrap">
+            <button onclick="deleteHardBlockEntryAt('custom', ${i})" class="text-danger-500 hover:text-danger-700 text-xs">${t('commonDelete')}</button>
+          </td>
+        </tr>
+      `).join('');
+      tbody.innerHTML = (personaRowsHtml + customRowsHtml) || `<tr><td colspan="4" class="px-3 py-4 text-center text-ink-faint text-xs">${t('pmNoCustomHardBlock')}</td></tr>`;
       renderHardBlockRemovedDefaults();
     }
 
@@ -2613,11 +2696,13 @@
       const container = document.getElementById('hardBlockRemovedDefaults');
       if (!container) return;
       const personaBucket = currentPersona === 'business' ? 'business' : 'personal';
-      const present = new Set(hardBlockPresets[personaBucket].filter(e => e.defaultValue !== undefined).map(e => e.defaultValue));
-      const removed = HARD_BLOCK_PRESETS_DEFAULT[personaBucket].filter(v => !present.has(v));
+      // Keyed by `en` (see mapHardBlockConceptToRow()'s comment) since a concept row is a triplet object,
+      // not a single comparable string.
+      const present = new Set(hardBlockPresets[personaBucket].filter(e => e.default).map(e => e.default.en));
+      const removed = HARD_BLOCK_PRESETS_DEFAULT[personaBucket].filter(c => !present.has(c.en));
       container.innerHTML = removed.length
-        ? t('pmRemovedDefaultsPrefix', { count: removed.length }) + removed.map(v =>
-            `<button onclick="restoreRemovedHardBlockDefault('${personaBucket}', '${escapeHtml(escapeForInlineJs(v))}')" class="inline-block mt-1 mr-1 px-2 py-0.5 bg-white border border-line-strong rounded hover:bg-paper-sunken text-ink-hover">+ ${escapeHtml(v)}</button>`
+        ? t('pmRemovedDefaultsPrefix', { count: removed.length }) + removed.map(c =>
+            `<button onclick="restoreRemovedHardBlockDefault('${personaBucket}', '${escapeHtml(escapeForInlineJs(c.en))}')" class="inline-block mt-1 mr-1 px-2 py-0.5 bg-white border border-line-strong rounded hover:bg-paper-sunken text-ink-hover">+ ${escapeHtml(c.en)} / ${escapeHtml(c.zh)} / ${escapeHtml(c.ja)}</button>`
           ).join('')
         : '';
     }
@@ -2662,7 +2747,7 @@
         .filter(r => !present.has(r.regex.source));
       container.innerHTML = removed.length
         ? t('pmRemovedDefaultsPrefix', { count: removed.length }) + removed.map(r =>
-            `<button onclick="restoreRemovedRegexDefault('${REGEX_PRESETS_DEFAULT.global.includes(r) ? 'global' : currentRegion}', '${escapeHtml(escapeForInlineJs(r.regex.source))}')" class="inline-block mt-1 mr-1 px-2 py-0.5 bg-white border border-line-strong rounded hover:bg-paper-sunken text-ink-hover">+ ${escapeHtml(r.name)}</button>`
+            `<button onclick="restoreRemovedRegexDefault('${REGEX_PRESETS_DEFAULT.global.includes(r) ? 'global' : currentRegion}', '${escapeHtml(escapeForInlineJs(r.regex.source))}')" class="inline-block mt-1 mr-1 px-2 py-0.5 bg-white border border-line-strong rounded hover:bg-paper-sunken text-ink-hover">+ ${escapeHtml(regexNameFor(r))}</button>`
           ).join('')
         : '';
     }
@@ -2698,17 +2783,32 @@
       triggerPreview();
     }
 
-    function revertHardBlockEntryAt(bucket, idx) {
+    // Persona-bucket concept rows (personal/business) — a triplet of EN/ZH/JA fields edited independently.
+    // Clearing a field just opts that language out of matching (see getHardBlockKeywords()); it does not
+    // delete the row. Custom rows stay on updateHardBlockValue() above, which keeps its own single value.
+    function updateHardBlockField(bucket, idx, field, rawValue) {
       const arr = hardBlockPresets[bucket];
       const entry = arr && arr[idx];
-      if (!entry || entry.defaultValue === undefined) return;
-      arr[idx] = { value: entry.defaultValue, source: 'builtin', defaultValue: entry.defaultValue };
+      if (!entry) return;
+      entry[field] = rawValue.trim();
+      entry.source = entry.source === 'builtin' ? 'overridden' : (entry.source || 'manual');
       renderHardBlockMgmtTable();
       triggerPreview();
     }
 
-    function restoreRemovedHardBlockDefault(bucket, value) {
-      hardBlockPresets[bucket].push({ value, source: 'builtin', defaultValue: value });
+    function revertHardBlockEntryAt(bucket, idx) {
+      const arr = hardBlockPresets[bucket];
+      const entry = arr && arr[idx];
+      if (!entry || !entry.default) return;
+      arr[idx] = { en: entry.default.en, zh: entry.default.zh, ja: entry.default.ja, source: 'builtin', default: entry.default };
+      renderHardBlockMgmtTable();
+      triggerPreview();
+    }
+
+    function restoreRemovedHardBlockDefault(bucket, en) {
+      const concept = (HARD_BLOCK_PRESETS_DEFAULT[bucket] || []).find(c => c.en === en);
+      if (!concept) return;
+      hardBlockPresets[bucket].push(mapHardBlockConceptToRow(concept));
       renderHardBlockMgmtTable();
       triggerPreview();
     }
@@ -2743,7 +2843,7 @@
         // Preserve the checksum validator (Luhn/TW ID/JP My Number, etc.) across edits — it's a pure
         // function of the matched string, not tied to the exact pattern text, so an edited TW_ID row
         // should keep failing non-checksum-valid numbers instead of silently losing that filter.
-        arr[idx] = { ...check.entry, validate: rule.validate, source: rule.source === 'builtin' ? 'overridden' : (rule.source || 'manual'), defaultPattern: rule.defaultPattern };
+        arr[idx] = { ...check.entry, validate: rule.validate, source: rule.source === 'builtin' ? 'overridden' : (rule.source || 'manual'), defaultPattern: rule.defaultPattern, defaultNameByLang: rule.defaultNameByLang };
       } else if (field === 'type') {
         if (!value) { showToast(t('pmWarnTagEmpty'), 'warning'); renderRegexMgmtTable(); return; }
         rule.type = value;
@@ -2763,7 +2863,7 @@
       const defList = bucket === 'global' ? REGEX_PRESETS_DEFAULT.global : (REGEX_PRESETS_DEFAULT[bucket] || []);
       const def = defList.find(r => r.regex.source === rule.defaultPattern);
       if (!def) return;
-      arr[idx] = { type: def.type, pattern: def.regex.source, flags: def.regex.flags, name: def.name, example: def.example, validate: def.validate, source: 'builtin', defaultPattern: def.regex.source };
+      arr[idx] = { type: def.type, pattern: def.regex.source, flags: def.regex.flags, name: regexNameFor(def), defaultNameByLang: def.name, example: def.example, validate: def.validate, source: 'builtin', defaultPattern: def.regex.source };
       renderRegexMgmtTable();
       triggerPreview();
     }
@@ -2772,7 +2872,7 @@
       const defList = bucket === 'global' ? REGEX_PRESETS_DEFAULT.global : (REGEX_PRESETS_DEFAULT[bucket] || []);
       const def = defList.find(r => r.regex.source === pattern);
       if (!def) return;
-      regexPresets[bucket].push({ type: def.type, pattern: def.regex.source, flags: def.regex.flags, name: def.name, example: def.example, validate: def.validate, source: 'builtin', defaultPattern: def.regex.source });
+      regexPresets[bucket].push({ type: def.type, pattern: def.regex.source, flags: def.regex.flags, name: regexNameFor(def), defaultNameByLang: def.name, example: def.example, validate: def.validate, source: 'builtin', defaultPattern: def.regex.source });
       renderRegexMgmtTable();
       triggerPreview();
     }
@@ -2932,7 +3032,7 @@
       // even for users who never touched a builtin row. See hardBlockBucketIsDefault()/regexBucketIsDefault().
       const hardBlockOverrides = {};
       Object.keys(HARD_BLOCK_PRESETS_DEFAULT).forEach(persona => {
-        if (!hardBlockBucketIsDefault(persona)) hardBlockOverrides[persona] = hardBlockPresets[persona].map(e => e.value);
+        if (!hardBlockBucketIsDefault(persona)) hardBlockOverrides[persona] = hardBlockPresets[persona].map(e => ({ en: e.en, zh: e.zh, ja: e.ja }));
       });
       const regexOverrides = {};
       Object.keys(REGEX_PRESETS_DEFAULT).forEach(region => {
@@ -3885,7 +3985,7 @@
         }
       };
 
-      getHardBlockKeywords().forEach(kw => addEnt("CRITICAL", kw, "Extremely sensitive term", false, true));
+      getHardBlockKeywords().forEach(kw => addEnt("CRITICAL", kw, t('reasonExtremelySensitiveTerm'), false, true));
       customDict.forEach(item => addEnt(item.type, item.value, item.reason, item.isAi, false));
 
       getActiveRegexRules().forEach(rule => {
