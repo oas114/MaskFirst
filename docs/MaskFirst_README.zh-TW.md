@@ -42,7 +42,7 @@ MaskFirst **不是**重寫 EduShield——它是一個獨立的姊妹檔案，�
 | **無憑證依賴** | 不需 API Key 或帳號；地端 AI（Ollama）為選用模組，僅連線 `http://localhost:11434`（本機迴路） |
 | **啟動時清空** | `window.addEventListener('load', ...)` 於載入時清空所有 `textarea` 與 `input[type="text"]`（排除 `ollamaUrl`、`ollamaModel`），防止瀏覽器自動填入歷史資料 |
 | **CSS 框架** | Tailwind CSS，三段式降級載入：CDN → 本地 `style.css`（見 [tailwind.config.js](../dev/tailwind.config.js) 的 `content: ["../*.html"]`）→ 防呆引導畫面 |
-| **零持久化設計** | 地區／身分選擇與其他一切狀態皆**不儲存**，詳見下方 2.1 節如何變更啟動預設值 |
+| **地區／身分／語言會記住，文件內容永遠不會** | 地區、身分、介面語言的選擇會存入 `localStorage`，下次開啟自動還原——這是介面偏好設定，不是文件資料。其餘一切（`sessionVault`、`customDict`、貼上的文字）仍依上面「資料生命週期」列的規則，重整/關閉即消滅。詳見下方 2.1 節如何變更裝置首次開啟時的預設值 |
 
 ---
 
@@ -53,14 +53,15 @@ MaskFirst **不是**重寫 EduShield——它是一個獨立的姊妹檔案，�
 這是 MaskFirst 與 EduShield 在結構上最大的差異。偵測規則與 Hard Block 詞庫不再是單一綁死台灣格式的陣列，而是組織成使用者可於頂部工具列兩個下拉選單（`#regionSelect`、`#personaSelect`）即時切換的「規則預設集」。
 
 ```javascript
-const DEFAULT_REGION = "us";      // "us" | "eu" | "uk" | "tw" | "jp"
-let currentRegion = DEFAULT_REGION;
-
-const DEFAULT_PERSONA = "personal"; // "personal" | "business"
-let currentPersona = DEFAULT_PERSONA;
+const DEFAULT_REGION = "us";      // "us" | "eu" | "uk" | "tw" | "jp" —僅作為 fallback，見下方說明
+const DEFAULT_PERSONA = "personal"; // "personal" | "business" —僅作為 fallback，見下方說明
+const REGION_STORAGE_KEY = 'maskfirst_region';
+const PERSONA_STORAGE_KEY = 'maskfirst_persona';
+let currentRegion = localStorage.getItem(REGION_STORAGE_KEY) || DEFAULT_REGION;
+let currentPersona = localStorage.getItem(PERSONA_STORAGE_KEY) || DEFAULT_PERSONA;
 ```
 
-**任何選擇皆不會被儲存**——重新整理頁面永遠會重置為 `DEFAULT_REGION`／`DEFAULT_PERSONA`。若您固定使用某個地區或身分模式，請用文字編輯器開啟 `MaskFirst.html`，找到 `<script>` 區塊開頭附近的這兩個常數並修改其值，即成為新的啟動預設值。
+您的地區／身分選擇會在每次變更時存入 `localStorage`，下次開啟頁面自動還原，不需要每次都重新選一次。`DEFAULT_REGION`／`DEFAULT_PERSONA` 只在裝置**第一次**開啟（尚未存過任何值）時才會用到。若想改變全新瀏覽器/使用者設定檔的起始值，請用文字編輯器開啟 `MaskFirst.html`，找到 `<script>` 區塊開頭附近的這兩個常數並修改其值。
 
 同一時間僅有**一組**地區規則生效，疊加於永遠開啟的 `global` 底層規則之上——這是刻意設計以避免不同國家格式互相誤判（例如同一個 9 碼數字不該同時被當作美國 SSN 又被當作其他東西）。身分模式邏輯相同，同一時間僅有一組詞庫生效。
 
@@ -201,7 +202,7 @@ window.TOKENSHIELD_AUTO_CONFIG = {
 
 ```javascript
 const LANG_STORAGE_KEY = 'maskfirst_display_lang';
-let currentLang = localStorage.getItem(LANG_STORAGE_KEY) || 'en'; // 會被記住——跟 Region/Persona 不同
+let currentLang = localStorage.getItem(LANG_STORAGE_KEY) || 'en'; // 會被記住，跟 Region/Persona（見 2.1 節）做法一致
 const I18N = { someKey: { en: '...', zh: '...', ja: '...' }, /* 約 220 組 key */ };
 function t(key, vars) { /* 查找 I18N[key][currentLang]，找不到就退回 en，再退回 key 本身；支援 {placeholder} 變數插值 */ }
 function applyLanguage(lang) { /* 設定 currentLang、寫入 localStorage、掃描套用所有 data-i18n*、呼叫 refreshDynamicText() */ }
@@ -209,7 +210,7 @@ function applyLanguage(lang) { /* 設定 currentLang、寫入 localStorage、掃
 
 靜態畫面透過 `data-i18n`（設定 `innerHTML`）、`data-i18n-placeholder`、`data-i18n-title`、`data-i18n-aria-label` 這幾個屬性接入字典。動態組出來的字串（toast 訊息、`showConfirmModal()` 的訊息、`renderHardBlockMgmtTable()`／`renderRegexMgmtTable()` 這類表格渲染函式）則直接呼叫 `t()`，不再把英文字面字串寫死。`refreshDynamicText()` 會重新執行這些「純渲染」函式，讓當下已經開啟的面板在切換語言的當下就立即反映新語言，不需要使用者重新開啟一次。PII Rule Guide 已不再渲染即時規則表格（`renderGuideTable()` 已移除，指南改為純概念說明，見 2.8 節）——`refreshGuideModalIfOpen()` 保留成一個有記錄的空函式，這樣其他呼叫它的地方不用知道這件事。
 
-**刻意不翻譯的部分**（視為技術／參考內容）：`REGEX_PRESETS_DEFAULT`／`HARD_BLOCK_PRESETS_DEFAULT` 規則庫本身（規則的 `name`／`example` 欄位、硬阻斷關鍵字清單——翻譯關鍵字清單會直接改變實際偵測行為，不只是顯示文字而已），以及 `LOCAL_AI_PROMPTS`／`aiPrompts` 這些提示詞內容（這些是要送給另一個 AI 模型的指令，不是給使用者看的介面文字）。`localStorage` 持久化是刻意對 MaskFirst「設計上零持久化」原則（見 1.2 節）的例外——這是顯示偏好設定，不是文件內容或掃描狀態。
+**刻意不翻譯的部分**（視為技術／參考內容）：`REGEX_PRESETS_DEFAULT`／`HARD_BLOCK_PRESETS_DEFAULT` 規則庫本身（規則的 `name`／`example` 欄位、硬阻斷關鍵字清單——翻譯關鍵字清單會直接改變實際偵測行為，不只是顯示文字而已），以及 `LOCAL_AI_PROMPTS`／`aiPrompts` 這些提示詞內容（這些是要送給另一個 AI 模型的指令，不是給使用者看的介面文字）。這裡（以及 Region／Persona，見 2.1 節）的 `localStorage` 持久化，是刻意對 MaskFirst 資料生命週期承諾（見 1.2 節）的一個範圍受限的例外——這些都是介面偏好設定，不是文件內容或掃描狀態，後者仍然每次重整都會消滅。
 
 ---
 
@@ -228,14 +229,25 @@ function applyLanguage(lang) { /* 設定 currentLang、寫入 localStorage、掃
 > [!IMPORTANT]
 > **零信任提醒**：正式處理真實個人或機密資料時，請務必下載離線單檔版本操作。GitHub Pages 線上版僅供功能評估使用。
 
-1. **（選用）設定地區與身分模式**——頂部工具列下拉選單，預設值來自原始碼中的 `DEFAULT_REGION`／`DEFAULT_PERSONA`。
+1. **（選用）設定地區與身分模式**——頂部工具列下拉選單，第一次開啟時預設值來自原始碼中的 `DEFAULT_REGION`／`DEFAULT_PERSONA`；之後您的選擇會存入 `localStorage`，下次開啟自動還原。
 2. **（選用）匯入或建立自訂詞庫**——CSV 上傳或線上表格編輯器。
-3. **貼上資料**至「Original Data Input」，偵測項目即時高亮（200ms debounce）並於下方列為膠囊。
+3. **貼上資料**至「Original Data Input」，偵測項目即時高亮（200ms debounce）並於下方列為膠囊，每個膠囊都會直接標示類別（如 `PERSON`、`PHONE`），不需要滑鼠懸浮才看得出來是哪一種。
 4. **（選用）手動遮蔽**——選取文字開啟「設為機密」選單；Tab 分隔表格可點擊儲存格進行整格／整欄／整列遮蔽。
 5. **點擊「Execute De-identification」**——右側面板顯示 Token 對照表與遮蔽後文字，可直接複製。命中 Hard Block 詞彙時複製按鈕會鎖定，需檢視並解鎖。
 6. **（選用）「Scan with Local AI」**——若已設定 Ollama，執行兩個通道掃描。
 7. **複製遮蔽資料**，送交 ChatGPT／Claude，接著切換至「Restore」頁籤。
 8. **貼上 AI 回覆**，點擊「Run Restore」，Token 自動比對回原始值。點擊任一已還原詞彙可在顯示／部分遮蔽／完全遮蔽間切換。
+
+#### 鍵盤快捷鍵
+
+三個頁籤（De-identification／Restore／Quick Mask）皆支援以下快捷鍵，作用於目前所在的頁籤：
+
+| 快捷鍵 | 作用 |
+|---|---|
+| `Ctrl+Enter`（Mac：`Cmd+Enter`） | 執行目前頁籤的主要動作（Execute De-identification／Run Restore／Detect） |
+| `Ctrl+Alt+C`（Mac：`Cmd+Option+C`） | 複製目前頁籤的結果 |
+
+複製鍵刻意不使用瀏覽器保留的 `Ctrl+Shift+C`（多數瀏覽器用來開啟「檢查元素」）。任何彈出視窗（設定、指南、管理自訂防護規則等）開啟時快捷鍵會暫停，避免與視窗內操作衝突。
 
 ### 3.3 常見問題
 

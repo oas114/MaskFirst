@@ -42,7 +42,7 @@ MaskFirst is **not** a rewrite of EduShield — it's a separate sibling file tha
 | **No credentials** | No API key or account needed. The local AI (Ollama) integration is optional and only ever connects to `http://localhost:11434` (loopback). |
 | **Clears on load** | `window.addEventListener('load', ...)` clears every `textarea` and `input[type="text"]` (except `ollamaUrl`/`ollamaModel`) on load, preventing browser autofill from leaking a previous session's data. |
 | **CSS framework** | Tailwind CSS, loaded via a 3-tier fallback: CDN first, then the local `style.css` (see [dev/tailwind.config.js](../dev/tailwind.config.js)'s `content: ["../*.html"]` glob), then a fail-safe guidance screen if both fail. |
-| **No persistence, by design** | Region and Persona selections, like everything else in the app, are **not saved**. See §2.1 below for how to change your startup defaults. |
+| **Region/Persona/language persist, document content never does** | Region, Persona, and display language selections are saved to `localStorage` and restored on your next visit — this is a UI preference, not document data. Everything else (`sessionVault`, `customDict`, pasted text) is still destroyed on page close/reload per the Data Lifecycle row above. See §2.1 below for how to change the fallback default used on a device's first-ever visit. |
 
 ---
 
@@ -53,14 +53,15 @@ MaskFirst is **not** a rewrite of EduShield — it's a separate sibling file tha
 This is MaskFirst's key structural difference from EduShield. Instead of one flat, Taiwan-specific rule set, detection rules and Hard Block keywords are organized into **presets** the user switches between at runtime via two `<select>` dropdowns in the header toolbar (`#regionSelect`, `#personaSelect`).
 
 ```javascript
-const DEFAULT_REGION = "us";      // "us" | "eu" | "uk" | "tw" | "jp"
-let currentRegion = DEFAULT_REGION;
-
-const DEFAULT_PERSONA = "personal"; // "personal" | "business"
-let currentPersona = DEFAULT_PERSONA;
+const DEFAULT_REGION = "us";      // "us" | "eu" | "uk" | "tw" | "jp" — fallback only, see below
+const DEFAULT_PERSONA = "personal"; // "personal" | "business" — fallback only, see below
+const REGION_STORAGE_KEY = 'maskfirst_region';
+const PERSONA_STORAGE_KEY = 'maskfirst_persona';
+let currentRegion = localStorage.getItem(REGION_STORAGE_KEY) || DEFAULT_REGION;
+let currentPersona = localStorage.getItem(PERSONA_STORAGE_KEY) || DEFAULT_PERSONA;
 ```
 
-**Nothing is persisted** — reloading the page always resets to `DEFAULT_REGION`/`DEFAULT_PERSONA`. If you always work in one region or persona, open `MaskFirst.html` in a text editor, find these two constants near the top of the `<script>` block, and change the value. That becomes your new startup default.
+Your Region/Persona selection is saved to `localStorage` on every change and restored automatically the next time you open the page — you don't need to reselect it each session. `DEFAULT_REGION`/`DEFAULT_PERSONA` only matter on a device's first-ever visit (before anything has been saved yet). If you want a different starting point for a fresh browser/profile, open `MaskFirst.html` in a text editor, find these two constants near the top of the `<script>` block, and change the value.
 
 Only **one** region preset is active at a time, layered on top of the always-on `global` baseline — this deliberately avoids cross-country format collisions (e.g. a bare 9-digit number shouldn't simultaneously be tested as a US SSN and something unrelated). Persona works the same way: only one keyword set is active at a time.
 
@@ -202,7 +203,7 @@ A `#langSelect` dropdown in the header toolbar switches the interface between **
 
 ```javascript
 const LANG_STORAGE_KEY = 'maskfirst_display_lang';
-let currentLang = localStorage.getItem(LANG_STORAGE_KEY) || 'en'; // persisted — unlike Region/Persona
+let currentLang = localStorage.getItem(LANG_STORAGE_KEY) || 'en'; // persisted, like Region/Persona (§2.1)
 const I18N = { someKey: { en: '...', zh: '...', ja: '...' }, /* ~220 keys */ };
 function t(key, vars) { /* looks up I18N[key][currentLang], falls back to en, then the raw key; supports {placeholder} interpolation */ }
 function applyLanguage(lang) { /* sets currentLang, persists it, walks data-i18n*, calls refreshDynamicText() */ }
@@ -210,7 +211,7 @@ function applyLanguage(lang) { /* sets currentLang, persists it, walks data-i18n
 
 Static markup opts in via `data-i18n` (sets `innerHTML`), `data-i18n-placeholder`, `data-i18n-title`, and `data-i18n-aria-label`. Dynamically-generated strings (toasts, `showConfirmModal()` messages, table renderers like `renderHardBlockMgmtTable()`/`renderRegexMgmtTable()`) call `t()` directly instead of embedding literal English. `refreshDynamicText()` re-runs the pure-render functions so a panel that's already open updates immediately on a language switch, without needing the user to reopen it. The PII Rule Guide no longer renders a live rule table (`renderGuideTable()` was removed when the guide became a static concept explainer, see §2.8) — `refreshGuideModalIfOpen()` is kept as a documented no-op so callers elsewhere don't need to know that.
 
-**Deliberately left untranslated** (treated as technical/reference content): the `REGEX_PRESETS_DEFAULT`/`HARD_BLOCK_PRESETS_DEFAULT` catalog (rule `name`/`example` fields, Hard Block keyword lists — translating the keyword lists would change actual detection behavior, not just display), and the `LOCAL_AI_PROMPTS`/`aiPrompts` prompt text (these are instructions sent to another AI model, not UI copy). `localStorage` persistence is a deliberate exception to MaskFirst's zero-persistence-by-design rule (§1.2) — it's a display preference, not document content or scan state.
+**Deliberately left untranslated** (treated as technical/reference content): the `REGEX_PRESETS_DEFAULT`/`HARD_BLOCK_PRESETS_DEFAULT` catalog (rule `name`/`example` fields, Hard Block keyword lists — translating the keyword lists would change actual detection behavior, not just display), and the `LOCAL_AI_PROMPTS`/`aiPrompts` prompt text (these are instructions sent to another AI model, not UI copy). `localStorage` persistence here (and for Region/Persona, §2.1) is a deliberate, scoped exception to MaskFirst's data-lifecycle promise (§1.2) — these are UI preferences, not document content or scan state, which are still destroyed on every reload.
 
 ---
 
@@ -229,14 +230,25 @@ Static markup opts in via `data-i18n` (sets `innerHTML`), `data-i18n-placeholder
 > [!IMPORTANT]
 > **Zero-trust reminder**: for real personal or confidential data, always download and run the offline single-file copy. The GitHub Pages hosted version is for feature evaluation only.
 
-1. **(Optional) Set Region & Persona** — top toolbar dropdowns. Defaults come from `DEFAULT_REGION`/`DEFAULT_PERSONA` in the source.
+1. **(Optional) Set Region & Persona** — top toolbar dropdowns. Defaults come from `DEFAULT_REGION`/`DEFAULT_PERSONA` in the source on first-ever visit; after that, your selection persists in `localStorage` and is restored automatically on every reopen.
 2. **(Optional) Import or build a custom dictionary** — CSV upload or the online table editor.
-3. **Paste your data** into "Original Data Input". Detected items highlight live (200ms debounce) and list as chips below.
+3. **Paste your data** into "Original Data Input". Detected items highlight live (200ms debounce) and list as chips below, each tagged with its category (e.g. `PERSON`, `PHONE`) so you don't have to hover to tell them apart.
 4. **(Optional) Manual masking** — select text for a "mark as sensitive" menu; for tab-delimited tables, click a cell for cell/column/row masking options.
 5. **Click "Execute De-identification"** — the right panel shows the token mapping and the masked output, ready to copy. A Hard Block match locks the copy button until you review and unlock it.
 6. **(Optional) "Scan with Local AI"** — runs both Ollama channels if configured.
 7. **Copy masked data**, send it to ChatGPT/Claude, then switch to the **Restore** tab.
 8. **Paste the AI's reply**, click **Run Restore** — tokens are matched back to their original values. Click any restored value to cycle through Show / Partial mask / Full mask.
+
+#### Keyboard Shortcuts
+
+All three tabs (De-identification / Restore / Quick Mask) support the following shortcuts, scoped to the currently active tab:
+
+| Shortcut | Action |
+|---|---|
+| `Ctrl+Enter` (`Cmd+Enter` on Mac) | Run the active tab's primary action (Execute De-identification / Run Restore / Detect) |
+| `Ctrl+Alt+C` (`Cmd+Option+C` on Mac) | Copy the active tab's result |
+
+Copy deliberately avoids `Ctrl+Shift+C`, which most browsers reserve for "Inspect Element". Shortcuts are disabled while any modal (Settings, Guide, Manage Custom Protection Rules, etc.) is open, to avoid conflicting with in-modal interactions.
 
 ### 3.3 Troubleshooting
 
