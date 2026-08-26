@@ -387,7 +387,6 @@
                 <select id="langSelectMobile" onchange="switchLanguage(this.value)" class="bg-white hover:bg-paper-sunken border border-line-strong text-ink-hover px-2 py-1 rounded-lg text-xs font-medium transition-colors focus:outline-none focus:ring-1 focus:ring-brand-500">
                   <option value="en">English</option>
                   <option value="zh">繁體中文</option>
-                  <option value="ja">日本語</option>
                 </select>
               </div>
               <div class="px-3 py-2 flex items-center justify-between gap-2">
@@ -437,7 +436,6 @@
           <select id="langSelect" onchange="switchLanguage(this.value)" title="Display language — independent from the Region ruleset below" data-i18n-title="langSelectTitle" class="h-10 bg-white hover:bg-paper-sunken border border-line-strong text-ink-hover px-2 rounded-lg text-[10px] sm:text-xs font-medium transition-colors focus:outline-none focus:ring-1 focus:ring-brand-500">
             <option value="en">English</option>
             <option value="zh">繁體中文</option>
-            <option value="ja">日本語</option>
           </select>
           <label class="sr-only" for="regionSelect" data-i18n="regionSelectLabel">Region ruleset</label>
           <select id="regionSelect" onchange="switchRegion(this.value)" title="Regional PII ruleset — only one is active at a time, plus the always-on Global baseline" data-i18n-title="regionSelectTitle" class="h-10 bg-white hover:bg-paper-sunken border border-line-strong text-ink-hover px-2 rounded-lg text-[10px] sm:text-xs font-medium transition-colors focus:outline-none focus:ring-1 focus:ring-brand-500">
@@ -1283,7 +1281,19 @@
     // Region/Persona select which rule data is active; this only controls display language.
     // ==========================================
     const LANG_STORAGE_KEY = 'maskfirst_display_lang';
+    // Japanese UI disabled 2026-08-27 (no validated demand yet, recurring 3-way translation cost on every
+    // future content change) — #langSelect no longer offers "ja", so a fresh pick can never produce it.
+    // This guards the other path: a returning visitor whose localStorage still has "ja" from before this
+    // change would otherwise silently keep getting Japanese strings from I18N (t() doesn't know "ja" was
+    // removed from the picker) while the dropdown itself shows nothing selected. Not a removal of the
+    // underlying ja translation data (I18N dict entries, HARD_BLOCK_PRESETS_DEFAULT/REGEX_PRESETS_DEFAULT
+    // ja fields, AI_PROMPTS_DEFAULT.ja/LOCAL_AI_PROMPTS.ja) — Hard Block's ja terms stay active in
+    // matching regardless of display language (see getHardBlockKeywords()), and the `jp` Region ruleset
+    // is unaffected; only the ja *display language* is turned off, and only at this one fallback point,
+    // so re-enabling later is a two-line revert (this guard + the two <option value="ja"> in the header).
+    const SUPPORTED_DISPLAY_LANGS = ['en', 'zh'];
     let currentLang = localStorage.getItem(LANG_STORAGE_KEY) || 'en';
+    if (!SUPPORTED_DISPLAY_LANGS.includes(currentLang)) currentLang = 'en';
 
     const I18N = {
       // ---- Header / nav ----

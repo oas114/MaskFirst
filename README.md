@@ -56,7 +56,7 @@ Nothing is saved between sessions — see [MaskFirst_README.md](./docs/MaskFirst
 
 ### Display Language
 
-A separate **language selector** (top toolbar) switches the interface between **English / 繁體中文 / 日本語**, independent from the Region ruleset above — Region decides which regex rule set is active, language only decides what the interface text looks like, so e.g. a Taiwan-based business processing EU data can still run the EU ruleset while reading the UI in Traditional Chinese. Your choice is remembered across sessions via `localStorage`, and defaults to English.
+A separate **language selector** (top toolbar) switches the interface between **English / 繁體中文**, independent from the Region ruleset above — Region decides which regex rule set is active, language only decides what the interface text looks like, so e.g. a Taiwan-based business processing EU data can still run the EU ruleset while reading the UI in Traditional Chinese. Your choice is remembered across sessions via `localStorage`, and defaults to English.
 
 ### Hybrid Defense Engine
 
