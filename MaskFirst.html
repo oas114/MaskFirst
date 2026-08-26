@@ -1645,6 +1645,7 @@
       const prevLang = currentLang;
       currentLang = lang;
       if (typeof syncAiPromptsToLanguage === 'function') syncAiPromptsToLanguage(prevLang, lang);
+      if (typeof maybeStartRegionFromLanguage === 'function') maybeStartRegionFromLanguage(lang);
       localStorage.setItem(LANG_STORAGE_KEY, lang);
       document.documentElement.lang = lang === 'zh' ? 'zh-Hant' : (lang === 'ja' ? 'ja' : 'en');
       document.querySelectorAll('[data-i18n]').forEach(el => {
@@ -1758,6 +1759,24 @@
     // don't have to reselect their ruleset every time they reopen the tool.
     const REGION_STORAGE_KEY = 'maskfirst_region';
     const PERSONA_STORAGE_KEY = 'maskfirst_persona';
+
+    // One-time starter nudge, not a standing link: display language and Region stay two independent
+    // dropdowns (see §2.9 of the technical manual — e.g. "EU ruleset + Traditional Chinese UI" is a
+    // deliberately supported combination for a cross-border user). This only picks a starting Region
+    // when Region has literally never been saved to localStorage yet (a real first-touch, not just
+    // "still at the US default"), so it never overrides a choice — including one the user made before
+    // ever touching the language switcher. Applied here, before `currentRegion` reads localStorage, so
+    // it's in effect from the very first render and persisted immediately — this must stay a plain
+    // localStorage write with no DOM/live-preview side effects, because at this point in the script
+    // (top-level, before `textarea` at :3649 and friends are declared) calling switchRegion() would hit
+    // module state that doesn't exist yet.
+    const LANG_TO_STARTER_REGION = { zh: 'tw', ja: 'jp' };
+    if (localStorage.getItem(REGION_STORAGE_KEY) === null) {
+      const startingLang = localStorage.getItem(LANG_STORAGE_KEY) || 'en';
+      const starterRegion = LANG_TO_STARTER_REGION[startingLang];
+      if (starterRegion) localStorage.setItem(REGION_STORAGE_KEY, starterRegion);
+    }
+
     let currentRegion = localStorage.getItem(REGION_STORAGE_KEY) || DEFAULT_REGION;
     let currentPersona = localStorage.getItem(PERSONA_STORAGE_KEY) || DEFAULT_PERSONA;
 
@@ -1769,6 +1788,19 @@
       triggerPreview();
       if (typeof refreshGuideModalIfOpen === 'function') refreshGuideModalIfOpen();
       if (typeof refreshProtectionManagerIfOpen === 'function') refreshProtectionManagerIfOpen();
+    }
+
+    // Covers a language switch that happens later in the same session (after the page has fully
+    // loaded, so switchRegion()'s DOM/live-preview side effects are safe to run here) — e.g. a
+    // returning user whose display language was already 'zh'/'ja' from before this feature shipped,
+    // but who never touched Region, so the block above (which only runs once at script load) never
+    // got a chance to seed it for them. Same "never fires if Region already has a value" guard as
+    // above, so a user who's ever picked any region — including one seeded by that block — is safe
+    // from having it silently changed again by a later language switch.
+    function maybeStartRegionFromLanguage(lang) {
+      if (localStorage.getItem(REGION_STORAGE_KEY) !== null) return; // Region already has an explicit value — never override it
+      const starterRegion = LANG_TO_STARTER_REGION[lang];
+      if (starterRegion) switchRegion(starterRegion);
     }
     function switchPersona(val) {
       currentPersona = val;
