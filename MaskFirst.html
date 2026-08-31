@@ -1468,8 +1468,6 @@
       confirmImportConfigWithPrompts: { en: ', plus custom AI prompts', zh: '，並包含自訂 AI 提示詞' },
       toastImportConfigFileReadFailed: { en: "Couldn't read the file: {message}", zh: '無法讀取檔案：{message}' },
       toastImportConfigParseFailed: { en: 'Failed to parse the config file: {message}', zh: '設定檔解析失敗：{message}' },
-      toastImportConfigApplied: { en: 'Config file imported and applied.', zh: '已匯入設定檔並套用。' },
-      toastImportConfigAppliedWithErrors: { en: 'Config file imported, but {count} regex rule(s) had an invalid format and were skipped.', zh: '已匯入設定檔，但有 {count} 筆正則規則格式錯誤已略過套用。' },
       toastImportComplete2: { en: 'Import complete, but {count} regex rule(s) had an invalid format and were skipped.', zh: '匯入完成，但有 {count} 筆正則規則格式錯誤已略過。' },
       commonClose: { en: 'Close', zh: '關閉' },
 
@@ -2418,13 +2416,13 @@
       return errors;
     }
 
-    // Extracts the window.TOKENSHIELD_AUTO_CONFIG = {...} JSON payload from plain text.
+    // Extracts the window.MASKFIRST_AUTO_CONFIG = {...} JSON payload from plain text.
     // Pure string scanning + JSON.parse only — never eval/execute the file content, so a
     // tampered file can't smuggle in arbitrary code regardless of what it contains.
     function extractAutoConfigJson(text) {
-      const marker = 'window.TOKENSHIELD_AUTO_CONFIG';
+      const marker = 'window.MASKFIRST_AUTO_CONFIG';
       const idx = text.indexOf(marker);
-      if (idx === -1) throw new Error('window.TOKENSHIELD_AUTO_CONFIG not found — is this the right config file?');
+      if (idx === -1) throw new Error('window.MASKFIRST_AUTO_CONFIG not found — is this the right config file?');
       const start = text.indexOf('{', idx);
       if (start === -1) throw new Error('Config content is malformed');
       let depth = 0, end = -1, inString = false, escaped = false;
@@ -3040,7 +3038,7 @@
       if (Object.keys(hardBlockOverrides).length) cfg.hardBlockOverrides = hardBlockOverrides;
       if (Object.keys(regexOverrides).length) cfg.regexOverrides = regexOverrides;
       const content = `// MaskFirst config file — use the "Import Config File" button in Manage Custom Protection Rules to select this file\n` +
-        `window.TOKENSHIELD_AUTO_CONFIG = ${JSON.stringify(cfg, null, 2)};\n`;
+        `window.MASKFIRST_AUTO_CONFIG = ${JSON.stringify(cfg, null, 2)};\n`;
       downloadTextAsFile(content, 'maskfirst.config.js', 'text/javascript;charset=utf-8;');
     }
 
